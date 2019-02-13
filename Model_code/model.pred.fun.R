@@ -72,7 +72,7 @@ prediction.epi <- function(theta) { # fit to infection data
   s.dist.f <- part.all.f[1:3,1:3]/apply(part.all.f[1:3,1:3],1,sum) #proportion of parters of same or other subpopulation, F
   s.dist.msm <- part.all.m[4:5,4:5]/apply(part.all.m[4:5,4:5],1,sum)  #proportion of MSM partnerships with same HIV status (for HIV- and HIV+)
   pred.s.dist <- c(diag(s.dist.m),diag(s.dist.f),diag(s.dist.msm)) #partners of same subpopulation, M and F
-  replacement <- matrix(0L, nrow = dim(screen[102:105,])[1], ncol = dim(screen[102:105,])[2])
+  replacement <- matrix(0L, nrow = dim(screen[102:105,])[1], ncol = dim(screen[102:105,])[2]) # turn off screening in 2013 and afterwards
   screen[102:105,] <- replacement
   params <-list(b=b,delta=delta, gamma=gamma,p.trt.1=p.trt.1, p.trt.2=p.trt.2, p.trt.3=p.trt.3,p.trt.4=p.trt.4, rep=rep,rep.symp=rep.symp, screen=screen, behav=behav,dur.imm=dur.imm, ct.data.years=ct.data.years, p.ct.primsec=p.ct.primsec, p.ct.el = p.ct.el, p.s.1=p.s.1, p.s.2 = p.s.2, p.s.3 = p.s.3, d=d, fileName="tintoTrt.txt", fileNameET="texitRateTrt.txt", fileNameES="texitRateScr.txt", fileNameA="talpha.txt", fileNameC="tcovps.txt") #parameters used by transmission model
   ### run the transmission model ###
