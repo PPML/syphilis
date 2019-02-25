@@ -1,0 +1,10 @@
+If gfortran is installed using Homebrew, then the libgfortran.dylib will not be 
+automatically found correctly by R. 
+
+
+The solution to this is posted here:
+https://stackoverflow.com/questions/29992066/rcpp-warning-directory-not-found-for-option-l-usr-local-cellar-gfortran-4-8
+
+To fix this, add the following line to the ~/.R/Makevars file. 
+FLIBS = -L`gfortran -print-file-name=libgfortran.dylib | xargs dirname`
+
