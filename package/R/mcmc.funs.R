@@ -13,10 +13,14 @@ likelihood <- function(theta){
 
 #calculate posterior likelihood
 dLogPosterior <-function(theta) {
-  log.prior <- log(prior(theta))
-  log.likelihood <- unlist(likelihood(theta)$LogLL)
-  log.posterior <- log.prior + log.likelihood
-  
+  tryCatch({
+		log.prior <- log(prior(theta))
+		log.likelihood <- unlist(likelihood(theta)$LogLL)
+		log.posterior <- log.prior + log.likelihood
+		if (is.na(log.posterior)||is.nan(log.posterior)) log.posterior <- -1e32
+			return(as.numeric(log.posterior))
+		},
+  error = function(x) -1e32)
 }
 
 #run adaptive Metroposlis Hastings MCMC algorithm (adapted from fitR package)

@@ -1,0 +1,55 @@
+library(syphLAMA)
+
+# command line arguments
+state <- commandArgs(trailingOnly=T)[[1]]
+nth_sim <- as.numeric(commandArgs(trailingOnly=T)[[2]])
+
+# script config
+N_loops <- 20
+output_directory <- "~/2019/Feburary/26/optim/"
+
+# setup syphLAMA load trace
+load.start()
+orig_theta_names <- names(theta)
+x <- load(system.file(paste0("mcmc/mcmc_", state), package='syphLAMA'))
+post.sample <- get(x = x); rm(x)
+trace <- post.sample$trace
+theta <- unlist(trace[sample.int(1, nrow(trace)),])
+
+# make sure the theta vector is named properly 
+dLogPosterior_for_optim <- function(theta) {
+	names(theta) <- orig_theta_names
+	d <- dLogPosterior(theta)
+}
+
+# main optim loop -- run optims until 'done' and checkpoint outputs iteratively 
+n_done <- 0
+done <- F
+optim_list <- list()
+while (!done) {
+  out <- optim(
+    par = theta,
+    fn = dLogPosterior_for_optim,
+    method = c("BFGS", "Nelder-Mead")[[if (n_done > 5) 1 else 2]],
+    control = list(fnscale = -1, maxit=1000)
+  )
+
+  if (out$value != -1e32) {
+		# update and save last optim loop
+    n_done <- n_done + 1
+    done = n_done == N_loops
+    optim_list[[n_done]] <- out
+    theta <- out$par
+    saveRDS(optim_list,
+            paste0(
+              output_directory,
+              site,
+              "_optim_list_",
+              nth_sim,
+              ".rds"
+            )
+    )
+  } else {
+    theta <-  unlist(trace[sample.int(1, nrow(trace)),])
+ }
+}
