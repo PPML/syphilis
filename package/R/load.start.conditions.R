@@ -14,18 +14,18 @@ load.start <- function(){
   library(reshape)
   
   ### load functions ###
-  source("Model_code/mixing.fun.R")  # function to calculate and balance contact matrix, outputs p.total.bal;p.total.bal.btwn;cm.low;cm.high
-  source("Model_code/aging.fun.R")  #function to calculate aging parameters
-  source("Model_code/population.size.fun.R") #function to calculate population sizes
-  source("Model_code/model.pred.fun.R")  #function to update parameters, run model, and print outputs used for fitting
-  source("Model_code/initial.files.R")  #read in required data files
-  source("Model_code/bezier.funs.R") #functions to calculate time-varying parameters
-  source("Model_code/myMCMC.R") #modified mcmcMH function from fitR package that ensures covariance matrix is positive definite
-  source("Model_code/model.out.fun.R") #function to calculate desired model outputs for calibration
-  source("Model_code/model.likelihood.fun.R") #calculate model likelihoods
-  source("Model_code/mcmc.funs.R")  #functions used for mcmc algorithm
-  source("Model_code/model.priors.fun.R") #calculate prior likelihood  
-  sourceCpp("Model_code/syph_trans_model.cpp") #read in rcpp code for transmission model
+  # source("Model_code/mixing.fun.R")  # function to calculate and balance contact matrix, outputs p.total.bal;p.total.bal.btwn;cm.low;cm.high
+  # source("Model_code/aging.fun.R")  #function to calculate aging parameters
+  # source("Model_code/population.size.fun.R") #function to calculate population sizes
+  # source("Model_code/model.pred.fun.R")  #function to update parameters, run model, and print outputs used for fitting
+  # source("Model_code/initial.files.R")  #read in required data files
+  # source("Model_code/bezier.funs.R") #functions to calculate time-varying parameters
+  # source("Model_code/myMCMC.R") #modified mcmcMH function from fitR package that ensures covariance matrix is positive definite
+  # source("Model_code/model.out.fun.R") #function to calculate desired model outputs for calibration
+  # source("Model_code/model.likelihood.fun.R") #calculate model likelihoods
+  # source("Model_code/mcmc.funs.R")  #functions used for mcmc algorithm
+  # source("Model_code/model.priors.fun.R") #calculate prior likelihood  
+  # sourceCpp("Model_code/syph_trans_model.cpp") #read in rcpp code for transmission model
   
   initial.files(state) #load required data files
   
@@ -91,20 +91,20 @@ load.start <- function(){
   
   # contact tracing probabilities and whether it is turned on
   p.ct.primsec <<- if(state == "MA") { # Black M, Hispanic M, NBNH M, Black F, Hispanic F, NBNH F
-                      ct.data.ps <- read.delim("R_inputs/ct_ma_rates_ps.txt")
+                      ct.data.ps <- read.delim(system.file("extdata/ct_ma_rates_ps.txt",package='syphLAMA'))
                       t(rbind(ct.data.ps$black.men, ct.data.ps$hispanic.men, ct.data.ps$other.men, 
                                            ct.data.ps$black.women, ct.data.ps$hispanic.women, ct.data.ps$other.women))
                   } else {
-                      ct.data.ps <- read.delim("R_inputs/ct_la_rates_ps.txt")
+                      ct.data.ps <- read.delim(system.file("extdata/ct_la_rates_ps.txt",package='syphLAMA'))
                       t(rbind(ct.data.ps$black.men, ct.data.ps$hispanic.men, ct.data.ps$other.men, 
                                            ct.data.ps$black.women, ct.data.ps$hispanic.women, ct.data.ps$other.women))
                   }
   p.ct.el <<- if(state == "MA") { # Black M, Hispanic M, NBNH M, Black F, Hispanic F, NBNH F
-                ct.data.el <- read.delim("R_inputs/ct_ma_rates_el.txt")
+                ct.data.el <- read.delim(system.file("extdata/ct_ma_rates_el.txt",package='syphLAMA'))
                 t(rbind(ct.data.el$black.men, ct.data.el$hispanic.men, ct.data.el$other.men, 
                                      ct.data.el$black.women, ct.data.el$hispanic.women, ct.data.el$other.women))
               } else {
-                ct.data.el <- read.delim("R_inputs/ct_la_rates_el.txt")
+                ct.data.el <- read.delim(system.file("extdata/ct_la_rates_el.txt",package='syphLAMA'))
                 t(rbind(ct.data.el$black.men, ct.data.el$hispanic.men, ct.data.el$other.men, 
                         ct.data.el$black.women, ct.data.el$hispanic.women, ct.data.el$other.women))
               }

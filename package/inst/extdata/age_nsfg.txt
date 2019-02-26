@@ -1,0 +1,1 @@
+sex	age.cat	p.same.age	subpop	lcl	ucl	varmale	1	0.9141	all	0.9	0.9273	4.75E-05female	1	0.83	all	0.812	0.845	7.09E-05

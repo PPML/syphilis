@@ -2,6 +2,7 @@
 #include<iostream>
 //[[Rcpp::depends(RcppArmadillo)]]
 using namespace Rcpp;
+using namespace arma;
 
 
 /// function for matrix multiplication (%*% in R)
@@ -22,7 +23,7 @@ using namespace Rcpp;
 
 /// main transmission model code 
 
-//[[Rcpp::export]]  
+// [[Rcpp::export]]  
 List syphSim(
     List  x, //params
     double dt, // timestep
