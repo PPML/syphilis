@@ -20,6 +20,6 @@ model.fits<- function(trace, sample.size){
     res<-model.epi.loglik(unlist(theta.list[i.iter,]))
     outputs <- rbind(outputs, c(i.iter,res))
   }
-  #browser()
+  browser()
   return(list(theta.list=theta.list, outputs=outputs))
 }

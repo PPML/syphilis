@@ -17,12 +17,11 @@ model.prev <- function(sol) {  #sol is the output from the transmission model, a
   pop.subpop.age <- colSums(matrix(tail(pop.size.all,1), nrow=2))
   pop.sub.adj <- rep(pop.subpop.age[11:16],2) #pop size by sex, subpop, redistributing MSM for calculating reported rates
   
-  #browser()
   #prevalence of early syphilis
   prev.total <- cbind(rowSums(inf.total[,m1])/sum(n.i[m1]), rowSums(inf.total[,m2])/sum(n.i[m2]),rowSums(inf.total[,m3])/sum(n.i[m3]),rowSums(inf.total[,m4])/sum(n.i[m4]),  
                       rowSums(inf.total[,m5])/sum(n.i[m5]),rowSums(inf.total[,f1])/sum(n.i[f1]),rowSums(inf.total[,f2])/sum(n.i[f2]),rowSums(inf.total[,f3])/sum(n.i[f3]))
   prev.tot.sex <- cbind(rowSums(inf.total[,males])/sum(n.i[males]), rowSums(inf.total[,females])/sum(n.i[females]))
-  
+  #browser()
   #late latent syphilis prevalence
   prev.late <- cbind(rowSums(inf.late[,m1])/sum(n.i[m1]), rowSums(inf.late[,m2])/sum(n.i[m2]),rowSums(inf.late[,m3])/sum(n.i[m3]),rowSums(inf.late[,m4])/sum(n.i[m4]),
                      rowSums(inf.late[,m5])/sum(n.i[m5]),rowSums(inf.late[,f1])/sum(n.i[f1]),rowSums(inf.late[,f2])/sum(n.i[f2]),rowSums(inf.late[,f3])/sum(n.i[f3]))

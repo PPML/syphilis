@@ -29,7 +29,7 @@ load.start <- function(){
   
   initial.files(state) #load required data files
   
-  showCounterfactual <<- FALSE #turn on counterfactual comparison for contact tracting
+  showCounterfactual <<- TRUE #turn on counterfactual comparison for contact tracting
   
   ### set up different subpopulations, sexes, and activity classes ###
   i<<-5 #number of subpopulations, 1= Black, 2=White, 3=Hispanic, 4=MSM-HIVneg, 5=MSM-HIVpos

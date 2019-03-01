@@ -3,6 +3,7 @@
 ##################################################################
 model.epi.loglik <- function(theta) {
   pred <- prediction.epi(theta) #run the model and produce required outputs
+  
   #calculate likelihoods
   #for beta parameter estimates, using model estimate as mean, data estimates for variance
   beta.params.age <- estBetaParamsVar(pred[["age.assort"]][c(1,3)],age.dist.dat$var)  #beta distn parameter estimates for age assortativity

@@ -120,6 +120,13 @@ plot.posteriors <- function(post.sample) {
   out.p.el.y.f.cf <- melt(as.matrix(subset(pred, select=(prev.cf.p.diag.el1+diag.len*2):(prev.cf.p.diag.el1+diag.len*3-1)))) #proportion of early cases that are early latent
   out.p.early.cf <- melt(as.matrix(subset(pred, select=(prev.cf.p.diag.early)))) #proportion of early cases that are early latent
   }
+  
+  out.inc.y.f.1 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*10):(prev.n.inc1+cal.period*11-1)))/sum(n.i[y.f.1]))
+  out.inc.o.f.1 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*11):(prev.n.inc1+cal.period*12-1)))/sum(n.i[o.f.1]))
+  out.inc.y.f.2 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*12):(prev.n.inc1+cal.period*13-1)))/sum(n.i[y.f.2]))
+  out.inc.o.f.2 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*13):(prev.n.inc1+cal.period*14-1)))/sum(n.i[o.f.2]))
+  out.inc.y.f.3 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*14):(prev.n.inc1+cal.period*15-1)))/sum(n.i[y.f.3]))
+  out.inc.o.f.3 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*15):(prev.n.inc1+cal.period*16-1)))/sum(n.i[o.f.3]))
   out.inc.y.m.1 <-melt(100*as.matrix(subset(pred, select=prev.n.inc1:(prev.n.inc1+cal.period-1)))/sum(n.i[y.m.1])) #model incidence by age, sex, and subpopulation
   out.inc.o.m.1 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period):(prev.n.inc1+cal.period*2-1)))/sum(n.i[o.m.1]))
   out.inc.y.m.2 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*2):(prev.n.inc1+cal.period*3-1)))/sum(n.i[y.m.2]))
@@ -130,12 +137,34 @@ plot.posteriors <- function(post.sample) {
   out.inc.o.msm <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*7):(prev.n.inc1+cal.period*8-1)))/sum(n.i[o.m.4]))
   out.inc.y.msmhiv <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*8):(prev.n.inc1+cal.period*9-1)))/sum(n.i[y.m.5]))
   out.inc.o.msmhiv <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*9):(prev.n.inc1+cal.period*10-1)))/sum(n.i[o.m.5]))
-  out.inc.y.f.1 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*10):(prev.n.inc1+cal.period*11-1)))/sum(n.i[y.f.1]))
-  out.inc.o.f.1 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*11):(prev.n.inc1+cal.period*12-1)))/sum(n.i[o.f.1]))
-  out.inc.y.f.2 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*12):(prev.n.inc1+cal.period*13-1)))/sum(n.i[y.f.2]))
-  out.inc.o.f.2 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*13):(prev.n.inc1+cal.period*14-1)))/sum(n.i[o.f.2]))
-  out.inc.y.f.3 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*14):(prev.n.inc1+cal.period*15-1)))/sum(n.i[y.f.3]))
-  out.inc.o.f.3 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*15):(prev.n.inc1+cal.period*16-1)))/sum(n.i[o.f.3]))
+  #prevalence
+  out.prev.y.m.1 <-melt(100*as.matrix(subset(pred, select=prev.prev.total1:(prev.prev.total1+cal.period-1)))) #model incidence by age, sex, and subpopulation
+  out.prev.o.m.1 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period):(prev.prev.total1+cal.period*2-1))))
+  out.prev.y.m.2 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*2):(prev.prev.total1+cal.period*3-1))))
+  out.prev.o.m.2 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*3):(prev.prev.total1+cal.period*4-1))))
+  out.prev.y.m.3 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*4):(prev.prev.total1+cal.period*5-1))))
+  out.prev.o.m.3 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*5):(prev.prev.total1+cal.period*6-1))))
+  out.prev.y.msm <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*6):(prev.prev.total1+cal.period*7-1))))
+  out.prev.o.msm <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*7):(prev.prev.total1+cal.period*8-1))))
+  out.prev.y.msmhiv <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*8):(prev.prev.total1+cal.period*9-1))))
+  out.prev.o.msmhiv <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*9):(prev.prev.total1+cal.period*10-1))))
+  out.prev.y.f.1 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*10):(prev.prev.total1+cal.period*11-1))))
+  out.prev.o.f.1 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*11):(prev.prev.total1+cal.period*12-1))))
+  out.prev.y.f.2 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*12):(prev.prev.total1+cal.period*13-1))))
+  out.prev.o.f.2 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*13):(prev.prev.total1+cal.period*14-1))))
+  out.prev.y.f.3 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*14):(prev.prev.total1+cal.period*15-1))))
+  out.prev.o.f.3 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*15):(prev.prev.total1+cal.period*16-1))))
+  out.prev.y.m.1 <-melt(100*as.matrix(subset(pred, select=prev.prev.total1:(prev.prev.total1+cal.period-1)))) #model incidence by age, sex, and subpopulation
+  out.prev.o.m.1 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period):(prev.prev.total1+cal.period*2-1))))
+  out.prev.y.m.2 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*2):(prev.prev.total1+cal.period*3-1))))
+  out.prev.o.m.2 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*3):(prev.prev.total1+cal.period*4-1))))
+  out.prev.y.m.3 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*4):(prev.prev.total1+cal.period*5-1))))
+  out.prev.o.m.3 <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*5):(prev.prev.total1+cal.period*6-1))))
+  out.prev.y.msm <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*6):(prev.prev.total1+cal.period*7-1))))
+  out.prev.o.msm <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*7):(prev.prev.total1+cal.period*8-1))))
+  out.prev.y.msmhiv <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*8):(prev.prev.total1+cal.period*9-1))))
+  out.prev.o.msmhiv <-melt(100*as.matrix(subset(pred, select=(prev.prev.total1+cal.period*9):(prev.prev.total1+cal.period*10-1))))
+  
   if(showCounterfactual == TRUE){
   out.inc.y.m.1.cf <-melt(100*as.matrix(subset(pred, select=prev.cf.n.inc1:(prev.cf.n.inc1+cal.period-1)))/sum(n.i[y.m.1])) #model incidence by age, sex, and subpopulation
   out.inc.o.m.1.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period):(prev.cf.n.inc1+cal.period*2-1)))/sum(n.i[o.m.1]))
@@ -153,8 +182,36 @@ plot.posteriors <- function(post.sample) {
   out.inc.o.f.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*13):(prev.cf.n.inc1+cal.period*14-1)))/sum(n.i[o.f.2]))
   out.inc.y.f.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*14):(prev.cf.n.inc1+cal.period*15-1)))/sum(n.i[y.f.3]))
   out.inc.o.f.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*15):(prev.cf.n.inc1+cal.period*16-1)))/sum(n.i[o.f.3]))
+  
+  #prevalence
+  out.prev.y.m.1.cf <-melt(100*as.matrix(subset(pred, select=prev.cf.prev.total1:(prev.cf.prev.total1+cal.period-1)))) #model prevalence by age, sex, and subpopulation
+  out.prev.o.m.1.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period):(prev.cf.prev.total1+cal.period*2-1))))
+  out.prev.y.m.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*2):(prev.cf.prev.total1+cal.period*3-1))))
+  out.prev.o.m.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*3):(prev.cf.prev.total1+cal.period*4-1))))
+  out.prev.y.m.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*4):(prev.cf.prev.total1+cal.period*5-1))))
+  out.prev.o.m.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*5):(prev.cf.prev.total1+cal.period*6-1))))
+  out.prev.y.msm.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*6):(prev.cf.prev.total1+cal.period*7-1))))
+  out.prev.o.msm.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*7):(prev.cf.prev.total1+cal.period*8-1))))
+  out.prev.y.msmhiv.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*8):(prev.cf.prev.total1+cal.period*9-1))))
+  out.prev.o.msmhiv.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*9):(prev.cf.prev.total1+cal.period*10-1))))
+  out.prev.y.f.1.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*10):(prev.cf.prev.total1+cal.period*11-1))))
+  out.prev.o.f.1.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*11):(prev.cf.prev.total1+cal.period*12-1))))
+  out.prev.y.f.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*12):(prev.cf.prev.total1+cal.period*13-1))))
+  out.prev.o.f.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*13):(prev.cf.prev.total1+cal.period*14-1))))
+  out.prev.y.f.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*14):(prev.cf.prev.total1+cal.period*15-1))))
+  out.prev.o.f.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*15):(prev.cf.prev.total1+cal.period*16-1))))
+  out.prev.y.m.1.cf <-melt(100*as.matrix(subset(pred, select=prev.cf.prev.total1:(prev.cf.prev.total1+cal.period-1)))) #model prevalence by age, sex, and subpopulation
+  out.prev.o.m.1.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period):(prev.cf.prev.total1+cal.period*2-1))))
+  out.prev.y.m.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*2):(prev.cf.prev.total1+cal.period*3-1))))
+  out.prev.o.m.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*3):(prev.cf.prev.total1+cal.period*4-1))))
+  out.prev.y.m.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*4):(prev.cf.prev.total1+cal.period*5-1))))
+  out.prev.o.m.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*5):(prev.cf.prev.total1+cal.period*6-1))))
+  out.prev.y.msm.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*6):(prev.cf.prev.total1+cal.period*7-1))))
+  out.prev.o.msm.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*7):(prev.cf.prev.total1+cal.period*8-1))))
+  out.prev.y.msmhiv.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*8):(prev.cf.prev.total1+cal.period*9-1))))
+  out.prev.o.msmhiv.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.prev.total1+cal.period*9):(prev.cf.prev.total1+cal.period*10-1))))
   }
-  #browser()
+  browser()
   # For any data separated into compartments, change data frame X2 value to avoid the bug where
   # X2 value of [name]10 gets put before an X2 value of [name][single digit > 1] in the resulting plot.
   # This bug only affects display of older male populations, but in case we change the order of
@@ -462,11 +519,11 @@ plot.posteriors <- function(post.sample) {
   max.inc.o.f <-max(out.inc.o.f.1$value, out.inc.o.f.2$value, out.inc.o.f.3$value, na.rm=TRUE) 
   max.inc <- ceiling(max(max.inc.y.m, max.inc.o.m, max.inc.y.f, max.inc.o.f))
   max.inc.msm <-ceiling(max(out.inc.y.msm$value, out.inc.o.msm$value, na.rm=TRUE)+1)
-  ### plot incident cases by subpop, age, and sex: 2000-2015 ###
+  ### plot incident cases by subpop, age, and sex: 2012-2016 ###
   
   plot.inc.y.m.1 <- ggplot(data=out.inc.y.m.1)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Black M 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -474,8 +531,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.m.1 <- ggplot(data=out.inc.o.m.1)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Black M 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -484,8 +541,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.m.2 <- ggplot(data=out.inc.y.m.2)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Other M 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -493,8 +550,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.m.2<- ggplot(data=out.inc.o.m.2)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Other M 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -502,8 +559,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.m.3 <- ggplot(data=out.inc.y.m.3)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Hispanic M 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -511,8 +568,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.m.3<- ggplot(data=out.inc.o.m.3)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Hispanic M 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -520,8 +577,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.f.1 <- ggplot(data=out.inc.y.f.1)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Black F 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -529,8 +586,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.f.1 <- ggplot(data=out.inc.o.f.1)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Black F 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -538,8 +595,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.f.2 <- ggplot(data=out.inc.y.f.2)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Other F 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -547,8 +604,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.f.2 <- ggplot(data=out.inc.o.f.2)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Other F 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -556,8 +613,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.f.3 <- ggplot(data=out.inc.y.f.3)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Hispanic F 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -565,8 +622,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.f.3 <- ggplot(data=out.inc.o.f.3)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Hispanic F 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -574,8 +631,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.msm <- ggplot(data=out.inc.y.msm)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="HIV- MSM 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc.msm))+
@@ -583,16 +640,16 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.msm <- ggplot(data=out.inc.o.msm)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="HIV- MSM 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc.msm))+
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.msmhiv <- ggplot(data=out.inc.y.msmhiv)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="HIV+ MSM 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc.msm))+
@@ -600,10 +657,156 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.msmhiv <- ggplot(data=out.inc.o.msmhiv)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="HIV+ MSM 45-64 y", x="Year", y="Incidence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc.msm))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  ### plot prevalence by subpop, age, and sex: 2012-2016 ###
+  
+  plot.prev.y.m.1 <- ggplot(data=out.prev.y.m.1)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Black M 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.m.1 <- ggplot(data=out.prev.o.m.1)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Black M 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    #scale_x_discrete(labels=seq((end.year-(cal.period*3)+1),end.year,1))
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.m.2 <- ggplot(data=out.prev.y.m.2)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Other M 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.m.2<- ggplot(data=out.prev.o.m.2)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Other M 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.m.3 <- ggplot(data=out.prev.y.m.3)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Hispanic M 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.m.3<- ggplot(data=out.prev.o.m.3)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Hispanic M 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.f.1 <- ggplot(data=out.prev.y.f.1)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Black F 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.f.1 <- ggplot(data=out.prev.o.f.1)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Black F 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.f.2 <- ggplot(data=out.prev.y.f.2)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Other F 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.f.2 <- ggplot(data=out.prev.o.f.2)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Other F 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.f.3 <- ggplot(data=out.prev.y.f.3)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Hispanic F 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.f.3 <- ggplot(data=out.prev.o.f.3)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Hispanic F 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.msm <- ggplot(data=out.prev.y.msm)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="HIV- MSM 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc.msm))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.msm <- ggplot(data=out.prev.o.msm)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="HIV- MSM 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc.msm))+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.msmhiv <- ggplot(data=out.prev.y.msmhiv)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="HIV+ MSM 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc.msm))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.msmhiv <- ggplot(data=out.prev.o.msmhiv)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="HIV+ MSM 45-64 y", x="Year", y="Prevalence (%)") +
     #coord_cartesian(ylim=c(0,max.inc.msm))+
     expand_limits(y=0)+
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
@@ -611,8 +814,8 @@ plot.posteriors <- function(post.sample) {
   # for the no-contact-tracing counterfactual
   if(showCounterfactual == TRUE) {
   plot.inc.y.m.1.cf <- ggplot(data=out.inc.y.m.1.cf)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Black M 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -620,8 +823,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.m.1.cf <- ggplot(data=out.inc.o.m.1.cf)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Black M 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -630,8 +833,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.m.2.cf <- ggplot(data=out.inc.y.m.2.cf)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Other M 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -639,8 +842,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.m.2.cf<- ggplot(data=out.inc.o.m.2.cf)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Other M 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -648,8 +851,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.m.3.cf <- ggplot(data=out.inc.y.m.3.cf)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Hispanic M 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -657,8 +860,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.m.3.cf<- ggplot(data=out.inc.o.m.3.cf)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Hispanic M 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -666,8 +869,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.f.1.cf <- ggplot(data=out.inc.y.f.1.cf)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Black F 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -675,8 +878,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.f.1.cf <- ggplot(data=out.inc.o.f.1.cf)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Black F 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -684,8 +887,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.f.2.cf <- ggplot(data=out.inc.y.f.2.cf)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Other F 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -693,8 +896,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.f.2.cf <- ggplot(data=out.inc.o.f.2.cf)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Other F 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -702,8 +905,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.f.3.cf <- ggplot(data=out.inc.y.f.3.cf)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Hispanic F 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -711,8 +914,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.f.3.cf <- ggplot(data=out.inc.o.f.3)+
-    geom_line(aes(x=X2, y=value, group=X1),color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1),color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="Hispanic F 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc))+
@@ -720,8 +923,8 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.msm.cf <- ggplot(data=out.inc.y.msm.cf)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="HIV- MSM 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc.msm))+
@@ -729,16 +932,16 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.msm.cf <- ggplot(data=out.inc.o.msm.cf)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="HIV- MSM 45-64 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc.msm))+
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.y.msmhiv.cf <- ggplot(data=out.inc.y.msmhiv.cf)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="HIV+ MSM 20-44 y", x="Year", y="Incidence (%)") +
     #coord_cartesian(ylim=c(0,max.inc.msm))+
@@ -746,10 +949,156 @@ plot.posteriors <- function(post.sample) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   plot.inc.o.msmhiv.cf <- ggplot(data=out.inc.o.msmhiv.cf)+
-    geom_line(aes(x=X2, y=value, group=X1), color="grey") +
-    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
+    geom_line(aes(x=X2, y=value, group=X1), color="plum1") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="purple4", size=1) +
     theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
     labs(title="HIV+ MSM 45-64 y", x="Year", y="Incidence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc.msm))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  ### plot prevalence by subpop, age, and sex: 2012-2016 ###
+  
+  plot.prev.y.m.1.cf <- ggplot(data=out.prev.y.m.1.cf)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Black M 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.m.1.cf <- ggplot(data=out.prev.o.m.1.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Black M 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    #scale_x_discrete(labels=seq((end.year-(cal.period*3)+1),end.year,1))
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.m.2.cf <- ggplot(data=out.prev.y.m.2.cf)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Other M 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.m.2.cf<- ggplot(data=out.prev.o.m.2.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Other M 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.m.3.cf <- ggplot(data=out.prev.y.m.3.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Hispanic M 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.m.3.cf<- ggplot(data=out.prev.o.m.3.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Hispanic M 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.f.1.cf <- ggplot(data=out.prev.y.f.1.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Black F 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.f.1.cf <- ggplot(data=out.prev.o.f.1.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Black F 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.f.2.cf <- ggplot(data=out.prev.y.f.2.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Other F 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.f.2.cf <- ggplot(data=out.prev.o.f.2.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Other F 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.f.3.cf <- ggplot(data=out.prev.y.f.3.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Hispanic F 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.f.3.cf <- ggplot(data=out.prev.o.f.3.cf)+
+    geom_line(aes(x=X2, y=value, group=X1),color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="Hispanic F 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.msm.cf <- ggplot(data=out.prev.y.msm.cf)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="HIV- MSM 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc.msm))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.msm.cf <- ggplot(data=out.prev.o.msm.cf)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="HIV- MSM 45-64 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc.msm))+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.y.msmhiv.cf <- ggplot(data=out.prev.y.msmhiv.cf)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="HIV+ MSM 20-44 y", x="Year", y="Prevalence (%)") +
+    #coord_cartesian(ylim=c(0,max.inc.msm))+
+    expand_limits(y=0)+
+    scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
+  
+  plot.prev.o.msmhiv.cf <- ggplot(data=out.prev.o.msmhiv.cf)+
+    geom_line(aes(x=X2, y=value, group=X1), color="lightskyblue") +
+    stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="blue", size=1) +
+    theme(legend.position="none", axis.text.x=element_text(angle=90,hjust=1), title=element_text(size=8)) + 
+    labs(title="HIV+ MSM 45-64 y", x="Year", y="Prevalence (%)") +
     #coord_cartesian(ylim=c(0,max.inc.msm))+
     expand_limits(y=0)+
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
@@ -1822,6 +2171,11 @@ plot.posteriors <- function(post.sample) {
                plot.inc.y.f.1, plot.inc.y.f.2, plot.inc.y.f.3, blankPlot,      blankPlot,
                plot.inc.o.f.1, plot.inc.o.f.2, plot.inc.o.f.3, blankPlot,      blankPlot,   ncol=5)
   
+  grid.arrange(plot.prev.y.m.1, plot.prev.y.m.2, plot.prev.y.m.3, plot.prev.y.msm, plot.prev.y.msmhiv, 
+               plot.prev.o.m.1, plot.prev.o.m.2, plot.prev.o.m.3, plot.prev.o.msm, plot.prev.o.msmhiv, 
+               plot.prev.y.f.1, plot.prev.y.f.2, plot.prev.y.f.3, blankPlot,      blankPlot,
+               plot.prev.o.f.1, plot.prev.o.f.2, plot.prev.o.f.3, blankPlot,      blankPlot,   ncol=5)
+  
   grid.arrange(plot.b.m,         plot.b.f,           plot.b.msm,      plot.behav,
                plot.dur.incub,   plot.dur.prim,      plot.dur.sec,    blankPlot,
                plot.dur.imm.inf, plot.dur.imm.early, plot.dur.immune, blankPlot, 
@@ -1868,6 +2222,10 @@ plot.posteriors <- function(post.sample) {
                plot.inc.o.m.1.cf, plot.inc.o.m.2.cf, plot.inc.o.m.3.cf, plot.inc.o.msm.cf, plot.inc.o.msmhiv.cf, 
                plot.inc.y.f.1.cf, plot.inc.y.f.2.cf, plot.inc.y.f.3.cf, blankPlot,      blankPlot,
                plot.inc.o.f.1.cf, plot.inc.o.f.2.cf, plot.inc.o.f.3.cf, blankPlot,      blankPlot,   ncol=5)
+  grid.arrange(plot.prev.y.m.1.cf, plot.prev.y.m.2.cf, plot.prev.y.m.3.cf, plot.prev.y.msm.cf, plot.prev.y.msmhiv.cf, 
+               plot.prev.o.m.1.cf, plot.prev.o.m.2.cf, plot.prev.o.m.3.cf, plot.prev.o.msm.cf, plot.prev.o.msmhiv.cf, 
+               plot.prev.y.f.1.cf, plot.prev.y.f.2.cf, plot.prev.y.f.3.cf, blankPlot,      blankPlot,
+               plot.prev.o.f.1.cf, plot.prev.o.f.2.cf, plot.prev.o.f.3.cf, blankPlot,      blankPlot,   ncol=5)
   }
   dev.off()
   
