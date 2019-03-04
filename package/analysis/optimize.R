@@ -14,7 +14,7 @@ orig_theta_names <- names(theta)
 x <- load(system.file(paste0("mcmc/mcmc_", state), package='syphLAMA'))
 post.sample <- get(x = x); rm(x)
 trace <- post.sample$trace
-theta <- unlist(trace[sample.int(1, nrow(trace)),])
+theta <- unlist(trace[sample.int(nrow(trace), 1),])
 
 # make sure the theta vector is named properly 
 dLogPosterior_for_optim <- function(theta) {
@@ -50,6 +50,6 @@ while (!done) {
             )
     )
   } else {
-    theta <-  unlist(trace[sample.int(1, nrow(trace)),])
+    theta <-  unlist(trace[sample.int(nrow(trace), 1),])
  }
 }
