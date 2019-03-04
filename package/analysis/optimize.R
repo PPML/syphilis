@@ -1,7 +1,7 @@
 library(syphLAMA)
 
 # command line arguments
-state <- commandArgs(trailingOnly=T)[[1]]
+site <- commandArgs(trailingOnly=T)[[1]]
 nth_sim <- as.numeric(commandArgs(trailingOnly=T)[[2]])
 
 # script config
