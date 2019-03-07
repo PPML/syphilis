@@ -1,7 +1,8 @@
 library(syphLAMA)
 
 # command line arguments
-site <- commandArgs(trailingOnly=T)[[1]]
+site <<- commandArgs(trailingOnly=T)[[1]]
+state <<- site
 nth_sim <- as.numeric(commandArgs(trailingOnly=T)[[2]])
 
 # script config
@@ -11,7 +12,7 @@ output_directory <- "~/2019/Feburary/26/optim/"
 # setup syphLAMA load trace
 load.start()
 orig_theta_names <- names(theta)
-x <- load(system.file(paste0("mcmc/mcmc_", state), package='syphLAMA'))
+x <- load(system.file(paste0("mcmc/mcmc_", site), package='syphLAMA'))
 post.sample <- get(x = x); rm(x)
 trace <- post.sample$trace
 theta <- unlist(trace[sample.int(nrow(trace), 1),])
@@ -20,6 +21,8 @@ theta <- unlist(trace[sample.int(nrow(trace), 1),])
 dLogPosterior_for_optim <- function(theta) {
 	names(theta) <- orig_theta_names
 	d <- dLogPosterior(theta)
+	print(d)
+	return(d)
 }
 
 # main optim loop -- run optims until 'done' and checkpoint outputs iteratively 
