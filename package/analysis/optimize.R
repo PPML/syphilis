@@ -7,7 +7,7 @@ nth_sim <- as.numeric(commandArgs(trailingOnly=T)[[2]])
 
 # script config
 N_loops <- 20
-output_directory <- "~/2019/Feburary/26/optim/"
+output_directory <- "~/2019/February/26/optim/"
 
 # setup syphLAMA load trace
 load.start()
