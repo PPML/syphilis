@@ -21,7 +21,7 @@ bezier.fun<- function(screen.bezier){
   p<-c(p0,p1,p2,p3)
   t<-seq(0,1, length.out=(cal.period+10)) #let time trend start 10 years before calibration start
   #browser()
-  bezier(t,p)  #this is the function from the bezier package - Hmisc also has a bezier function that is NOT the one to use
+  bezier::bezier(t,p)  #this is the function from the bezier package - Hmisc also has a bezier function that is NOT the one to use
 }
 
 

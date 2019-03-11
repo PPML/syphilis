@@ -36,7 +36,7 @@ blankPlot <- ggplot()+geom_blank(aes(1,1)) +  # make a blank plot to use as a pl
 
 # plot calibration targets and priors/posteriors 
 
-plot.posteriors <- function(post.sample) {
+plot.posteriors <- function(post.sample, output_dir) {
   #cal.period <- st_env$cal.period
   #n.i <- st_env$n.i
   #y.m.1 <- st_env$y.m.1
@@ -59,7 +59,8 @@ plot.posteriors <- function(post.sample) {
   #start.year <- st_env$start.year
   #prep model outputs for plotting
   # here y=20-44y, o=45-64y, m=male, f=female, 1=black, 2=other, 3=Hispanic, msm=hiv- men who have sex with men, msmhiv= hiv+ msm
-  pred <- as.data.frame(post.sample$outputs)
+  # pred <- as.data.frame(post.sample$outputs)
+	pred <- t(as.data.frame(apply(post.sample$outputs, 1, unlist)))
   diag.len <- nrow(diag.age.sex.dat)
   msm.len <- nrow(msm.dat) #years of data for proportion of male cases reported as msm
   hiv.len <- nrow(subset(msm.dat[,c("pHIV_y","pHIV_o")], (!is.na(msm.dat[,"pHIV_y"])) & (!is.na(msm.dat[,"pHIV_o"])))) #years of data for hiv coinfection
@@ -1802,7 +1803,7 @@ plot.posteriors <- function(post.sample) {
     labs(title="F, other: 20-44y",x="Year", y="Screening rate") +
     coord_cartesian(ylim=c(0,1))
   ### save prior/posterior plots to pdf ###
-  pdf(file=paste("Model_outputs/syph_test_",state, ".pdf", sep=""), width=10, height=10, paper="USr")
+  pdf(file=file.path(output_dir, paste("syph_plots_",state, ".pdf", sep="")), width=10, height=10, paper="USr")
   grid.arrange(plot.diag.y.m, plot.diag.o.m, 
                plot.diag.y.f, plot.diag.o.f, 
                bottom=textGrob("Calibration targets", x=0.01, y=1, just="left"),
