@@ -117,11 +117,11 @@ List syphSim(
   arma::vec ct_cov_el(dim);
   arma::vec ct_cov(dim);
   //arma::vec ct_cov_late(dim);
-  String fileName = x["fileName"];
-  String fileNameET = x["fileNameET"];
-  String fileNameES = x["fileNameES"];
-  String fileNameA = x["fileNameA"];
-  String fileNameC = x["fileNameC"];
+  // String fileName = x["fileName"];
+  // String fileNameET = x["fileNameET"];
+  // String fileNameES = x["fileNameES"];
+  // String fileNameA = x["fileNameA"];
+  // String fileNameC = x["fileNameC"];
   double gamma1 = gamma[0]; //1/dur primary
   double gamma2 = gamma[1]; //1/dur secondary
   double gamma3 = gamma[2]; //1/dur latent
@@ -183,16 +183,16 @@ List syphSim(
   
   
   /// year loop
-  std::ofstream outfile;
-  std::ofstream outfileET;
-  std::ofstream outfileES;
-  std::ofstream outfileA;
-  std::ofstream outfileC;
+  // std::ofstream outfile;
+  // std::ofstream outfileET;
+  // std::ofstream outfileES;
+  // std::ofstream outfileA;
+  // std::ofstream outfileC;
   //outfile.open(fileName);
   //outfileET.open(fileNameET);
   //outfileES.open(fileNameES);
-  outfileA.open(fileNameA);
-  outfileC.open(fileNameC);
+  // outfileA.open(fileNameA);
+  // outfileC.open(fileNameC);
   for(int y=0; y<nYrs; y++){
     if(y >= nYrs-(nCTYrs+1) && y < nYrs-1) {
       arma::vec pct_cases_primsec = (I1+I2+IR1+IR2)/(I1+I2+IR1+IR2+L1+LR1); // pct_cases_el would be 1-this
@@ -580,8 +580,8 @@ List syphSim(
   //outfile.close();
   //outfileET.close();
   //outfileES.close();
-  outfileA.close();
-  outfileC.close();
+  // outfileA.close();
+  // outfileC.close();
   return Rcpp::List::create(
     Rcpp::Named("initPop") = initPop,
     Rcpp::Named("out") = out,

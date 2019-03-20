@@ -10,6 +10,7 @@ Authors@R: as.person(c(
   ))
 Description: 
 License: What license is it under?
+LazyData: true
 LinkingTo: 
     Rcpp,
 		RcppArmadillo
