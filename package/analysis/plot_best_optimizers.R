@@ -1,4 +1,4 @@
-library(syphLAMA)
+devtools::load_all()
 
 state <<- 'LA'
 load.start()

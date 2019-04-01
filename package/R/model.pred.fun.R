@@ -95,7 +95,8 @@ prediction.epi <- function(theta) { # fit to infection data
                    births.sa, 
                    births.nsa,
                    aging,
-                   aging.nsa)
+                   aging.nsa,
+	                 output_every_timestep=F)
   sol<-out.cpp$out
   ct <- out.cpp$ct
   
@@ -148,7 +149,8 @@ prediction.epi <- function(theta) { # fit to infection data
                      births.sa, 
                      births.nsa,
                      aging,
-                     aging.nsa)
+                     aging.nsa,
+										 output_every_timestep = F)
     sol.cf<-out.cpp.cf$out
 
     prev.cf<-model.prev(sol.cf)

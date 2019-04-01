@@ -9,7 +9,7 @@ mat_mult <- function(a, b) {
     .Call('_syphLAMA_mat_mult', PACKAGE = 'syphLAMA', a, b)
 }
 
-syphSim <- function(x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, births_sa, births_nsa, aging, aging_nsa) {
-    .Call('_syphLAMA_syphSim', PACKAGE = 'syphLAMA', x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, births_sa, births_nsa, aging, aging_nsa)
+syphSim <- function(x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, births_sa, births_nsa, aging, aging_nsa, output_every_timestep) {
+    .Call('_syphLAMA_syphSim', PACKAGE = 'syphLAMA', x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, births_sa, births_nsa, aging, aging_nsa, output_every_timestep)
 }
 

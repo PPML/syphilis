@@ -37,7 +37,8 @@ List syphSim(
     arma::mat births_sa, //births p_sexually active
     arma::mat births_nsa, //births p_not sexually active
     arma::mat aging, //aging rate
-    arma::mat aging_nsa //aging p.not sexually active
+    arma::mat aging_nsa, //aging p.not sexually active
+		bool output_every_timestep 
     
 ) {
   int i = 5; //number of subpopulations
@@ -104,8 +105,12 @@ List syphSim(
   arma::vec p_trt4(dim); //trt rate, late latent
   arma::vec lambda(dim); //force of infection
   arma::vec Pop(dim*23); //population matrix
-  NumericMatrix outputs(nYrs, dim*23+1);
-  NumericMatrix out(nYrs, dim*23+1);
+	int output_nrow = nYrs;
+	if (output_every_timestep) {
+		output_nrow = output_nrow * 52;
+	}
+  NumericMatrix outputs(output_nrow, dim*23+1);
+  NumericMatrix out(output_nrow, dim*23+1);
   double nCTYrs = as<double>(x["ct.data.years"]); // number of years for which we have contact tracing data
   NumericMatrix ct_primsec(nCTYrs, dim);
   NumericMatrix ct_el(nCTYrs, dim);
@@ -555,28 +560,35 @@ List syphSim(
       }
         
         // fill results table with annual outputs
-      if(w==0) {
-        outputs(y,0) = y; //year
-        for(int n=0; n<dim*23; n++) {
-          outputs(y,1+n) = Pop[n]; // 
-        }
-        if (y >= nYrs-(nCTYrs+1) && y < nYrs-1) { //record contact tracing coverage
-          for(int n=0; n<dim; n++) {
-            ct_primsec(y-(nYrs-(nCTYrs+1)), n) = ct_cov_primsec(n);
-            ct_el(y-(nYrs-(nCTYrs+1)), n) = ct_cov_el(n);
-            ct(y-(nYrs-(nCTYrs+1)), n) = ct_cov(n);
-          }
-        }
-      }
+			if (output_every_timestep) {
+				outputs(y*52+w,0) = y + w/52;
+				for (int n=0; n<dim*23; n++) {
+					outputs(y*52+w,1+n) = Pop[n];
+				}
+			} else {
+				if(w==0) {
+					outputs(y,0) = y; //year
+					for(int n=0; n<dim*23; n++) {
+						outputs(y,1+n) = Pop[n]; // 
+					}
+					if (y >= nYrs-(nCTYrs+1) && y < nYrs-1) { //record contact tracing coverage
+						for(int n=0; n<dim; n++) {
+							ct_primsec(y-(nYrs-(nCTYrs+1)), n) = ct_cov_primsec(n);
+							ct_el(y-(nYrs-(nCTYrs+1)), n) = ct_cov_el(n);
+							ct(y-(nYrs-(nCTYrs+1)), n) = ct_cov(n);
+						}
+					}
+				}
+			}
   
     } /// end of week loop
   } /// end of year loop
   
-  for(int m=0; m<nYrs; m++) {
-    for(int n=0; n<dim*23+1; n++) {
-      out(m,n) = outputs(m,n);
-    }
-  }
+  // for(int m=0; m<nYrs; m++) {
+  //   for(int n=0; n<dim*23+1; n++) {
+  //     out(m,n) = outputs(m,n);
+  //   }
+  // }
   //outfile.close();
   //outfileET.close();
   //outfileES.close();
@@ -584,7 +596,7 @@ List syphSim(
   // outfileC.close();
   return Rcpp::List::create(
     Rcpp::Named("initPop") = initPop,
-    Rcpp::Named("out") = out,
+    Rcpp::Named("out") = outputs,
     Rcpp::Named("ct") = ct,
     Rcpp::Named("ct_ps") = ct_cov_primsec,
     Rcpp::Named("ct_el") = ct_cov_el
