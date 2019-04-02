@@ -3,29 +3,6 @@
 #######################################################
 
 load.start <- function(){
-  library(deSolve)
-  library(scales)
-  library(lattice)
-  library(latticeExtra)
-  library(fitR)
-  library(Rcpp)
-  library(bezier)
-  library(plyr)
-  library(reshape)
-  
-  ### load functions ###
-  # source("Model_code/mixing.fun.R")  # function to calculate and balance contact matrix, outputs p.total.bal;p.total.bal.btwn;cm.low;cm.high
-  # source("Model_code/aging.fun.R")  #function to calculate aging parameters
-  # source("Model_code/population.size.fun.R") #function to calculate population sizes
-  # source("Model_code/model.pred.fun.R")  #function to update parameters, run model, and print outputs used for fitting
-  # source("Model_code/initial.files.R")  #read in required data files
-  # source("Model_code/bezier.funs.R") #functions to calculate time-varying parameters
-  # source("Model_code/myMCMC.R") #modified mcmcMH function from fitR package that ensures covariance matrix is positive definite
-  # source("Model_code/model.out.fun.R") #function to calculate desired model outputs for calibration
-  # source("Model_code/model.likelihood.fun.R") #calculate model likelihoods
-  # source("Model_code/mcmc.funs.R")  #functions used for mcmc algorithm
-  # source("Model_code/model.priors.fun.R") #calculate prior likelihood  
-  # sourceCpp("Model_code/syph_trans_model.cpp") #read in rcpp code for transmission model
   
   initial.files(state) #load required data files
   
