@@ -121,12 +121,6 @@ List syphSim(
   arma::vec ct_cov_primsec(dim);
   arma::vec ct_cov_el(dim);
   arma::vec ct_cov(dim);
-  //arma::vec ct_cov_late(dim);
-  // String fileName = x["fileName"];
-  // String fileNameET = x["fileNameET"];
-  // String fileNameES = x["fileNameES"];
-  // String fileNameA = x["fileNameA"];
-  // String fileNameC = x["fileNameC"];
   double gamma1 = gamma[0]; //1/dur primary
   double gamma2 = gamma[1]; //1/dur secondary
   double gamma3 = gamma[2]; //1/dur latent
@@ -188,16 +182,6 @@ List syphSim(
   
   
   /// year loop
-  // std::ofstream outfile;
-  // std::ofstream outfileET;
-  // std::ofstream outfileES;
-  // std::ofstream outfileA;
-  // std::ofstream outfileC;
-  //outfile.open(fileName);
-  //outfileET.open(fileNameET);
-  //outfileES.open(fileNameES);
-  // outfileA.open(fileNameA);
-  // outfileC.open(fileNameC);
   for(int y=0; y<nYrs; y++){
     if(y >= nYrs-(nCTYrs+1) && y < nYrs-1) {
       arma::vec pct_cases_primsec = (I1+I2+IR1+IR2)/(I1+I2+IR1+IR2+L1+LR1); // pct_cases_el would be 1-this
@@ -209,10 +193,6 @@ List syphSim(
       arma::vec det_rate = as<arma::vec>(alpha) + trt_rate;
       arma::vec ratio_primsec = intoTrtI12/(I1+I2+IR1+IR2);
       arma::vec ratio_el = intoTrtL1/(L1+LR1);
-      //outfile<<intoTrtI12<<'\n';
-      //outfileET<<exitRateTrt<<'\n';
-      //outfileES<<exitRateScr<<'\n';
-      //outfileA<<alpha<<'\n';
       for(int i=0; i < 32; i++) {
         if(i < 20) { // M
           if(i >= 0 && i < 4) { // Black
@@ -251,10 +231,8 @@ List syphSim(
           }
         }
       }
-      //outfileC<<(ct_cov_primsec % (I1+I2+IR1+IR2))<<'\n';
       // inpute coverage for all early syphilis
       ct_cov = det_rate%p_ct*d;
-      //outfileC<<ct_cov<<'\n';
       //ct_cov = ((ct_cov_primsec % (I1+I2+IR1+IR2)) + (ct_cov_el % (L1+LR1))) / (I1+I2+IR1+IR2+L1+LR1);
       //ct_cov_late = (intoTrtL2/L2) % p_ct_late;
       count++;
@@ -269,7 +247,7 @@ List syphSim(
     dTL1 = dTL1.zeros();
     
     for(int w=0; w<52; w++){
-      //updata reporting (in screened), transmission rr, and background abx use
+      //update reporting (in screened), transmission rr, and background abx use
       double c_rr = c_msm[y];
       double rep = report[y];
       double abx = pabx[y];
