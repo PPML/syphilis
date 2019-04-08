@@ -13,10 +13,10 @@ License: What license is it under?
 LazyData: true
 LinkingTo: 
     Rcpp,
-		RcppArmadillo
+    RcppArmadillo
 Imports: 
     Rcpp,
-		deSolve,
+    deSolve,
     scales,
     lattice,
     latticeExtra,
@@ -24,4 +24,6 @@ Imports:
     bezier,
     plyr,
     reshape
+Suggests:
+    here
 RoxygenNote: 6.1.1
