@@ -1,4 +1,5 @@
-library(syphLAMA)
+library(here)
+devtools::load_all()
 
 # command line arguments
 site <<- commandArgs(trailingOnly=T)[[1]]
@@ -7,15 +8,15 @@ nth_sim <- as.numeric(commandArgs(trailingOnly=T)[[2]])
 
 # script config
 N_loops <- 20
-output_directory <- "~/2019/April/2/optim/"
+output_directory <- here("inst/optim/4-8-19")
 
 # setup syphLAMA load trace
 load.start()
-orig_theta_names <- names(theta)
 x <- load(system.file(paste0("mcmc/mcmc_", site), package='syphLAMA'))
 post.sample <- get(x = x); rm(x)
 trace <- post.sample$trace
 theta <- unlist(trace[sample.int(nrow(trace), 1),])
+orig_theta_names <- names(theta)
 
 # make sure the theta vector is named properly 
 dLogPosterior_for_optim <- function(theta) {
