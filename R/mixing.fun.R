@@ -127,7 +127,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   }
  
   ### Total number of partnerships within and across subpopulations ###
-  p.total <- array(aaply(grid,1, function(x) {
+  p.total <- array(plyr::aaply(grid,1, function(x) {
     if(x[6]!=4 && x[6]!=5) 
       (theta[x[6],x[5]] * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.r[x[5],x[1],x[3],x[6]] * n.dist.sa[x[5],x[1],x[3],x[6]])
     else 
@@ -135,7 +135,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
       }),
     dim=c(k,k,l,l,j,i))#total partnerships within each stratum x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
   
-  p.total.btwn <-array(aaply(grid,1, function(x) { #total partnerships with other subpops (will be divided between other 2 subpops for het,with other HIV status for MSM) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
+  p.total.btwn <-array(plyr::aaply(grid,1, function(x) { #total partnerships with other subpops (will be divided between other 2 subpops for het,with other HIV status for MSM) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
     if(x[6]!=4 && x[6]!=5) (
       if(x[5]==1)
         (1-theta[x[6],x[5]]) * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.r[x[5],x[1],x[3],x[6]] * n.dist.sa[x[5],x[1],x[3],x[6]]
@@ -147,7 +147,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
       }),
     dim=c(k,k,l,l,j,i))
   
-  p.total.msm.hivneg.unadj <- array(aaply(grid,1, function(x){   ### Total partnerships between HIV neg MSM and other F subpopulations (i=1-3 is desired partnerships for F with MSM, i=4 is desired partnerships with F for MSM)
+  p.total.msm.hivneg.unadj <- array(plyr::aaply(grid,1, function(x){   ### Total partnerships between HIV neg MSM and other F subpopulations (i=1-3 is desired partnerships for F with MSM, i=4 is desired partnerships with F for MSM)
     if(theta[4,1]<1)(
       if(x[5]==2)   #assign proportion of btwn partnerships in females to be with MSM subpop
         (1-theta[x[6],x[5]]) * p.m.hivneg.sa[x[6]] * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.r[x[5],x[1],x[3],x[6]] * n.dist.sa[x[5],x[1],x[3],x[6]]#total partnerships with other subpops (will be divided between other 2 subpops) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
@@ -164,7 +164,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   p.total.msm.hivneg[,,2,1,1,4] <- (1-pi.all[1]) * (p.total.msm.hivneg.unadj[,,2,1,1,4] + p.total.msm.hivneg.unadj[,,2,2,1,4])
   
   
-  p.total.msm.hivpos.unadj <- array(aaply(grid,1, function(x){   ### Total partnerships between HIV pos MSM and other F subpopulations (i=1-3 is desired partnerships for F with MSM, i=4 is desired partnerships with F for MSM)
+  p.total.msm.hivpos.unadj <- array(plyr::aaply(grid,1, function(x){   ### Total partnerships between HIV pos MSM and other F subpopulations (i=1-3 is desired partnerships for F with MSM, i=4 is desired partnerships with F for MSM)
     if(theta[5,1]<1)(
       if(x[5]==2)   #assign proportion of btwn partnerships in females to be with MSM subpop
         (1-theta[x[6],x[5]]) * p.m.hivpos.sa[x[6]] * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.r[x[5],x[1],x[3],x[6]] * n.dist.sa[x[5],x[1],x[3],x[6]]#total partnerships with other subpops (will be divided between other 2 subpops) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
@@ -266,7 +266,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   
   rb.btwn[is.na(rb.btwn)] <-0 #to prevent errors if epsilon/theta/pi =1
   
-  c.bal <-array(aaply(grid,1,function(x){  #for person of AC=k, with partner of AC=k', age=l, partner age=l', sex=j, subpop=i (kk'll'ji)
+  c.bal <-array(plyr::aaply(grid,1,function(x){  #for person of AC=k, with partner of AC=k', age=l, partner age=l', sex=j, subpop=i (kk'll'ji)
     if(x[6]!=4 && x[6]!=5) ( #if not MSM
       if (x[5]==1) #if non-MSM and M
         c.r[x[5],x[1],x[3],x[6]]*rb[x[2],x[1],x[4],x[3],x[6]]^omega 
@@ -280,7 +280,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   c.bal[is.na(c.bal)] <-0  #to prevent errors if epsilon =1
   c.bal[is.infinite(c.bal)] <-0 
   
-  c.bal.btwn <-array(aaply(grid.btwn,1,function(x) {   ##using omega.t to define degree of compromise -- right now smaller subpops determine mixing
+  c.bal.btwn <-array(plyr::aaply(grid.btwn,1,function(x) {   ##using omega.t to define degree of compromise -- right now smaller subpops determine mixing
     if (x[6]!=x[7]) (
       if (x[5]==2) (
         if (x[6]<4)  
@@ -312,7 +312,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   c.bal.btwn[is.na(c.bal.btwn)] <-0  #to prevent errors if epsilon =1
   c.bal.btwn[is.infinite(c.bal.btwn)] <-0 
   
-  p.total.bal <<- array(aaply(grid,1, function(x) {
+  p.total.bal <<- array(plyr::aaply(grid,1, function(x) {
     if(x[6]!=4 && x[6]!=5)
       (theta[x[6],x[5]] * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal[x[1],x[2],x[3],x[4],x[5],x[6]] * n.dist.sa[x[5],x[1],x[3],x[6]])
     else
@@ -320,7 +320,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
     }), dim=c(k,k,l,l,j,i))#total partnerships within each stratum x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
   
   
-  p.total.bal.btwn <<-array(aaply(grid.btwn, 1, function(x) { #total partnerships with other subpops (will be divided between other 2 subpops) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
+  p.total.bal.btwn <<-array(plyr::aaply(grid.btwn, 1, function(x) { #total partnerships with other subpops (will be divided between other 2 subpops) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
     if (x[6]<4 && x[7]<4) (
       if (x[5]==1)
         (1-theta[x[6],x[5]]) * p.s.dist[x[6],x[7]] * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal.btwn[x[1],x[2],x[3],x[4],x[5],x[6],x[7]] * n.dist.sa[x[5],x[1],x[3],x[6]]
@@ -335,7 +335,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   dim=c(k,k,l,l,j,i,i))
   
   
-  p.total.bal.msm.hivneg.unadj <<- array(aaply(grid.btwn,1, function(x){   ### Total partnerships between MSM and other subpopulations
+  p.total.bal.msm.hivneg.unadj <<- array(plyr::aaply(grid.btwn,1, function(x){   ### Total partnerships between MSM and other subpopulations
     if(theta[4,1]<1)(
       if(x[5]==2 & x[7]==4) (  #assign proportion of btwn partnerships in females to be with MSM subpop
         (1-theta[x[6],x[5]]) *p.m.hivneg.sa[x[6]]* 1 * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal.btwn[x[1],x[2],x[3],x[4],x[5],x[6],x[7]] * n.dist.sa[x[5],x[1],x[3],x[6]])#total partnerships with other subpops (will be divided between other 2 subpops) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
@@ -354,7 +354,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   
   
   
-  p.total.bal.msm.hivpos.unadj <<- array(aaply(grid.btwn,1, function(x){   ### Total partnerships between MSM and other subpopulations
+  p.total.bal.msm.hivpos.unadj <<- array(plyr::aaply(grid.btwn,1, function(x){   ### Total partnerships between MSM and other subpopulations
     if(theta[5,1]<1)(
       if(x[5]==2 & x[7]==5) (  #assign proportion of btwn partnerships in females to be with MSM subpop
         (1-theta[x[6],x[5]]) *p.m.hivpos.sa[x[6]] * 1 * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal.btwn[x[1],x[2],x[3],x[4],x[5],x[6],x[7]] * n.dist.sa[x[5],x[1],x[3],x[6]])#total partnerships with other subpops (will be divided between other 2 subpops) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
@@ -372,7 +372,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   
   
   
-  #p.total.bal.btwn <<- array(aaply(grid.btwn,1, function(x) (1-theta[x[6],x[5]]) * p.s.dist[x[6],x[7]] * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal.btwn[x[1],x[2],x[3],x[4],x[5],x[6],x[7]] * n.dist[x[5],x[1],x[3],x[6]]), dim=c(k,k,l,l,j,i,i))#total partnerships within opposite subpop x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
+  #p.total.bal.btwn <<- array(plyr::aaply(grid.btwn,1, function(x) (1-theta[x[6],x[5]]) * p.s.dist[x[6],x[7]] * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal.btwn[x[1],x[2],x[3],x[4],x[5],x[6],x[7]] * n.dist[x[5],x[1],x[3],x[6]]), dim=c(k,k,l,l,j,i,i))#total partnerships within opposite subpop x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
   
   # code below confirms that balanced rb = 1 as expected -- can run if troubleshooting
   # rb.bal[,,1,1,] <- p.total.bal[,,1,1,2,]/aperm(p.total.bal[,,1,1,1,],c(2,1,3)) #ratio of partnerships for given AC (F, M), age (F,M), and subpop
@@ -458,7 +458,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   # rb.bal.btwn[is.na(rb.bal.btwn)] <-0 #to prevent errors if epsilon=1
   
   
-  cm <- array(aaply(grid,1, function(x) { #total within subpop contacts 
+  cm <- array(plyr::aaply(grid,1, function(x) { #total within subpop contacts 
     if(x[6]!=4 && x[6]!=5)
       (theta[x[6],x[5]] * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal[x[1],x[2],x[3],x[4],x[5],x[6]])
     else
@@ -466,7 +466,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
     }), dim=c(k,k,l,l,j,i))
 
 
-  cm.btwn <<-array(aaply(grid.btwn, 1, function(x) { #total contacts with other subpops (treat heterosexual & MSM pops separately) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
+  cm.btwn <<-array(plyr::aaply(grid.btwn, 1, function(x) { #total contacts with other subpops (treat heterosexual & MSM pops separately) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
     if (x[6]<4 && x[7]<4) (
       if (x[5]==1)
         (1-theta[x[6],x[5]]) * p.s.dist[x[6],x[7]] * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal.btwn[x[1],x[2],x[3],x[4],x[5],x[6],x[7]] 
@@ -480,7 +480,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   }),
   dim=c(k,k,l,l,j,i,i))
   
-  cm.msm.hivneg.unadj <- array(aaply(grid.btwn,1, function(x){   ### Total contacts between HIV- MSM and other subpopulations
+  cm.msm.hivneg.unadj <- array(plyr::aaply(grid.btwn,1, function(x){   ### Total contacts between HIV- MSM and other subpopulations
     if(theta[4,1]<1) (
       if(x[5]==2 & x[7]==4) (  #assign proportion of btwn partnerships in females to be with MSM subpop
         (1-theta[x[6],x[5]]) * p.m.hivneg.sa[x[6]] * 1 * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal.btwn[x[1],x[2],x[3],x[4],x[5],x[6],x[7]] )#total partnerships with other subpops (will be divided between other 2 subpops) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 
@@ -497,7 +497,7 @@ mixing <- function(epsilon,pi.all,theta, c.min, rp.all,theta.hiv){
   cm.msm.hivneg[,,2,2,1,5,] <- pi.all[1] * (cm.msm.hivneg.unadj[,,2,1,1,5,] + cm.msm.hivneg.unadj[,,2,2,1,5,])  ## redistribute contacts between o MSM and F according to F age assortativity param
   cm.msm.hivneg[,,2,1,1,5,] <- (1-pi.all[1]) * (cm.msm.hivneg.unadj[,,2,1,1,5,] + cm.msm.hivneg.unadj[,,2,2,1,5,])
   
-  cm.msm.hivpos.unadj <- array(aaply(grid.btwn,1, function(x){   ### Total contacts between HIV+ MSM and other subpopulations
+  cm.msm.hivpos.unadj <- array(plyr::aaply(grid.btwn,1, function(x){   ### Total contacts between HIV+ MSM and other subpopulations
     if(theta[5,1]<1) (
       if(x[5]==2 & x[7]==5) (  #assign proportion of btwn partnerships in females to be with MSM subpop
         (1-theta[x[6],x[5]]) * p.m.hivpos.sa[x[6]] * 1 * p.c[x[1],x[2],x[3],x[4],x[5],x[6]] * c.bal.btwn[x[1],x[2],x[3],x[4],x[5],x[6],x[7]] )#total partnerships with other subpops (will be divided between other 2 subpops) x6:subpop(i); x5=sex(j);x4=age of contact; x3=age; x2=AC of contact ; x1=AC 

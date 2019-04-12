@@ -20,7 +20,7 @@
 #' 
 prediction.epi <- function(theta) {
   e <- constructSimulationEnvironment(theta)
-	sim <- runSimulation(e)
+  sim <- runSimulation(e)
   summarizeSimulation(e, sim)
 }
 
