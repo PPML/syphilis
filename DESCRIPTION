@@ -1,14 +1,18 @@
 Package: syphLAMA
 Type: Package
-Title: A model of syphilis fit to data from Louisiana and Massachusetts
+Title: An Ordinary Differential Equations Model of Syphilis in Louisiana and Massachusetts
 Version: 0.1
-Date: 2019-02-25
+Date: 2019-04-02
 Authors@R: as.person(c(
 	  "Jessie Lowell [aut]",
     "Christian Testa <ctesta@hsph.harvard.edu> [aut, cre]",
     "Ashleigh Tuite [aut]"
   ))
-Description: 
+Description: This package contains an ordinary differential equations model of
+		syphilis fit to syphilis case data from Louisiana and Massachusetts and its
+		analysis investigating hypothetical screening and treatment scenarios. The
+		model is fit using a Bayesian approach relying on the Markov Chain Monte
+		Carlo method to sample the defined posterior distribution.
 License: What license is it under?
 LazyData: true
 LinkingTo: 
