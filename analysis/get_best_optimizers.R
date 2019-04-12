@@ -1,7 +1,9 @@
-library(syphLAMA)
+# library(syphLAMA)
+devtools::load_all()
+library(here)
 
 # Find optimization.R output files
-files_path <- '~/2019/February/26/optim/'
+files_path <- here('inst/optims/4-8-19/')
 la_files <- grep('LA', list.files(files_path, full.names=T), value=T)
 ma_files <- grep('MA', list.files(files_path, full.names=T), value=T)
 
@@ -63,8 +65,7 @@ ma_top5_pars <- ma_optim_max_pars[ma_top5_idxs,]
 
 
 # Save results
-outdir <- "~/2019/March/11/"
-dir.create(outdir, recursive=T)
+outdir <- here("inst/optims/")
 saveRDS(la_top5_pars, file.path(outdir, 'la_top5_pars.rds'))
 saveRDS(ma_top5_pars, file.path(outdir, 'ma_top5_pars.rds'))
 

@@ -20,8 +20,8 @@
 #' 
 prediction.epi <- function(theta) {
   e <- constructSimulationEnvironment(theta)
-  sim <- runSimulation(e)
-  summarizeSimulation(e, sim)
+  e <- runSimulation(e)
+  summarizeSimulation(e)
 }
 
 
@@ -115,7 +115,7 @@ constructSimulationEnvironment <- function(theta) {
 runSimulation <- function(e) {
   with(e, {
 		### run the transmission model ###
-		syphSim(params,
+		sim <- syphSim(params,
 						tstep,
 						cm.list,
 						p.abx,
@@ -130,9 +130,10 @@ runSimulation <- function(e) {
 						aging.nsa,
 						output_every_timestep=F)
 	})
+	return(e)
 }
 
-summarizeSimulation <- function(e, sim) {
+summarizeSimulation <- function(e) {
   with(e, {
 		sol<-sim$out
 		ct <- sim$ct
