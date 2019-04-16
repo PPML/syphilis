@@ -35,6 +35,18 @@ ma_max_idxs <- sapply(ma_optim_vals, function(x) which(x==max(x))[[1]])
 print(sort(la_maxs, decreasing=T))
 print(sort(ma_maxs, decreasing=T))
 
+print("LA best 5 log-posterior values: ")
+print(head(sort(la_maxs, decreasing=T)))
+print("LA worst 5 log-posterior values: ")
+print(tail(sort(la_maxs, decreasing=T)))
+
+
+print("MA best 5 log-posterior values: ")
+print(head(sort(ma_maxs, decreasing=T)))
+print("MA worst 5 log-posterior values: ")
+print(tail(sort(ma_maxs, decreasing=T)))
+
+
 # Get the corresponding parameter vectors for the top 5 posterior values
 # get_optim_pars -> which are in top 5 -> 
 la_top5_maxs <- sort(la_maxs, decreasing=T)[1:5]
