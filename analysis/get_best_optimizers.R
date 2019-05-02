@@ -1,7 +1,9 @@
-library(syphLAMA)
+# library(syphLAMA)
+devtools::load_all()
+library(here)
 
 # Find optimization.R output files
-files_path <- '~/2019/February/26/optim/'
+files_path <- here('inst/optims/4-8-19/')
 la_files <- grep('LA', list.files(files_path, full.names=T), value=T)
 ma_files <- grep('MA', list.files(files_path, full.names=T), value=T)
 
@@ -33,6 +35,18 @@ ma_max_idxs <- sapply(ma_optim_vals, function(x) which(x==max(x))[[1]])
 print(sort(la_maxs, decreasing=T))
 print(sort(ma_maxs, decreasing=T))
 
+print("LA best 5 log-posterior values: ")
+print(head(sort(la_maxs, decreasing=T)))
+print("LA worst 5 log-posterior values: ")
+print(tail(sort(la_maxs, decreasing=T)))
+
+
+print("MA best 5 log-posterior values: ")
+print(head(sort(ma_maxs, decreasing=T)))
+print("MA worst 5 log-posterior values: ")
+print(tail(sort(ma_maxs, decreasing=T)))
+
+
 # Get the corresponding parameter vectors for the top 5 posterior values
 # get_optim_pars -> which are in top 5 -> 
 la_top5_maxs <- sort(la_maxs, decreasing=T)[1:5]
@@ -63,8 +77,7 @@ ma_top5_pars <- ma_optim_max_pars[ma_top5_idxs,]
 
 
 # Save results
-outdir <- "~/2019/March/11/"
-dir.create(outdir, recursive=T)
+outdir <- here("inst/optims/")
 saveRDS(la_top5_pars, file.path(outdir, 'la_top5_pars.rds'))
 saveRDS(ma_top5_pars, file.path(outdir, 'ma_top5_pars.rds'))
 

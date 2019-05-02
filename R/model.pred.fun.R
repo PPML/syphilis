@@ -20,7 +20,7 @@
 #' 
 prediction.epi <- function(theta) {
   e <- constructSimulationEnvironment(theta)
-  runSimulation(e)
+  e <- runSimulation(e)
   summarizeSimulation(e)
 }
 
@@ -131,6 +131,7 @@ runSimulation <- function(e) {
 						output_every_timestep=F)
 		return(sim)
 	})
+	return(e)
 }
 
 summarizeSimulation <- function(e) {

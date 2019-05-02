@@ -65,95 +65,95 @@ plot.posteriors <- function(post.sample, output_dir) {
   msm.len <- nrow(msm.dat) #years of data for proportion of male cases reported as msm
   hiv.len <- nrow(subset(msm.dat[,c("pHIV_y","pHIV_o")], (!is.na(msm.dat[,"pHIV_y"])) & (!is.na(msm.dat[,"pHIV_o"])))) #years of data for hiv coinfection
   
-  out.subpop <- melt(as.matrix(subset(pred, select=subpop.assort1:subpop.assort8))) #model subpopulation assortativity 
-  out.age <- melt(as.matrix(subset(pred, select=age.assort1:age.assort4))) #model age assortativity
-  out.diag.y.m <- melt(as.matrix(subset(pred, select=prev.early.inf.rate.m1:(prev.early.inf.rate.m1+diag.len-1))))  #reported early syph cases by age-sex
-  out.diag.o.m <- melt(as.matrix(subset(pred, select=(prev.early.inf.rate.m1+diag.len):(prev.early.inf.rate.m1+diag.len*2-1))))  
-  out.diag.y.f <- melt(as.matrix(subset(pred, select=prev.early.inf.rate.f.y1:(prev.early.inf.rate.f.y1+diag.len-1)))) 
-  out.diag.o.f <- melt(as.matrix(subset(pred, select=prev.early.inf.rate.f.o1:(prev.early.inf.rate.f.o1+diag.len-1)))) 
-  out.diaglate.y.m <- melt(as.matrix(subset(pred, select=prev.diag.late1:(prev.diag.late1+diag.len-1))))  #reported late syph cases by age-sex
-  out.diaglate.o.m <- melt(as.matrix(subset(pred, select=(prev.diag.late1+diag.len):(prev.diag.late1+diag.len*2-1))))  
-  out.diaglate.y.f <- melt(as.matrix(subset(pred, select=(prev.diag.late1+diag.len*2):(prev.diag.late1+diag.len*3-1))))
-  out.diaglate.o.f <- melt(as.matrix(subset(pred, select=(prev.diag.late1+diag.len*3):(prev.diag.late1+diag.len*4-1))))  
+  out.subpop <- reshape::melt(as.matrix(subset(pred, select=subpop.assort1:subpop.assort8))) #model subpopulation assortativity 
+  out.age <- reshape::melt(as.matrix(subset(pred, select=age.assort1:age.assort4))) #model age assortativity
+  out.diag.y.m <- reshape::melt(as.matrix(subset(pred, select=prev.early.inf.rate.m1:(prev.early.inf.rate.m1+diag.len-1))))  #reported early syph cases by age-sex
+  out.diag.o.m <- reshape::melt(as.matrix(subset(pred, select=(prev.early.inf.rate.m1+diag.len):(prev.early.inf.rate.m1+diag.len*2-1))))  
+  out.diag.y.f <- reshape::melt(as.matrix(subset(pred, select=prev.early.inf.rate.f.y1:(prev.early.inf.rate.f.y1+diag.len-1)))) 
+  out.diag.o.f <- reshape::melt(as.matrix(subset(pred, select=prev.early.inf.rate.f.o1:(prev.early.inf.rate.f.o1+diag.len-1)))) 
+  out.diaglate.y.m <- reshape::melt(as.matrix(subset(pred, select=prev.diag.late1:(prev.diag.late1+diag.len-1))))  #reported late syph cases by age-sex
+  out.diaglate.o.m <- reshape::melt(as.matrix(subset(pred, select=(prev.diag.late1+diag.len):(prev.diag.late1+diag.len*2-1))))  
+  out.diaglate.y.f <- reshape::melt(as.matrix(subset(pred, select=(prev.diag.late1+diag.len*2):(prev.diag.late1+diag.len*3-1))))
+  out.diaglate.o.f <- reshape::melt(as.matrix(subset(pred, select=(prev.diag.late1+diag.len*3):(prev.diag.late1+diag.len*4-1))))  
   syph.ratio.y.m <- out.diag.y.m$value/(out.diaglate.y.m$value+ out.diag.y.m$value) #proportion of early cases to all cases by age-sex
   syph.ratio.o.m <- out.diag.o.m$value/(out.diaglate.o.m$value+ out.diag.o.m$value)
   syph.ratio.y.f <- out.diag.y.f$value/(out.diaglate.y.f$value+ out.diag.y.f$value)
   syph.ratio.o.f <- out.diag.o.f$value/(out.diaglate.o.f$value+ out.diag.o.f$value)
   
   if(showCounterfactual == TRUE) {
-  out.diag.y.m.cf <- melt(as.matrix(subset(pred, select=prev.cf.early.inf.rate.m1:(prev.cf.early.inf.rate.m1+diag.len-1))))  #reported early syph cases by age-sex
-  out.diag.o.m.cf <- melt(as.matrix(subset(pred, select=(prev.cf.early.inf.rate.m1+diag.len):(prev.cf.early.inf.rate.m1+diag.len*2-1))))  
-  out.diag.y.f.cf <- melt(as.matrix(subset(pred, select=prev.cf.early.inf.rate.f.y1:(prev.cf.early.inf.rate.f.y1+diag.len-1)))) 
-  out.diag.o.f.cf <- melt(as.matrix(subset(pred, select=prev.cf.early.inf.rate.f.o1:(prev.cf.early.inf.rate.f.o1+diag.len-1)))) 
-  out.diaglate.y.m.cf <- melt(as.matrix(subset(pred, select=prev.cf.diag.late1:(prev.cf.diag.late1+diag.len-1))))  #reported late syph cases by age-sex
-  out.diaglate.o.m.cf <- melt(as.matrix(subset(pred, select=(prev.cf.diag.late1+diag.len):(prev.cf.diag.late1+diag.len*2-1))))  
-  out.diaglate.y.f.cf <- melt(as.matrix(subset(pred, select=(prev.cf.diag.late1+diag.len*2):(prev.cf.diag.late1+diag.len*3-1))))
-  out.diaglate.o.f.cf <- melt(as.matrix(subset(pred, select=(prev.cf.diag.late1+diag.len*3):(prev.cf.diag.late1+diag.len*4-1))))  
+  out.diag.y.m.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.early.inf.rate.m1:(prev.cf.early.inf.rate.m1+diag.len-1))))  #reported early syph cases by age-sex
+  out.diag.o.m.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.early.inf.rate.m1+diag.len):(prev.cf.early.inf.rate.m1+diag.len*2-1))))  
+  out.diag.y.f.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.early.inf.rate.f.y1:(prev.cf.early.inf.rate.f.y1+diag.len-1)))) 
+  out.diag.o.f.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.early.inf.rate.f.o1:(prev.cf.early.inf.rate.f.o1+diag.len-1)))) 
+  out.diaglate.y.m.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.diag.late1:(prev.cf.diag.late1+diag.len-1))))  #reported late syph cases by age-sex
+  out.diaglate.o.m.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.diag.late1+diag.len):(prev.cf.diag.late1+diag.len*2-1))))  
+  out.diaglate.y.f.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.diag.late1+diag.len*2):(prev.cf.diag.late1+diag.len*3-1))))
+  out.diaglate.o.f.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.diag.late1+diag.len*3):(prev.cf.diag.late1+diag.len*4-1))))  
   syph.ratio.y.m.cf <- out.diag.y.m.cf$value/(out.diaglate.y.m.cf$value+ out.diag.y.m.cf$value) #proportion of early cases to all cases by age-sex
   syph.ratio.o.m.cf <- out.diag.o.m.cf$value/(out.diaglate.o.m.cf$value+ out.diag.o.m.cf$value)
   syph.ratio.y.f.cf <- out.diag.y.f.cf$value/(out.diaglate.y.f.cf$value+ out.diag.y.f.cf$value)
   syph.ratio.o.f.cf <- out.diag.o.f.cf$value/(out.diaglate.o.f.cf$value+ out.diag.o.f.cf$value)
   }
-  out.rr.diag <- melt(as.matrix(subset(pred, select=prev.diag.rr1:prev.diag.rr8))) ## reported case relative risk (pooled estimates for last 5 years)
-  out.p.msm.y <- melt(as.matrix(subset(pred, select=prev.p.diag.msm1:(prev.p.diag.msm1+msm.len-1)))) #proportion of male cases in young MSM
-  out.p.msm.o <- melt(as.matrix(subset(pred, select=(prev.p.diag.msm1+msm.len):(prev.p.diag.msm1+msm.len*2-1)))) #proportion of male cases in old MSM
-  out.p.hiv.y <- melt(as.matrix(subset(pred, select=prev.p.diag.hiv1:(prev.p.diag.hiv1+hiv.len-1)))) #proportion of young MSM cases with HIV
-  out.p.hiv.o <- melt(as.matrix(subset(pred, select=(prev.p.diag.hiv1+hiv.len):(prev.p.diag.hiv1+hiv.len*2-1)))) #proportion of old MSM cases with HIV
-  out.p.sec.y.m <- melt(as.matrix(subset(pred, select=prev.p.diag.sec1:(prev.p.diag.sec1+diag.len-1)))) #proportion of early cases that are secondary
-  out.p.sec.o.m <- melt(as.matrix(subset(pred, select=(prev.p.diag.sec1+diag.len):(prev.p.diag.sec1+diag.len*2-1)))) #proportion of early cases that are secondary
-  out.p.sec.y.f <- melt(as.matrix(subset(pred, select=(prev.p.diag.sec1+diag.len*2):(prev.p.diag.sec1+diag.len*3-1)))) #proportion of early cases that are secondary
-  out.p.el.y.m <- melt(as.matrix(subset(pred, select=prev.p.diag.el1:(prev.p.diag.el1+diag.len-1)))) #proportion of early cases that are early latent
-  out.p.el.o.m <- melt(as.matrix(subset(pred, select=(prev.p.diag.el1+diag.len):(prev.p.diag.el1+diag.len*2-1)))) #proportion of early cases that are early latent
-  out.p.el.y.f <- melt(as.matrix(subset(pred, select=(prev.p.diag.el1+diag.len*2):(prev.p.diag.el1+diag.len*3-1)))) #proportion of early cases that are early latent
-  out.p.early <- melt(as.matrix(subset(pred, select=(prev.p.diag.early)))) #proportion of early cases that are early latent
+  out.rr.diag <- reshape::melt(as.matrix(subset(pred, select=prev.diag.rr1:prev.diag.rr8))) ## reported case relative risk (pooled estimates for last 5 years)
+  out.p.msm.y <- reshape::melt(as.matrix(subset(pred, select=prev.p.diag.msm1:(prev.p.diag.msm1+msm.len-1)))) #proportion of male cases in young MSM
+  out.p.msm.o <- reshape::melt(as.matrix(subset(pred, select=(prev.p.diag.msm1+msm.len):(prev.p.diag.msm1+msm.len*2-1)))) #proportion of male cases in old MSM
+  out.p.hiv.y <- reshape::melt(as.matrix(subset(pred, select=prev.p.diag.hiv1:(prev.p.diag.hiv1+hiv.len-1)))) #proportion of young MSM cases with HIV
+  out.p.hiv.o <- reshape::melt(as.matrix(subset(pred, select=(prev.p.diag.hiv1+hiv.len):(prev.p.diag.hiv1+hiv.len*2-1)))) #proportion of old MSM cases with HIV
+  out.p.sec.y.m <- reshape::melt(as.matrix(subset(pred, select=prev.p.diag.sec1:(prev.p.diag.sec1+diag.len-1)))) #proportion of early cases that are secondary
+  out.p.sec.o.m <- reshape::melt(as.matrix(subset(pred, select=(prev.p.diag.sec1+diag.len):(prev.p.diag.sec1+diag.len*2-1)))) #proportion of early cases that are secondary
+  out.p.sec.y.f <- reshape::melt(as.matrix(subset(pred, select=(prev.p.diag.sec1+diag.len*2):(prev.p.diag.sec1+diag.len*3-1)))) #proportion of early cases that are secondary
+  out.p.el.y.m <- reshape::melt(as.matrix(subset(pred, select=prev.p.diag.el1:(prev.p.diag.el1+diag.len-1)))) #proportion of early cases that are early latent
+  out.p.el.o.m <- reshape::melt(as.matrix(subset(pred, select=(prev.p.diag.el1+diag.len):(prev.p.diag.el1+diag.len*2-1)))) #proportion of early cases that are early latent
+  out.p.el.y.f <- reshape::melt(as.matrix(subset(pred, select=(prev.p.diag.el1+diag.len*2):(prev.p.diag.el1+diag.len*3-1)))) #proportion of early cases that are early latent
+  out.p.early <- reshape::melt(as.matrix(subset(pred, select=(prev.p.diag.early)))) #proportion of early cases that are early latent
   
   if(showCounterfactual == TRUE) {
-  out.rr.diag.cf <- melt(as.matrix(subset(pred, select=prev.cf.diag.rr1:prev.cf.diag.rr8))) ## reported case relative risk (pooled estimates for last 5 years)
-  out.p.msm.y.cf <- melt(as.matrix(subset(pred, select=prev.cf.p.diag.msm1:(prev.cf.p.diag.msm1+msm.len-1)))) #proportion of male cases in young MSM
-  out.p.msm.o.cf <- melt(as.matrix(subset(pred, select=(prev.cf.p.diag.msm1+msm.len):(prev.cf.p.diag.msm1+msm.len*2-1)))) #proportion of male cases in old MSM
-  out.p.hiv.y.cf <- melt(as.matrix(subset(pred, select=prev.cf.p.diag.hiv1:(prev.cf.p.diag.hiv1+hiv.len-1)))) #proportion of young MSM cases with HIV
-  out.p.hiv.o.cf <- melt(as.matrix(subset(pred, select=(prev.cf.p.diag.hiv1+hiv.len):(prev.cf.p.diag.hiv1+hiv.len*2-1)))) #proportion of old MSM cases with HIV
-  out.p.sec.y.m.cf <- melt(as.matrix(subset(pred, select=prev.cf.p.diag.sec1:(prev.cf.p.diag.sec1+diag.len-1)))) #proportion of early cases that are secondary
-  out.p.sec.o.m.cf <- melt(as.matrix(subset(pred, select=(prev.cf.p.diag.sec1+diag.len):(prev.cf.p.diag.sec1+diag.len*2-1)))) #proportion of early cases that are secondary
-  out.p.sec.y.f.cf <- melt(as.matrix(subset(pred, select=(prev.cf.p.diag.sec1+diag.len*2):(prev.cf.p.diag.sec1+diag.len*3-1)))) #proportion of early cases that are secondary
-  out.p.el.y.m.cf <- melt(as.matrix(subset(pred, select=prev.cf.p.diag.el1:(prev.cf.p.diag.el1+diag.len-1)))) #proportion of early cases that are early latent
-  out.p.el.o.m.cf <- melt(as.matrix(subset(pred, select=(prev.cf.p.diag.el1+diag.len):(prev.cf.p.diag.el1+diag.len*2-1)))) #proportion of early cases that are early latent
-  out.p.el.y.f.cf <- melt(as.matrix(subset(pred, select=(prev.cf.p.diag.el1+diag.len*2):(prev.cf.p.diag.el1+diag.len*3-1)))) #proportion of early cases that are early latent
-  out.p.early.cf <- melt(as.matrix(subset(pred, select=(prev.cf.p.diag.early)))) #proportion of early cases that are early latent
+  out.rr.diag.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.diag.rr1:prev.cf.diag.rr8))) ## reported case relative risk (pooled estimates for last 5 years)
+  out.p.msm.y.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.p.diag.msm1:(prev.cf.p.diag.msm1+msm.len-1)))) #proportion of male cases in young MSM
+  out.p.msm.o.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.p.diag.msm1+msm.len):(prev.cf.p.diag.msm1+msm.len*2-1)))) #proportion of male cases in old MSM
+  out.p.hiv.y.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.p.diag.hiv1:(prev.cf.p.diag.hiv1+hiv.len-1)))) #proportion of young MSM cases with HIV
+  out.p.hiv.o.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.p.diag.hiv1+hiv.len):(prev.cf.p.diag.hiv1+hiv.len*2-1)))) #proportion of old MSM cases with HIV
+  out.p.sec.y.m.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.p.diag.sec1:(prev.cf.p.diag.sec1+diag.len-1)))) #proportion of early cases that are secondary
+  out.p.sec.o.m.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.p.diag.sec1+diag.len):(prev.cf.p.diag.sec1+diag.len*2-1)))) #proportion of early cases that are secondary
+  out.p.sec.y.f.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.p.diag.sec1+diag.len*2):(prev.cf.p.diag.sec1+diag.len*3-1)))) #proportion of early cases that are secondary
+  out.p.el.y.m.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.p.diag.el1:(prev.cf.p.diag.el1+diag.len-1)))) #proportion of early cases that are early latent
+  out.p.el.o.m.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.p.diag.el1+diag.len):(prev.cf.p.diag.el1+diag.len*2-1)))) #proportion of early cases that are early latent
+  out.p.el.y.f.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.p.diag.el1+diag.len*2):(prev.cf.p.diag.el1+diag.len*3-1)))) #proportion of early cases that are early latent
+  out.p.early.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.p.diag.early)))) #proportion of early cases that are early latent
   }
-  out.inc.y.m.1 <-melt(100*as.matrix(subset(pred, select=prev.n.inc1:(prev.n.inc1+cal.period-1)))/sum(n.i[y.m.1])) #model incidence by age, sex, and subpopulation
-  out.inc.o.m.1 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period):(prev.n.inc1+cal.period*2-1)))/sum(n.i[o.m.1]))
-  out.inc.y.m.2 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*2):(prev.n.inc1+cal.period*3-1)))/sum(n.i[y.m.2]))
-  out.inc.o.m.2 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*3):(prev.n.inc1+cal.period*4-1)))/sum(n.i[o.m.2]))
-  out.inc.y.m.3 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*4):(prev.n.inc1+cal.period*5-1)))/sum(n.i[y.m.3]))
-  out.inc.o.m.3 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*5):(prev.n.inc1+cal.period*6-1)))/sum(n.i[o.m.3]))
-  out.inc.y.msm <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*6):(prev.n.inc1+cal.period*7-1)))/sum(n.i[y.m.4]))
-  out.inc.o.msm <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*7):(prev.n.inc1+cal.period*8-1)))/sum(n.i[o.m.4]))
-  out.inc.y.msmhiv <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*8):(prev.n.inc1+cal.period*9-1)))/sum(n.i[y.m.5]))
-  out.inc.o.msmhiv <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*9):(prev.n.inc1+cal.period*10-1)))/sum(n.i[o.m.5]))
-  out.inc.y.f.1 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*10):(prev.n.inc1+cal.period*11-1)))/sum(n.i[y.f.1]))
-  out.inc.o.f.1 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*11):(prev.n.inc1+cal.period*12-1)))/sum(n.i[o.f.1]))
-  out.inc.y.f.2 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*12):(prev.n.inc1+cal.period*13-1)))/sum(n.i[y.f.2]))
-  out.inc.o.f.2 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*13):(prev.n.inc1+cal.period*14-1)))/sum(n.i[o.f.2]))
-  out.inc.y.f.3 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*14):(prev.n.inc1+cal.period*15-1)))/sum(n.i[y.f.3]))
-  out.inc.o.f.3 <-melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*15):(prev.n.inc1+cal.period*16-1)))/sum(n.i[o.f.3]))
+  out.inc.y.m.1 <-reshape::melt(100*as.matrix(subset(pred, select=prev.n.inc1:(prev.n.inc1+cal.period-1)))/sum(n.i[y.m.1])) #model incidence by age, sex, and subpopulation
+  out.inc.o.m.1 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period):(prev.n.inc1+cal.period*2-1)))/sum(n.i[o.m.1]))
+  out.inc.y.m.2 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*2):(prev.n.inc1+cal.period*3-1)))/sum(n.i[y.m.2]))
+  out.inc.o.m.2 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*3):(prev.n.inc1+cal.period*4-1)))/sum(n.i[o.m.2]))
+  out.inc.y.m.3 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*4):(prev.n.inc1+cal.period*5-1)))/sum(n.i[y.m.3]))
+  out.inc.o.m.3 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*5):(prev.n.inc1+cal.period*6-1)))/sum(n.i[o.m.3]))
+  out.inc.y.msm <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*6):(prev.n.inc1+cal.period*7-1)))/sum(n.i[y.m.4]))
+  out.inc.o.msm <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*7):(prev.n.inc1+cal.period*8-1)))/sum(n.i[o.m.4]))
+  out.inc.y.msmhiv <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*8):(prev.n.inc1+cal.period*9-1)))/sum(n.i[y.m.5]))
+  out.inc.o.msmhiv <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*9):(prev.n.inc1+cal.period*10-1)))/sum(n.i[o.m.5]))
+  out.inc.y.f.1 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*10):(prev.n.inc1+cal.period*11-1)))/sum(n.i[y.f.1]))
+  out.inc.o.f.1 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*11):(prev.n.inc1+cal.period*12-1)))/sum(n.i[o.f.1]))
+  out.inc.y.f.2 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*12):(prev.n.inc1+cal.period*13-1)))/sum(n.i[y.f.2]))
+  out.inc.o.f.2 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*13):(prev.n.inc1+cal.period*14-1)))/sum(n.i[o.f.2]))
+  out.inc.y.f.3 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*14):(prev.n.inc1+cal.period*15-1)))/sum(n.i[y.f.3]))
+  out.inc.o.f.3 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*15):(prev.n.inc1+cal.period*16-1)))/sum(n.i[o.f.3]))
   if(showCounterfactual == TRUE){
-  out.inc.y.m.1.cf <-melt(100*as.matrix(subset(pred, select=prev.cf.n.inc1:(prev.cf.n.inc1+cal.period-1)))/sum(n.i[y.m.1])) #model incidence by age, sex, and subpopulation
-  out.inc.o.m.1.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period):(prev.cf.n.inc1+cal.period*2-1)))/sum(n.i[o.m.1]))
-  out.inc.y.m.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*2):(prev.cf.n.inc1+cal.period*3-1)))/sum(n.i[y.m.2]))
-  out.inc.o.m.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*3):(prev.cf.n.inc1+cal.period*4-1)))/sum(n.i[o.m.2]))
-  out.inc.y.m.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*4):(prev.cf.n.inc1+cal.period*5-1)))/sum(n.i[y.m.3]))
-  out.inc.o.m.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*5):(prev.cf.n.inc1+cal.period*6-1)))/sum(n.i[o.m.3]))
-  out.inc.y.msm.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*6):(prev.cf.n.inc1+cal.period*7-1)))/sum(n.i[y.m.4]))
-  out.inc.o.msm.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*7):(prev.cf.n.inc1+cal.period*8-1)))/sum(n.i[o.m.4]))
-  out.inc.y.msmhiv.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*8):(prev.cf.n.inc1+cal.period*9-1)))/sum(n.i[y.m.5]))
-  out.inc.o.msmhiv.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*9):(prev.cf.n.inc1+cal.period*10-1)))/sum(n.i[o.m.5]))
-  out.inc.y.f.1.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*10):(prev.cf.n.inc1+cal.period*11-1)))/sum(n.i[y.f.1]))
-  out.inc.o.f.1.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*11):(prev.cf.n.inc1+cal.period*12-1)))/sum(n.i[o.f.1]))
-  out.inc.y.f.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*12):(prev.cf.n.inc1+cal.period*13-1)))/sum(n.i[y.f.2]))
-  out.inc.o.f.2.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*13):(prev.cf.n.inc1+cal.period*14-1)))/sum(n.i[o.f.2]))
-  out.inc.y.f.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*14):(prev.cf.n.inc1+cal.period*15-1)))/sum(n.i[y.f.3]))
-  out.inc.o.f.3.cf <-melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*15):(prev.cf.n.inc1+cal.period*16-1)))/sum(n.i[o.f.3]))
+  out.inc.y.m.1.cf <-reshape::melt(100*as.matrix(subset(pred, select=prev.cf.n.inc1:(prev.cf.n.inc1+cal.period-1)))/sum(n.i[y.m.1])) #model incidence by age, sex, and subpopulation
+  out.inc.o.m.1.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period):(prev.cf.n.inc1+cal.period*2-1)))/sum(n.i[o.m.1]))
+  out.inc.y.m.2.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*2):(prev.cf.n.inc1+cal.period*3-1)))/sum(n.i[y.m.2]))
+  out.inc.o.m.2.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*3):(prev.cf.n.inc1+cal.period*4-1)))/sum(n.i[o.m.2]))
+  out.inc.y.m.3.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*4):(prev.cf.n.inc1+cal.period*5-1)))/sum(n.i[y.m.3]))
+  out.inc.o.m.3.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*5):(prev.cf.n.inc1+cal.period*6-1)))/sum(n.i[o.m.3]))
+  out.inc.y.msm.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*6):(prev.cf.n.inc1+cal.period*7-1)))/sum(n.i[y.m.4]))
+  out.inc.o.msm.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*7):(prev.cf.n.inc1+cal.period*8-1)))/sum(n.i[o.m.4]))
+  out.inc.y.msmhiv.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*8):(prev.cf.n.inc1+cal.period*9-1)))/sum(n.i[y.m.5]))
+  out.inc.o.msmhiv.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*9):(prev.cf.n.inc1+cal.period*10-1)))/sum(n.i[o.m.5]))
+  out.inc.y.f.1.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*10):(prev.cf.n.inc1+cal.period*11-1)))/sum(n.i[y.f.1]))
+  out.inc.o.f.1.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*11):(prev.cf.n.inc1+cal.period*12-1)))/sum(n.i[o.f.1]))
+  out.inc.y.f.2.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*12):(prev.cf.n.inc1+cal.period*13-1)))/sum(n.i[y.f.2]))
+  out.inc.o.f.2.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*13):(prev.cf.n.inc1+cal.period*14-1)))/sum(n.i[o.f.2]))
+  out.inc.y.f.3.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*14):(prev.cf.n.inc1+cal.period*15-1)))/sum(n.i[y.f.3]))
+  out.inc.o.f.3.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*15):(prev.cf.n.inc1+cal.period*16-1)))/sum(n.i[o.f.3]))
   }
   #browser()
   # For any data separated into compartments, change data frame X2 value to avoid the bug where
@@ -1711,13 +1711,13 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #rep.symp - reporting probability
   bez.rep <- as.data.frame(cbind(bezA=ilogit(post.sample$theta[,"logit.rep.a"]), bezD=ilogit(post.sample$theta[,"logit.rep.d"]),bezB= post.rep.b, bezC=post.rep.c))
-  rep.post <-melt(apply(bez.rep, 1, bezier.fun))
+  rep.post <-reshape::melt(apply(bez.rep, 1, bezier.fun))
   #browser()
   rep.post$X1 <- rep.post$X1+start.year-11
   #rep.post$X1 <- rep.post$X1+start.year-11
   rep.prior.bez<- as.data.frame(cbind(a=rbeta(1000,prior.param1["rep.a"],prior.param2["rep.a"]),d=rbeta(1000,prior.param1["rep.d"],prior.param2["rep.d"]),b=runif(1000,prior.param1["rand.rep.b"],prior.param2["rand.rep.b"]),c=runif(1000,prior.param1["rand.rep.c"],prior.param2["rand.rep.c"])))
   rep.prior.bez<-matrix(apply(rep.prior.bez,1, prior.ctrl),ncol=4, byrow=TRUE)
-  rep.prior <-melt(apply(rep.prior.bez, 1, bezier.fun))
+  rep.prior <-reshape::melt(apply(rep.prior.bez, 1, bezier.fun))
   x<-data.frame(c(aggregate(value~X1, rep.prior, mean),aggregate(value~X1,rep.prior, min),  aggregate(value~X1, rep.prior, max)))
   x<-x[,c(1,2,4,6)]
   names(x)<-c("time", "mean", "min", "max")
@@ -1731,10 +1731,10 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #transmission RR in MSM - change in condom use/behaviour in MSM leading to changes in transmission over time
   bez.behav <- data.frame(X1=as.numeric(ilogit(post.sample$theta[,"logit.behav.lin"])))
-  behav.post <-melt(apply(bez.behav, 1, behav.fun))
+  behav.post <-reshape::melt(apply(bez.behav, 1, behav.fun))
   behav.post$X1 <- behav.post$X1+start.year-11
   behav.prior.bez<- as.data.frame(runif(1000,prior.param1["behav.lin"],prior.param2["behav.lin"]))
-  behav.prior <-melt(apply(behav.prior.bez, 1, behav.fun))
+  behav.prior <-reshape::melt(apply(behav.prior.bez, 1, behav.fun))
   x<-data.frame(c(aggregate(value~X1, behav.prior, mean),aggregate(value~X1,behav.prior, min),  aggregate(value~X1, behav.prior, max)))
   x<-x[,c(1,2,4,6)]
   names(x)<-c("time", "mean", "min", "max")
@@ -1748,11 +1748,11 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #screen.m1 - screening rate in youngest males (other)
   bez.screen.m1 <- as.data.frame(cbind(bezA=ilogit(post.sample$theta[,"logit.screen.m1.a"]), bezD=ilogit(post.sample$theta[,"logit.screen.m1.d"]),bezB= post.scr.m1.b, bezC=post.scr.m1.c))
-  screen.m1.post <-melt(apply(bez.screen.m1, 1, bezier.fun))
+  screen.m1.post <-reshape::melt(apply(bez.screen.m1, 1, bezier.fun))
   screen.m1.post$X1 <- screen.m1.post$X1+start.year-11
   screen.m1.prior.bez<- as.data.frame(cbind(a=rbeta(1000,prior.param1["screen.m1.a"],prior.param2["screen.m1.a"]),d=rbeta(1000,prior.param1["screen.m1.d"],prior.param2["screen.m1.d"]),b=runif(1000,prior.param1["rand.screen.m1.b"],prior.param2["rand.screen.m1.b"]),c=runif(1000,prior.param1["rand.screen.m1.c"],prior.param2["rand.screen.m1.c"])))
   screen.m1.prior.bez <- matrix(apply(screen.m1.prior.bez,1, prior.ctrl),ncol=4, byrow=TRUE)
-  screen.m1.prior <-melt(apply(screen.m1.prior.bez, 1, bezier.fun))
+  screen.m1.prior <-reshape::melt(apply(screen.m1.prior.bez, 1, bezier.fun))
   x<-data.frame(c(aggregate(value~X1, screen.m1.prior, mean),aggregate(value~X1,screen.m1.prior, min),  aggregate(value~X1, screen.m1.prior, max)))
   x<-x[,c(1,2,4,6)]
   names(x)<-c("time", "mean", "min", "max")
@@ -1767,11 +1767,11 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #screen.msm1 - screening rate in youngest MSM
   bez.screen.msm1 <- as.data.frame(cbind(bezA=ilogit(post.sample$theta[,"logit.screen.msm1.a"]), bezD=ilogit(post.sample$theta[,"logit.screen.msm1.d"]),bezB= post.scr.msm1.b, bezC=post.scr.msm1.c))
-  screen.msm1.post <-melt(apply(bez.screen.msm1, 1, bezier.fun))
+  screen.msm1.post <-reshape::melt(apply(bez.screen.msm1, 1, bezier.fun))
   screen.msm1.post$X1 <- screen.msm1.post$X1+start.year-11
   screen.msm1.prior.bez<- as.data.frame(cbind(a=rbeta(1000,prior.param1["screen.msm1.a"],prior.param2["screen.msm1.a"]),d=rbeta(1000,prior.param1["screen.msm1.d"],prior.param2["screen.msm1.d"]),b=runif(1000,prior.param1["rand.screen.msm1.b"],prior.param2["rand.screen.msm1.b"]),c=runif(1000,prior.param1["rand.screen.msm1.c"],prior.param2["rand.screen.msm1.c"])))
   screen.msm1.prior.bez <- matrix(apply(screen.msm1.prior.bez,1, prior.ctrl),ncol=4, byrow=TRUE)
-  screen.msm1.prior <-melt(apply(screen.msm1.prior.bez, 1, bezier.fun))
+  screen.msm1.prior <-reshape::melt(apply(screen.msm1.prior.bez, 1, bezier.fun))
   x<-data.frame(c(aggregate(value~X1, screen.msm1.prior, mean),aggregate(value~X1,screen.msm1.prior, min),  aggregate(value~X1, screen.msm1.prior, max)))
   x<-x[,c(1,2,4,6)]
   names(x)<-c("time", "mean", "min", "max")
@@ -1786,11 +1786,11 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #screen.f1 - screening rate in youngest females (other)
   bez.screen.f1 <- as.data.frame(cbind(bezA=ilogit(post.sample$theta[,"logit.screen.f1.a"]), bezD=ilogit(post.sample$theta[,"logit.screen.f1.d"]),bezB= post.scr.f1.b, bezC=post.scr.f1.c))
-  screen.f1.post <-melt(apply(bez.screen.f1, 1, bezier.fun))
+  screen.f1.post <-reshape::melt(apply(bez.screen.f1, 1, bezier.fun))
   screen.f1.post$X1 <- screen.f1.post$X1+start.year-11
   screen.f1.prior.bez<- as.data.frame(cbind(a=rbeta(1000,prior.param1["screen.f1.a"],prior.param2["screen.f1.a"]),d=rbeta(1000,prior.param1["screen.f1.d"],prior.param2["screen.f1.d"]),b=runif(1000,prior.param1["rand.screen.f1.b"],prior.param2["rand.screen.f1.b"]),c=runif(1000,prior.param1["rand.screen.f1.c"],prior.param2["rand.screen.f1.c"])))
   screen.f1.prior.bez <- matrix(apply(screen.f1.prior.bez,1, prior.ctrl),ncol=4, byrow=TRUE)
-  screen.f1.prior <-melt(apply(screen.f1.prior.bez, 1, bezier.fun))
+  screen.f1.prior <-reshape::melt(apply(screen.f1.prior.bez, 1, bezier.fun))
   x<-data.frame(c(aggregate(value~X1, screen.f1.prior, mean),aggregate(value~X1,screen.f1.prior, min),  aggregate(value~X1, screen.f1.prior, max)))
   x<-x[,c(1,2,4,6)]
   names(x)<-c("time", "mean", "min", "max")
