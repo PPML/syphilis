@@ -1,8 +1,6 @@
 #include <RcppArmadillo.h>
-#include<iostream>
 //[[Rcpp::depends(RcppArmadillo)]]
 using namespace Rcpp;
-using namespace arma;
 
 
 /// function for matrix multiplication (%*% in R)
@@ -23,7 +21,7 @@ using namespace arma;
 
 /// main transmission model code 
 
-// [[Rcpp::export]]  
+//[[Rcpp::export]]  
 List syphSim(
     List  x, //params
     double dt, // timestep
@@ -37,8 +35,7 @@ List syphSim(
     arma::mat births_sa, //births p_sexually active
     arma::mat births_nsa, //births p_not sexually active
     arma::mat aging, //aging rate
-    arma::mat aging_nsa, //aging p.not sexually active
-		bool output_every_timestep 
+    arma::mat aging_nsa //aging p.not sexually active
     
 ) {
   int i = 5; //number of subpopulations
@@ -48,10 +45,6 @@ List syphSim(
   int dim = i*j*k*l; //total number of population subgroups in output matrix
   NumericVector b = as<NumericVector>(x["b"]); //transmission rate
   double delta = as<double>(x["delta"]); //1/dur incubation 
-  double p_s_1 = as<double>(x["p.s.1"]); // Percentage population Black
-  double p_s_2 = as<double>(x["p.s.2"]); // Percentage population NB, NH
-  double p_s_3 = as<double>(x["p.s.3"]); // Percentage population Hispanic
-  double d = as<double>(x["d"]); // delay to diagnosis with contact tracing
   NumericVector gamma = as<NumericVector>(x["gamma"]); //1/dur infectious
   NumericVector trt1 = as<NumericVector>(x["p.trt.1"]); //treatment rate, primary syph
   NumericVector trt2 = as<NumericVector>(x["p.trt.2"]); //treatment rate, secondary syph
@@ -105,22 +98,9 @@ List syphSim(
   arma::vec p_trt4(dim); //trt rate, late latent
   arma::vec lambda(dim); //force of infection
   arma::vec Pop(dim*23); //population matrix
-	int output_nrow = nYrs;
-	if (output_every_timestep) {
-		output_nrow = output_nrow * 52;
-	}
-  NumericMatrix outputs(output_nrow, dim*23+1);
-  NumericMatrix out(output_nrow, dim*23+1);
-  double nCTYrs = as<double>(x["ct.data.years"]); // number of years for which we have contact tracing data
-  NumericMatrix ct_primsec(nCTYrs, dim);
-  NumericMatrix ct_el(nCTYrs, dim);
-  NumericMatrix ct(nCTYrs, dim);
-  arma::mat p_ct_primsec = as<arma::mat>(x["p.ct.primsec"]);
-  arma::mat p_ct_el = as<arma::mat>(x["p.ct.el"]);
-  //double p_ct_late;
-  arma::vec ct_cov_primsec(dim);
-  arma::vec ct_cov_el(dim);
-  arma::vec ct_cov(dim);
+  NumericMatrix outputs(nYrs, dim*23+1);
+  NumericMatrix out(nYrs, dim*23+1);
+  
   double gamma1 = gamma[0]; //1/dur primary
   double gamma2 = gamma[1]; //1/dur secondary
   double gamma3 = gamma[2]; //1/dur latent
@@ -128,29 +108,6 @@ List syphSim(
   double lambda2 = 365/dur_imm[1]; //1/dur imm early latent
   double lambda3 = 365/dur_imm[2]; //1/dur imm late latent
   
-  // Keeping track of entry and exit numbers from contact-tracing-relevant compartments
-  arma::vec DI12 = I1+IR1+I2+IR2;
-  arma::vec DL1 = L1+LR1;
-  arma::vec DL2 = L2+LR2;
-  arma::vec DT1 = T1;
-  arma::vec DT2 = T2;
-  arma::vec DT3 = T3;
-  DI12 = DI12.zeros();
-  DL1 = DL1.zeros();
-  DL2 = DL2.zeros();
-  DT1 = DT1.zeros();
-  DT2 = DT2.zeros();
-  DT3 = DT3.zeros();
-  arma::vec intoTrtI12 = DI12;
-  arma::vec intoTrtL1 = DL1;
-  arma::vec totalYearPop = DI12.zeros(); // initializing with right number of dimensions
-  arma::vec exitRateScr = DI12;
-  arma::vec exitRateTrt = DI12;
-  arma::vec dTI12 = DI12;
-  arma::vec dTL1 = DI12;
-  dTI12 = dTI12.zeros();
-  dTL1 = dTL1.zeros();
-  int count = 0;
   //update treatment parameters for males
   for(int n=0; n<((i-2)*k*l); n++) {
     p_trt1[n] = trt1[0];
@@ -180,74 +137,11 @@ List syphSim(
     p_trt4[n] = trt4[3];
   }
   
-  
   /// year loop
   for(int y=0; y<nYrs; y++){
-    if(y >= nYrs-(nCTYrs+1) && y < nYrs-1) {
-      arma::vec pct_cases_primsec = (I1+I2+IR1+IR2)/(I1+I2+IR1+IR2+L1+LR1); // pct_cases_el would be 1-this
-      arma::vec ones(dim);
-      ones = ones.ones();
-      arma::vec p_ct(dim);
-      arma::vec p_trt = (pct_cases_primsec%(p_trt1+p_trt2))+((ones-pct_cases_primsec)%p_trt3);
-      arma::vec trt_rate = (p_trt%(I1+I2+IR1+IR2+L1+LR1))/totalYearPop;
-      arma::vec det_rate = as<arma::vec>(alpha) + trt_rate;
-      arma::vec ratio_primsec = intoTrtI12/(I1+I2+IR1+IR2);
-      arma::vec ratio_el = intoTrtL1/(L1+LR1);
-      for(int i=0; i < 32; i++) {
-        if(i < 20) { // M
-          if(i >= 0 && i < 4) { // Black
-            p_ct[i] = (pct_cases_primsec[i]*p_ct_primsec(count,0))+((ones[i]-pct_cases_primsec[i])*p_ct_el(count,0));
-            ct_cov_primsec[i] = alpha[i] * p_ct_primsec(count,0) * d;//ratio_primsec[i] * p_ct_primsec(count,0);
-            ct_cov_el[i] = alpha[i] * p_ct_el(count,0) * d;
-          } else if (i >= 4 && i < 8) { // Hispanic
-            p_ct[i] = (pct_cases_primsec[i]*p_ct_primsec(count,1))+((ones[i]-pct_cases_primsec[i])*p_ct_el(count,1));
-            ct_cov_primsec[i] = alpha[i] * p_ct_primsec(count,1) * d;
-            ct_cov_el[i] = alpha[i] * p_ct_el(count,1) * d;
-          } else if (i >= 8 && i < 12) { // Non-Black, Non-Hispanic
-            p_ct[i] = (pct_cases_primsec[i]*p_ct_primsec(count,2))+((ones[i]-pct_cases_primsec[i])*p_ct_el(count,2));
-            ct_cov_primsec[i] = alpha[i] * p_ct_primsec(count,1) * d;
-            ct_cov_el[i] = alpha[i] * p_ct_el(count,1) * d;
-          } else { // MSM, either HIV- or HIV+
-            // Note that subpopulation 2 here corresponds to 3 in the rest of the model and vice versa, oops
-            p_ct[i] = ((pct_cases_primsec[i]*p_ct_primsec(count,0))+((ones[i]-pct_cases_primsec[i])*p_ct_el(count,0)))*p_s_1
-            + ((pct_cases_primsec[i]*p_ct_primsec(count,1))+((ones[i]-pct_cases_primsec[i])*p_ct_el(count,1)))*p_s_3
-            + ((pct_cases_primsec[i]*p_ct_primsec(count,2))+((ones[i]-pct_cases_primsec[i])*p_ct_el(count,2)))*p_s_2;
-            ct_cov_primsec[i] = alpha[i] * (p_ct_primsec(count,0)*p_s_1 + p_ct_primsec(count,1)*p_s_3 + p_ct_primsec(count,2)*p_s_2) * d;
-            ct_cov_el[i] = alpha[i] * (p_ct_el(count,0)*p_s_1 + p_ct_el(count,1)*p_s_3 + p_ct_el(count,2)*p_s_2) * d;
-          }
-        } else { // F
-          if(i >= 20 && i < 24) { // Black
-            p_ct[i] = (pct_cases_primsec[i]*p_ct_primsec(count,3))+((ones[i]-pct_cases_primsec[i])*p_ct_el(count,3));
-            ct_cov_primsec[i] = alpha[i] * p_ct_primsec(count,3) * d;
-            ct_cov_el[i] = alpha[i] * p_ct_el(count,3) * d;
-          } else if (i >= 24 && i < 28) { // Hispanic
-            p_ct[i] = (pct_cases_primsec[i]*p_ct_primsec(count,4))+((ones[i]-pct_cases_primsec[i])*p_ct_el(count,4));
-            ct_cov_primsec[i] = alpha[i] * p_ct_primsec(count,4) * d;
-            ct_cov_el[i] = alpha[i] * p_ct_el(count,4) * d;
-          } else { // Non-Black, Non-Hispanic
-            p_ct[i] = (pct_cases_primsec[i]*p_ct_primsec(count,5))+((ones[i]-pct_cases_primsec[i])*p_ct_el(count,5));
-            ct_cov_primsec[i] = alpha[i] * p_ct_primsec(count,5) * d;
-            ct_cov_el[i] = alpha[i] * p_ct_el(count,5) * d;
-          }
-        }
-      }
-      // inpute coverage for all early syphilis
-      ct_cov = det_rate%p_ct*d;
-      //ct_cov = ((ct_cov_primsec % (I1+I2+IR1+IR2)) + (ct_cov_el % (L1+LR1))) / (I1+I2+IR1+IR2+L1+LR1);
-      //ct_cov_late = (intoTrtL2/L2) % p_ct_late;
-      count++;
-    }
-    
-    intoTrtI12 = intoTrtI12.zeros();
-    intoTrtL1 = intoTrtL1.zeros();
-    totalYearPop = totalYearPop.zeros();
-    exitRateTrt = exitRateTrt.zeros();
-    exitRateScr = exitRateScr.zeros();
-    dTI12 = dTI12.zeros();
-    dTL1 = dTL1.zeros();
-    
     for(int w=0; w<52; w++){
-      //update reporting (in screened), transmission rr, and background abx use
+      
+      //updata reporting (in screened), transmission rr, and background abx use
       double c_rr = c_msm[y];
       double rep = report[y];
       double abx = pabx[y];
@@ -514,17 +408,6 @@ List syphSim(
         Pop[n+dim*12] += (gamma1*IR1[n] - gamma2*IR2[n] - p_trt2[n]*IR2[n] -alpha[n]*IR2[n] - abx*IR2[n]  + agingIR2[n]) * dt; //dIR2/dt
         Pop[n+dim*13] += (gamma2*IR2[n] - gamma3*LR1[n] - p_trt3[n]*LR1[n] -alpha[n]*LR1[n] - abx*LR1[n] + agingLR1[n]) * dt; //dLR1/dt
         Pop[n+dim*14] += (gamma3*LR1[n] - p_trt4[n]*LR2[n] -alpha[n]*LR2[n] - abx*LR2[n]  + agingLR2[n]) * dt; //dLR2/dt
-        /*DI12 += ( delta*E[n]  - gamma1*I1[n] - p_trt1[n]*I1[n] -alpha[n]*I1[n] - abx*I1[n] + agingI1[n] ) * dt +
-          (delta*ER[n] - gamma1*IR1[n] - p_trt1[n]*IR1[n] -alpha[n]*IR1[n] - abx*IR1[n]  + agingIR1[n]) * dt +
-          (gamma1*I1[n] - gamma2*I2[n] - p_trt2[n]*I2[n] -alpha[n]*I2[n] - abx*I2[n] + agingI2[n]) * dt +
-          (gamma1*IR1[n] - gamma2*IR2[n] - p_trt2[n]*IR2[n] -alpha[n]*IR2[n] - abx*IR2[n]  + agingIR2[n]) * dt;*/
-        //intoTrtI12[n] += (p_trt1[n]*(I1[n]+IR1[n]) + p_trt2[n]*(I2[n] + IR2[n]) + alpha[n]*(I1[n]+I2[n]+IR1[n]+IR2[n]))*dt; // Need exit *into treatment*, but only for a year
-        //intoTrtL1[n] += (p_trt3[n]*(L1[n] + LR1[n]) + alpha[n]*(L1[n]+LR1[n]))*dt;
-        //totalYearPop[n] += S[n] + E[n] + I1[n] + I2[n] + L1[n] + L2[n] + T1[n] + T2[n] + T3[n] + SR[n] + ER[n] + IR1[n] + IR2[n] + LR1[n] + LR2[n];
-        dTI12[n] += (p_trt1[n]*(I1[n]+IR1[n]) + p_trt2[n]*(I2[n] + IR2[n]) + alpha[n]*(I1[n]+I2[n]+IR1[n]+IR2[n]) + abx*(I1[n]+I2[n]+IR1[n]+IR2[n]) - lambda1*T1[n] + agingT1[n])*dt; // Need exit *into treatment*, but only for a year
-        dTL1[n] += (p_trt3[n]*(L1[n] + LR1[n]) + alpha[n]*(L1[n]+LR1[n]) + abx*(L1[n]+LR1[n]) - lambda2*T2[n] + agingT2[n])*dt;
-        exitRateTrt[n] += ((p_trt1[n]*(I1[n]+IR1[n]) + p_trt2[n]*(I2[n] + IR2[n])))*dt;
-        exitRateScr[n] += (alpha[n]*(I1[n]+I2[n]+IR1[n]+IR2[n]))*dt;
         Pop[n+dim*15] += (lambda[n]*(S[n]+SR[n])) * dt; //dInc/dt
         Pop[n+dim*16] += (lambda[n]*SR[n]) * dt; //dIncr/dt
         Pop[n+dim*17] += (rep_s[n]*p_trt1[n]*(I1[n]+IR1[n]) + rep*alpha[n]*(I1[n] + IR1[n])) * dt; //dD1/dt
@@ -532,52 +415,29 @@ List syphSim(
         Pop[n+dim*19] += (rep_s[n]*p_trt3[n]*(L1[n]+LR1[n]) + rep*alpha[n]*(L1[n] + LR1[n])) * dt; //dD3/dt
         Pop[n+dim*20] += (agingNSA[n] + birthsNSA[n]) * dt; //dNSA/dt
         Pop[n+dim*21] += (rep_s[n]*p_trt4[n]*(L2[n]+LR2[n]) + rep*alpha[n]*(L2[n] + LR2[n])) * dt; //dD4/dt
-        Pop[n+dim*22] += (rep_s[n]*p_trt1[n]*IR1[n] + rep*alpha[n]* IR1[n] + rep_s[n]*p_trt2[n]*IR2[n] + rep*alpha[n]*IR2[n] + rep_s[n]*p_trt3[n]*LR1[n] + rep*alpha[n]* LR1[n]) * dt; //dDR/dt
+        Pop[n+dim*22] += (rep_s[n]*p_trt1[n]*IR1[n] + rep*alpha[n]* IR1[n] + rep_s[n]*p_trt2[n]*IR2[n] + rep*alpha[n]*IR2[n] + rep_s[n]*p_trt3[n]*LR1[n] + rep*alpha[n]* LR1[n] ) * dt; //dDR/dt
       }
-      
       }
         
         // fill results table with annual outputs
-			if (output_every_timestep) {
-				outputs(y*52+w,0) = y + w/52;
-				for (int n=0; n<dim*23; n++) {
-					outputs(y*52+w,1+n) = Pop[n];
-				}
-			} else {
-				if(w==0) {
-					outputs(y,0) = y; //year
-					for(int n=0; n<dim*23; n++) {
-						outputs(y,1+n) = Pop[n]; // 
-					}
-					if (y >= nYrs-(nCTYrs+1) && y < nYrs-1) { //record contact tracing coverage
-						for(int n=0; n<dim; n++) {
-							ct_primsec(y-(nYrs-(nCTYrs+1)), n) = ct_cov_primsec(n);
-							ct_el(y-(nYrs-(nCTYrs+1)), n) = ct_cov_el(n);
-							ct(y-(nYrs-(nCTYrs+1)), n) = ct_cov(n);
-						}
-					}
-				}
-			}
-  
+      if(w==0) {
+        outputs(y,0) = y; //year
+        for(int n=0; n<dim*23; n++) {
+          outputs(y,1+n) = Pop[n]; // 
+          }
+        }
     } /// end of week loop
   } /// end of year loop
   
-  // for(int m=0; m<nYrs; m++) {
-  //   for(int n=0; n<dim*23+1; n++) {
-  //     out(m,n) = outputs(m,n);
-  //   }
-  // }
-  //outfile.close();
-  //outfileET.close();
-  //outfileES.close();
-  // outfileA.close();
-  // outfileC.close();
+  for(int m=0; m<nYrs; m++) {
+    for(int n=0; n<dim*23+1; n++) {
+      out(m,n) = outputs(m,n);
+    }
+  }
+  
   return Rcpp::List::create(
     Rcpp::Named("initPop") = initPop,
-    Rcpp::Named("out") = outputs,
-    Rcpp::Named("ct") = ct,
-    Rcpp::Named("ct_ps") = ct_cov_primsec,
-    Rcpp::Named("ct_el") = ct_cov_el
+    Rcpp::Named("out") = out
   );
 }
 

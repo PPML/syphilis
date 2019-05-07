@@ -31,8 +31,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // syphSim
-List syphSim(List x, double dt, List cm, NumericVector pabx, NumericVector rep_count, int nYrs, NumericVector initPop, NumericVector n_sa, arma::mat births, arma::mat births_sa, arma::mat births_nsa, arma::mat aging, arma::mat aging_nsa, bool output_every_timestep);
-RcppExport SEXP _syphLAMA_syphSim(SEXP xSEXP, SEXP dtSEXP, SEXP cmSEXP, SEXP pabxSEXP, SEXP rep_countSEXP, SEXP nYrsSEXP, SEXP initPopSEXP, SEXP n_saSEXP, SEXP birthsSEXP, SEXP births_saSEXP, SEXP births_nsaSEXP, SEXP agingSEXP, SEXP aging_nsaSEXP, SEXP output_every_timestepSEXP) {
+List syphSim(List x, double dt, List cm, NumericVector pabx, NumericVector rep_count, int nYrs, NumericVector initPop, NumericVector n_sa, arma::mat births, arma::mat births_sa, arma::mat births_nsa, arma::mat aging, arma::mat aging_nsa);
+RcppExport SEXP _syphLAMA_syphSim(SEXP xSEXP, SEXP dtSEXP, SEXP cmSEXP, SEXP pabxSEXP, SEXP rep_countSEXP, SEXP nYrsSEXP, SEXP initPopSEXP, SEXP n_saSEXP, SEXP birthsSEXP, SEXP births_saSEXP, SEXP births_nsaSEXP, SEXP agingSEXP, SEXP aging_nsaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -49,8 +49,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type births_nsa(births_nsaSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type aging(agingSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type aging_nsa(aging_nsaSEXP);
-    Rcpp::traits::input_parameter< bool >::type output_every_timestep(output_every_timestepSEXP);
-    rcpp_result_gen = Rcpp::wrap(syphSim(x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, births_sa, births_nsa, aging, aging_nsa, output_every_timestep));
+    rcpp_result_gen = Rcpp::wrap(syphSim(x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, births_sa, births_nsa, aging, aging_nsa));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -58,7 +57,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_syphLAMA_mv_mult", (DL_FUNC) &_syphLAMA_mv_mult, 2},
     {"_syphLAMA_mat_mult", (DL_FUNC) &_syphLAMA_mat_mult, 2},
-    {"_syphLAMA_syphSim", (DL_FUNC) &_syphLAMA_syphSim, 14},
+    {"_syphLAMA_syphSim", (DL_FUNC) &_syphLAMA_syphSim, 13},
     {NULL, NULL, 0}
 };
 
