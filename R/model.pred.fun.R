@@ -50,7 +50,12 @@ constructSimulationEnvironment <- function(theta) {
 		rr.screen <- unname(exp(theta["log.rr.screen.ac"])) #screening rr in higher sexual activity group
 		screen <- unname(t(apply(t(apply(screen.trend, 1, function(x) x*rr.screen.s)), 1, FUN=screen.fun, rr.screen=rr.screen))) #calculate actual screening rates for each group by multiplying base rates by rr
 		screen[screen<0.0001]<-0  # make sure that screening rate isn't <0
-		screen <-rbind(screen[rep(1, times=(cal.start-11)),], screen, screen[rep((nrow(screen)), times=10),]) ##generate screening rates for the entire model period (assume screening rates pre-calibration start=rate at start of calibration); time trend starts 10 years before cal start
+		# screen <-rbind(screen[rep(1, times=(cal.start-11)),], screen, screen[rep((nrow(screen)), times=10),]) ##generate screening rates for the entire model period (assume screening rates pre-calibration start=rate at start of calibration); time trend starts 10 years before cal start
+		screen <- rbind(
+		  screen[rep(1, times = (cal.start - 11)),],
+			screen,
+			screen[rep(nrow(screen), times = model.end - (cal.start - 11 + nrow(screen))),])
+
 		b <- ilogit(c(theta["logit.b.m"], theta["logit.b.f"], theta["logit.b.msm"])) #transmission rates
 		delta <- 365/((exp(theta["log.dur.incub"]))) #1/incubation period
 		dur.inf <- c(exp(theta["log.dur.prim"]), exp(theta["log.dur.sec"]),365-(exp(theta["log.dur.prim"])+exp(theta["log.dur.sec"]))) #infectious durations from primary, secondary, and early latent sypilis (early latent dur = 365 d - dur prim - dur sec)
@@ -70,11 +75,21 @@ constructSimulationEnvironment <- function(theta) {
 		rep.bezier <- matrix(rep(c(ilogit(theta["logit.rep.a"]), ilogit(theta["logit.rep.d"]),rep.bc[1],rep.bc[2]),40), ncol=4, byrow=TRUE) #get 4 bezier points for calc reporting prob in each subgroup
 		rep.trend <- apply(rep.bezier,1, bezier.fun) #baseline reporting probability over calibration period
 		rep.trend[rep.trend>1]<-1  # make sure that reporting rate isn't >1
-		rep <-rbind(rep.trend[rep(1, times=(cal.start-11)),], rep.trend, rep.trend[rep((nrow(rep.trend)), times=10),])  #expand reporting prob to cover entire model run time, assume reporting pre-calibration period = reporting at start of cal; time trend starts 10 years prior to cal start
-		rep.symp<-matrix(c(rep[,males]*rr.rep.symp.m, rep[,females]*rr.rep.symp.f), ncol=40) #reporting rate if male or female case who actively seeks treatment
-		rep<-rep[,1] #reporting rate if case identified by screening
+		# rep <-rbind(rep.trend[rep(1, times=(cal.start-11)),], rep.trend, rep.trend[rep((nrow(rep.trend)), times=10),])  #expand reporting prob to cover entire model run time, assume reporting pre-calibration period = reporting at start of cal; time trend starts 10 years prior to cal start
+		rep.trend <- rbind(
+		  rep.trend[rep(1, times=(cal.start-11)),],
+			rep.trend,
+			rep.trend[rep(nrow(rep.trend), times=model.end - (cal.start - 11 + nrow(rep.trend))),])
+
+		rep.symp<-matrix(c(rep.trend[,males]*rr.rep.symp.m, rep.trend[,females]*rr.rep.symp.f), ncol=40) #reporting rate if male or female case who actively seeks treatment
+		# rep<-rep[,1] #reporting rate if case identified by screening
 		behav.trend<-behav.fun(ilogit(theta["logit.behav.lin"])) # behav time trend representing changing condom use/behaviour in MSM
-		behav <-c(rep(1, times=(cal.start-11)), behav.trend, behav.trend[rep(length(behav.trend), times=10)]) #expand to cover entire model run time, assume behav pre-calibration period = value at start of calibration; trend starts 10 years prior to cal start
+		# behav <-c(rep(1, times=(cal.start-11)), behav.trend, behav.trend[rep(length(behav.trend), times=10)]) #expand to cover entire model run time, assume behav pre-calibration period = value at start of calibration; trend starts 10 years prior to cal start
+		behav <- 
+			c(rep(1, times=(cal.start-11)),
+			behav.trend,
+			behav.trend[rep(length(behav.trend), times=model.end - (cal.start - 11 + length(behav.trend)))])
+
 		rp.all <- exp(c(theta["log.rp.1.1.1.1"],theta["log.rp.1.1.2.1"],theta["log.rp.1.2.1.1"],theta["log.rp.1.2.2.1"], #relative rates of partner change in different population groups
 										theta["log.rp.1.1.1.2"],theta["log.rp.1.1.2.2"],theta["log.rp.1.2.1.2"], theta["log.rp.1.2.2.2"],
 										theta["log.rp.2.1.1.1"],theta["log.rp.2.1.2.1"],theta["log.rp.2.2.1.1"],theta["log.rp.2.2.2.1"],
@@ -104,7 +119,7 @@ constructSimulationEnvironment <- function(theta) {
 		# replacement <- matrix(0L, nrow = dim(screen[102:105,])[1], ncol = dim(screen[102:105,])[2]) # turn off screening in 2013 and afterwards
 		# screen[102:105,] <- replacement
 		params <-list(b=b,delta=delta, gamma=gamma,p.trt.1=p.trt.1, p.trt.2=p.trt.2,
-									p.trt.3=p.trt.3,p.trt.4=p.trt.4, rep=rep,rep.symp=rep.symp,
+									p.trt.3=p.trt.3,p.trt.4=p.trt.4, rep=rep.trend,rep.symp=rep.symp,
 									screen=screen, behav=behav,dur.imm=dur.imm,
 									ct.data.years=ct.data.years, p.ct.primsec=p.ct.primsec, p.ct.el
 									= p.ct.el, p.s.1=p.s.1, p.s.2 = p.s.2, p.s.3 = p.s.3, d=d) #parameters used by transmission model
@@ -120,15 +135,14 @@ runSimulation <- function(e) {
 						cm.list,
 						p.abx,
 						rep.count, 
-						model.end+1,
+						model.end + 1,
 						yinit, 
 						n.sa,
 						births,
 						births.sa, 
 						births.nsa,
 						aging,
-						aging.nsa,
-						output_every_timestep=F)
+						aging.nsa)
 	})
 	return(e)
 }

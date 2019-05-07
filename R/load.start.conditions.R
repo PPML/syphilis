@@ -2,7 +2,7 @@
 ### function to load start conditions and functions ###
 #######################################################
 
-load.start <- function(){
+load.start <- function(model.end = 106){
   
   initial.files(state) #load required data files
   
@@ -19,7 +19,11 @@ load.start <- function(){
   tstep <<- 1/52  #weekly time step
   cal.period <<- 5 #duration of calibration period (2012-2016 currently)
   cal.start <<- 100  #time at which start calibration 
-  model.end <<- cal.start + cal.period + 1
+	if (missing(model.end)) {
+		model.end <<- cal.start + cal.period + 1
+	} else { 
+	  model.end <<- model.end 
+	}
   end.year <<- 2016
   start.year <<- 2012
   ct.data.years <<- if(state=="MA") 12 else 6
