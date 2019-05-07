@@ -143,6 +143,7 @@ runSimulation <- function(e) {
 						births.nsa,
 						aging,
 						aging.nsa)
+		return(sim)
 	})
 	return(e)
 }
