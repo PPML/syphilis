@@ -1,0 +1,315 @@
+---
+title: Analyzing the Impact of Screening
+author: Christian Testa
+date: May 2, 2019
+output: pdf_document
+---
+
+
+Some of the scenarios we'd like to simulate for the purpose of examining the
+model's behavior are counterfactual simulations where historical screening
+levels were less than the model-fit optimizing estimates. 
+
+In order to do this, we will take a parametrization of the model in each
+geography and decrease the amount of modeled screening for asymptomatic
+infections. We will do this for increments of 10%, ranging from 0 (no
+screening) to 100% (the un-altered model estimated level).
+
+## Louisiana
+```{r load}
+# Load the model
+devtools::load_all()
+library(here)
+library(ggplot2)
+state <- 'LA'
+load.start(model.end = 150)
+library(xts) # zoo conflicts with assigning index in load.start, so load xts after load.start()
+
+statenames <- setNames(c("Lousiana", "Massachusetts"), c('LA', 'MA'))
+```
+
+```{r get optim}
+# Get model optimizers
+optims <- readRDS(here(paste0("inst/optims/", tolower(state), "_top5_pars.rds")))
+```
+
+```{r get best optimizer}
+posteriors <- apply(optims, 1, function(x) dLogPosterior(unlist(x)))
+theta <- unlist(optims[which(posteriors == max(posteriors))[[1]],])
+```
+
+```{r get_prevalence_from_theta, echo=FALSE}
+get_prevalence <- function(theta, screening_level = 1) {
+	# Setup simulation parameters
+	e <- constructSimulationEnvironment(theta)
+	e$screening_level <- screening_level
+	with(e, {
+		 # adjust screening level -- note that the screening level is adjusted 
+		 # during the calibration (data) period from start to end, not including 
+		 # the 11 prior years for which screening is also simulated.
+		screen[cal.start:nrow(screen),] <- screening_level*screen[cal.start:nrow(screen), ]
+		params$screen <- screen
+
+	})
+	# Run Simulation
+	e <- runSimulation(e)
+	# Get outcomes matrix
+	sol <- e$sim$out
+
+	# Get infections
+	# Note that the -1 lag added here is because the model reports a 0th year
+	# which is a duplication of the starting initial conditions before any
+	# updates to it are simulated.
+	infected_idx <- 1+c(e.index, prim.index, sec.index, early.index,
+											latent.index, er.index, primr.index, secr.index,
+											earlyr.index, latentr.index)
+	prevalence_numerator <- 
+		rowSums(sol[+1 + (cal.start-11):(nrow(sol)-1), infected_idx])
+
+	# Get total population
+	all_idx <- 1+c(s.index, e.index, prim.index, sec.index, early.index,
+								 latent.index, sr.index, er.index, primr.index, secr.index,
+								 earlyr.index, latentr.index)
+	prevalence_denominator <- 
+		rowSums(sol[+1 + (cal.start-11):(nrow(sol)-1), all_idx])
+
+  prevalence <- prevalence_numerator / prevalence_denominator
+	# prevalence <- xts(x = prevalence, order.by = seq(from = start.year,
+																									 # length.out =
+																										 # length(prevalence)))
+	prevalence <- xts(
+		x = prevalence, 
+		order.by = 
+			seq(as.Date(paste0((start.year-11), "-01-01")),length=length(prevalence),by="years")
+		)
+
+	return(prevalence)
+}
+```
+
+```{r}
+prevalence_list <- list()
+for (screening_level in seq(0,1,by=0.1)) {
+  prevalence_list[[as.character(screening_level)]] <- 
+		get_prevalence(theta = theta, screening_level = screening_level)
+}
+
+prevalence_df <- do.call(cbind.data.frame, prevalence_list)
+prevalence_df <- tibble::rownames_to_column(prevalence_df, var='year')
+prevalence_df$year <- as.integer(format(as.POSIXct(prevalence_df$year), '%Y'))
+prevalence_df <- reshape2::melt(prevalence_df, id.vars='year', variable.name = 'screening_level')
+
+ggplot(
+  data = prevalence_df,
+  mapping = aes(x=year, y=value*1000, color = screening_level)) + 
+geom_line() + 
+xlab("Year") + 
+ylab("Prevalence Per 1000") + 
+ggtitle(paste0(statenames[[state]], ": ", "Prevalence in All Populations"), subtitle = paste0("Forecasted through ", start.year - cal.start + model.end))
+
+ggsave(paste0("~/Desktop/", state, "_prevalence_long_timetrend.png"))
+```
+
+Let's look specifically at the 2000 to 2016.
+```{r}
+ggplot(
+  data = dplyr::filter(prevalence_df, year %in% 2000:2016),
+  mapping = aes(x=year, y=value*1000, color = screening_level)) + 
+geom_line() + 
+xlab("Year") + 
+ylab("Prevalence Per 1000") + 
+ggtitle(paste0(statenames[[state]], ": ", "Prevalence in All Populations"), subtitle = paste0("Forecasted through ", 2016))
+
+ggsave(paste0("~/Desktop/", state, "_prevalence_short_timetrend.png"))
+```
+
+Let's look at incidence. 
+
+```{r}
+get_incidence <- function(theta, screening_level = 1) {
+	# Setup simulation parameters
+	e <- constructSimulationEnvironment(theta)
+	e$screening_level <- screening_level
+	with(e, {
+		 # adjust screening level -- note that the screening level is adjusted 
+		 # during the calibration (data) period from start to end, not including 
+		 # the 11 prior years for which screening is also simulated.
+		screen[cal.start:nrow(screen),] <- screening_level*screen[cal.start:nrow(screen), ]
+		params$screen <- screen
+
+	})
+	# Run Simulation
+	e <- runSimulation(e)
+	# Get outcomes matrix
+	sol <- e$sim$out
+
+	# Get infections
+	# Note that the -1 lag added here is because the model reports a 0th year
+	# which is a duplication of the starting initial conditions before any
+	# updates to it are simulated.
+	incident_idx <- 1+c(inc.index, incr.index)
+
+	incidence_numerator <- 
+		rowSums(sol[+1 + (cal.start-11):(nrow(sol)-1), incident_idx])
+
+	# Lag incidence since it is calculated cumulatively
+	incidence_numerator <- 
+		incidence_numerator[2:length(incidence_numerator)] - 
+		incidence_numerator[1:(length(incidence_numerator)-1)]
+
+	# Get total population
+	all_idx <- 1+c(s.index, e.index, prim.index, sec.index, early.index,
+								 latent.index, sr.index, er.index, primr.index, secr.index,
+								 earlyr.index, latentr.index)
+	incidence_denominator <- 
+		rowSums(sol[+2 + (cal.start-11):(nrow(sol)-2), all_idx])
+
+  incidence <- incidence_numerator / incidence_denominator
+
+	incidence <- xts(
+		x = incidence, 
+		order.by = 
+			seq(as.Date(paste0((start.year-11), "-01-01")),length=length(incidence),by="years")
+		)
+
+	return(incidence)
+}
+
+```
+
+
+```{r}
+incidence_list <- list()
+for (screening_level in seq(0,1,by=0.1)) {
+  incidence_list[[as.character(screening_level)]] <- 
+		get_incidence(theta = theta, screening_level = screening_level)
+}
+
+incidence_df <- do.call(cbind.data.frame, incidence_list)
+incidence_df <- tibble::rownames_to_column(incidence_df, var='year')
+incidence_df$year <- as.integer(format(as.POSIXct(incidence_df$year), '%Y'))
+incidence_df <- reshape2::melt(incidence_df, id.vars='year', variable.name = 'screening_level')
+
+ggplot(
+  data = incidence_df,
+  mapping = aes(x=year, y=value*1000, color = screening_level)) + 
+geom_line() + 
+xlab("Year") + 
+ylab("Incidence Per 1000") + 
+ggtitle(paste0(statenames[[state]], ": ", "Incidence in All Populations"), subtitle = paste0("Forecasted through ", start.year - cal.start + model.end))
+
+ggsave(paste0("~/Desktop/", state, "_incidence_long_timetrend.png"))
+```
+
+
+Let's look specifically at the 2000 to 2016.
+```{r}
+ggplot(
+  data = dplyr::filter(incidence_df, year %in% 2000:2016),
+  mapping = aes(x=year, y=value*1000, color = screening_level)) + 
+geom_line() + 
+xlab("Year") + 
+ylab("Incidence Per 1000") + 
+ggtitle(paste0(statenames[[state]], ": ",  "Incidence in All Populations"), subtitle = paste0("Forecasted through ", 2016))
+
+ggsave(paste0("~/Desktop/", state, "_incidence_short_timetrend.png"))
+```
+
+
+
+
+## Massachusetts
+
+```{r}
+unloadNamespace(zoo) # unload zoo because it conflicts with defining 'index'
+state <- 'MA'
+load.start(model.end = 150)
+library(xts) # reload xts (depends on zoo)
+```
+
+```{r}
+# Get model optimizers
+optims <- readRDS(here(paste0("inst/optims/", tolower(state), "_top5_pars.rds")))
+posteriors <- apply(optims, 1, function(x) dLogPosterior(unlist(x)))
+theta <- unlist(optims[which(posteriors == max(posteriors))[[1]],])
+```
+
+### MA - Prevalence Long Time Trend
+```{r}
+prevalence_list <- list()
+for (screening_level in seq(0,1,by=0.1)) {
+  prevalence_list[[as.character(screening_level)]] <- 
+		get_prevalence(theta = theta, screening_level = screening_level)
+}
+
+prevalence_df <- do.call(cbind.data.frame, prevalence_list)
+prevalence_df <- tibble::rownames_to_column(prevalence_df, var='year')
+prevalence_df$year <- as.integer(format(as.POSIXct(prevalence_df$year), '%Y'))
+prevalence_df <- reshape2::melt(prevalence_df, id.vars='year', variable.name = 'screening_level')
+
+ggplot(
+  data = prevalence_df,
+  mapping = aes(x=year, y=value*1000, color = screening_level)) + 
+geom_line() + 
+xlab("Year") + 
+ylab("Prevalence Per 1000") + 
+ggtitle(paste0(statenames[[state]], ": ", "Prevalence in All Populations"), subtitle = paste0("Forecasted through ", start.year - cal.start + model.end))
+
+ggsave(paste0("~/Desktop/", state, "_prevalence_long_timetrend.png"))
+```
+
+### MA - Prevalence Short Time Trend
+
+Let's look specifically at the 2000 to 2016.
+```{r}
+ggplot(
+  data = dplyr::filter(prevalence_df, year %in% 2000:2016),
+  mapping = aes(x=year, y=value*1000, color = screening_level)) + 
+geom_line() + 
+xlab("Year") + 
+ylab("Prevalence Per 1000") + 
+ggtitle(paste0(statenames[[state]], ": ", "Prevalence in All Populations"), subtitle = paste0("Forecasted through ", 2016))
+
+ggsave(paste0("~/Desktop/", state, "_prevalence_short_timetrend.png"))
+```
+
+### MA - Incidence Long Time Trend
+
+```{r}
+incidence_list <- list()
+for (screening_level in seq(0,1,by=0.1)) {
+  incidence_list[[as.character(screening_level)]] <- 
+		get_incidence(theta = theta, screening_level = screening_level)
+}
+
+incidence_df <- do.call(cbind.data.frame, incidence_list)
+incidence_df <- tibble::rownames_to_column(incidence_df, var='year')
+incidence_df$year <- as.integer(format(as.POSIXct(incidence_df$year), '%Y'))
+incidence_df <- reshape2::melt(incidence_df, id.vars='year', variable.name = 'screening_level')
+
+ggplot(
+  data = incidence_df,
+  mapping = aes(x=year, y=value*1000, color = screening_level)) + 
+geom_line() + 
+xlab("Year") + 
+ylab("Incidence Per 1000") + 
+ggtitle(paste0(statenames[[state]], ": ", "Incidence in All Populations"), subtitle = paste0("Forecasted through ", start.year - cal.start + model.end))
+
+ggsave(paste0("~/Desktop/", state, "_incidence_long_timetrend.png"))
+```
+
+
+### MA - Incidence Short Time Trend
+
+Let's look specifically at the 2000 to 2016.
+```{r}
+ggplot(
+  data = dplyr::filter(incidence_df, year %in% 2000:2016),
+  mapping = aes(x=year, y=value*1000, color = screening_level)) + 
+geom_line() + 
+xlab("Year") + 
+ylab("Incidence Per 1000") + 
+ggtitle(paste0(statenames[[state]], ": ", "Incidence in All Populations"), subtitle = paste0("Forecasted through ", start.year - cal.start + model.end))
+
+ggsave(paste0("~/Desktop/", state, "_incidence_short_timetrend.png"))
+```
