@@ -249,6 +249,8 @@ plot.posteriors <- function(post.sample, output_dir) {
   max.y.f <-max(out.diag.y.f$value, na.rm=TRUE)
   max.o.f <-max(out.diag.o.f$value, na.rm=TRUE)
   max.diag <- max(max.y.m, max.o.m, max.y.f, max.o.f,diag.data$diag.age.sex.rate) +5
+	max.diag.y <- max(max.y.m, max.y.f) + 5
+	max.diag.o <- max(max.o.m, max.o.f) + 5
   
   ### plot reported cases by age and sex ###
   plot.diag.y.m <- ggplot(data=out.diag.y.m)+
@@ -258,7 +260,7 @@ plot.posteriors <- function(post.sample, output_dir) {
     geom_point(data=as.data.frame(diag.age.sex.dat),aes(x=1:diag.len, y=diag_all_y_m), color="red", shape=15, size=2) +
     labs(title="All M 20-44 y", x="Year", y="Reported early syphilis cases\nper 100,000") +
     # coord_cartesian(ylim=c(0,max.diag))+
-    expand_limits(y=c(0, max.diag))+
+    expand_limits(y=c(0, max.diag.y))+
     scale_x_discrete(labels=seq((end.year-diag.len+1),end.year,1))
   
   plot.diag.o.m <- ggplot(data=out.diag.o.m)+
@@ -268,7 +270,7 @@ plot.posteriors <- function(post.sample, output_dir) {
     geom_point(data=as.data.frame(diag.age.sex.dat),aes(x=1:diag.len, y=diag_all_o_m), color="red", shape=15, size=2) +
     labs(title="All M 45-64 y", x="Year", y="Reported early syphilis cases\nper 100,000") +
     # coord_cartesian(ylim=c(0,max.diag))+
-    expand_limits(y=c(0, max.diag))+
+    expand_limits(y=c(0, max.diag.y))+
     #expand_limits(y=0)+
     scale_x_discrete(labels=seq((end.year-diag.len+1),end.year,1))
   
@@ -280,7 +282,7 @@ plot.posteriors <- function(post.sample, output_dir) {
     labs(title="All F 20-44 y", x="Year", y="Reported early syphilis cases\nper 100,000") +
     # coord_cartesian(ylim=c(0,max.diag))+
     #expand_limits(y=0)+
-    expand_limits(y=c(0, max.diag))+
+    expand_limits(y=c(0, max.diag.o))+
     scale_x_discrete(labels=seq((end.year-diag.len+1),end.year,1))
   
   plot.diag.o.f <- ggplot(data=out.diag.o.f)+
@@ -290,7 +292,7 @@ plot.posteriors <- function(post.sample, output_dir) {
     geom_point(data=as.data.frame(diag.age.sex.dat),aes(x=1:diag.len, y=diag_all_o_f), color="red", shape=15, size=2) +
     labs(title="All F 45-64 y", x="Year", y="Reported early syphilis cases\nper 100,000") +
     # coord_cartesian(ylim=c(0,max.diag))+
-    expand_limits(y=c(0, max.diag))+
+    expand_limits(y=c(0, max.diag.o))+
     ##expand_limits(y=0)+
     scale_x_discrete(labels=seq((end.year-diag.len+1),end.year,1))
   
