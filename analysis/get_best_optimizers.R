@@ -81,3 +81,15 @@ outdir <- here("inst/optims/")
 saveRDS(la_top5_pars, file.path(outdir, 'la_top5_pars.rds'))
 saveRDS(ma_top5_pars, file.path(outdir, 'ma_top5_pars.rds'))
 
+
+# Get best parametrizations
+theta_la <- la_optim_max_pars[which(sapply(la_optim_vals, max) == max(sapply(la_optim_vals, max))), ]
+theta_la <- as.numeric(theta_la)
+names(theta_la) <- param_names
+
+theta_ma <- ma_optim_max_pars[which(sapply(ma_optim_vals, max) == max(sapply(ma_optim_vals, max))), ]
+theta_ma <- as.numeric(theta_ma)
+names(theta_ma) <- param_names
+
+usethis::use_data(theta_la, overwrite = TRUE)
+usethis::use_data(theta_ma, overwrite = TRUE)
