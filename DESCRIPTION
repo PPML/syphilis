@@ -29,5 +29,6 @@ Imports:
     plyr,
     reshape
 Suggests:
-    here
+    here,
+    testthat
 RoxygenNote: 6.1.1
