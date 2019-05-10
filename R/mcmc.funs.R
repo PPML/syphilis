@@ -13,6 +13,7 @@ likelihood <- function(theta){
 
 #calculate posterior likelihood
 dLogPosterior <-function(theta) {
+  if (length(names(theta)) == 0) stop("theta must have names.")
   tryCatch({
 		log.prior <- log(prior(theta))
 		log.likelihood <- unlist(likelihood(theta)$LogLL)
