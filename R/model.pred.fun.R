@@ -121,7 +121,7 @@ constructSimulationEnvironment <- function(theta) {
 		params <-list(b=b,delta=delta, gamma=gamma,p.trt.1=p.trt.1, p.trt.2=p.trt.2,
 									p.trt.3=p.trt.3,p.trt.4=p.trt.4, rep=rep.trend,rep.symp=rep.symp,
 									screen=screen, behav=behav,dur.imm=dur.imm,
-									p.s.1=p.s.1, p.s.2 = p.s.2, p.s.3 = p.s.3, d=d) #parameters used by transmission model
+									p.s.1=p.s.1, p.s.2 = p.s.2, p.s.3 = p.s.3) #parameters used by transmission model
 	})
 	return(e)
 }
