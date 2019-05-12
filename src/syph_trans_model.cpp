@@ -97,9 +97,9 @@ List syphSim(
   arma::vec p_trt3(dim); //trt rate, early latent
   arma::vec p_trt4(dim); //trt rate, late latent
   arma::vec lambda(dim); //force of infection
-  arma::vec Pop(dim*23); //population matrix
-  NumericMatrix outputs(nYrs, dim*23+1);
-  NumericMatrix out(nYrs, dim*23+1);
+  arma::vec Pop(dim*24); //population matrix
+  NumericMatrix outputs(nYrs, dim*24+1);
+  NumericMatrix out(nYrs, dim*24+1);
   
   double gamma1 = gamma[0]; //1/dur primary
   double gamma2 = gamma[1]; //1/dur secondary
@@ -148,7 +148,7 @@ List syphSim(
       double rep_on = rep_count[y];
       
       if(y==0 && w==0){   ///populate the model at t=0
-        for(int n=0; n<dim*23; n++){
+        for(int n=0; n<dim*24; n++){
           Pop[n] = initPop[n];
         }
       }
@@ -416,13 +416,14 @@ List syphSim(
         Pop[n+dim*20] += (agingNSA[n] + birthsNSA[n]) * dt; //dNSA/dt
         Pop[n+dim*21] += (rep_s[n]*p_trt4[n]*(L2[n]+LR2[n]) + rep*alpha[n]*(L2[n] + LR2[n])) * dt; //dD4/dt
         Pop[n+dim*22] += (rep_s[n]*p_trt1[n]*IR1[n] + rep*alpha[n]* IR1[n] + rep_s[n]*p_trt2[n]*IR2[n] + rep*alpha[n]*IR2[n] + rep_s[n]*p_trt3[n]*LR1[n] + rep*alpha[n]* LR1[n] ) * dt; //dDR/dt
+				Pop[n+dim*23] += (alpha[n]*(S[n] + E[n] + SR[n] + ER[n] + I1[n] + IR1[n] + I2[n] + IR2[n] + L1[n] + LR1[n] + L2[n] + LR2[n])) * dt; //dCumulativeTesting/dt
       }
       }
         
         // fill results table with annual outputs
       if(w==0) {
         outputs(y,0) = y; //year
-        for(int n=0; n<dim*23; n++) {
+        for(int n=0; n<dim*24; n++) {
           outputs(y,1+n) = Pop[n]; // 
           }
         }
@@ -430,7 +431,7 @@ List syphSim(
   } /// end of year loop
   
   for(int m=0; m<nYrs; m++) {
-    for(int n=0; n<dim*23+1; n++) {
+    for(int n=0; n<dim*24+1; n++) {
       out(m,n) = outputs(m,n);
     }
   }

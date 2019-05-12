@@ -86,7 +86,8 @@ load.start <- function(){
     D3=c(rep(0,index)),     #reported, early latent
     NSA=n.nsa,              #not sexually active
     D4=c(rep(0,index)),     #reported, late latent
-    DR = c(rep(0,index))    #reported, primary, secondary, early latent in prior infecteds
+    DR = c(rep(0,index)),   #reported, primary, secondary, early latent in prior infecteds
+		TESTED = c(rep(0,index)) 
    )
   
   
