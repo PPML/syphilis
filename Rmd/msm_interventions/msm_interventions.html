@@ -124,7 +124,24 @@ $(document).ready(function () {
 </div>
 
 
-
+<p>A major point of interest of this project is to estimate the potential impact of hypothetical screening interventions targeted on the Men Who Have Sex with Men (MSM) population in comparison to general population focused interventions.</p>
+<p>In this model, there are MSM of 8 kinds, divided by age group (20-44, 45-65), sexual activity (low, high), and by HIV positive or negative status.</p>
+<p>We can use the following metrics to compare the interventions which we simulate.</p>
+<ul>
+<li>Number of Additional Tests</li>
+<li>Number of Incident Cases</li>
+<li>Number of Prevalent Cases</li>
+<li>Number Needed to Test to Avert One Additional Incident Case</li>
+<li>Number Needed to Test to Avert One Prevalent Case</li>
+</ul>
+<p>Note that these metrics are interpreted as relative to the base case scenario (the simulation where a screening intervention was not carried out and levels of screening are maintained in the future at the same level as the last year of calibration data, 2016).</p>
+<p>The number of tests and number of incident cases are defined as cumulative measures during the intervention time period, whereas the number of prevalent cases is taken as a measure at the last intervention year time-point.</p>
+<p>We will simulate the interventions over the 5 years after the data-period, 2017-2021.</p>
+<p>The interventions we will investigate are as follows:</p>
+<pre><code>## Loading syphilis</code></pre>
+<pre><code>## [1] &quot;Annual&quot;                &quot;Twice Annual&quot;          &quot;MSM Annual&quot;           
+## [4] &quot;MSM Twice Annual&quot;      &quot;HIV+ MSM Annual&quot;       &quot;HIV+ MSM Twice Annual&quot;
+## [7] &quot;HIV- MSM Annual&quot;       &quot;HIV- MSM Twice Annual&quot;</code></pre>
 
 
 

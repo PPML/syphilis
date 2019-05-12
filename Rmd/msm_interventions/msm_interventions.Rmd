@@ -9,31 +9,32 @@ potential impact of hypothetical screening interventions
 targeted on the Men Who Have Sex with Men (MSM) population in
 comparison to general population focused interventions.
 
-In this model, there are MSM of 8 kinds, divided by age group (20-44, 45-65),
-sexual activity (low, high), and by HIV positive or negative status.
-
-We can use the following metrics to compare the interventions which 
+We will use the following metrics to compare the interventions which 
 we simulate. 
 
-	- Number of Additional Tests
-	- Number of Incident Cases 
-	- Number of Prevalent Cases
-	- Number Needed to Test to Avert One Additional Incident Case
-	- Number Needed to Test to Avert One Prevalent Case
+- Number of Additional Tests
+- Number of Incident Cases 
+- Number of Prevalent Cases
+- Number Needed to Test to Avert One Additional Incident Case
+- Number Needed to Test to Avert One Prevalent Case
 
-Note that these metrics are interpreted as relative to the base case scenario
-(the simulation where a screening intervention was not carried out and levels
-of screening are maintained in the future at the same level as the last year of
-calibration data, 2016). 
+These metrics will be interpreted as relative to the base case scenario.
 
-The number of tests and number of incident cases are defined as cumulative
+Note that the number of tests and number of incident cases are defined as cumulative
 measures during the intervention time period, whereas the number of prevalent 
 cases is taken as a measure at the last intervention year time-point.
 
-We will simulate the interventions over the 5 years after the data-period,
+Our interventions will be simulated during a span of 5 years after the data-period, 
 2017-2021.
 
+The interventions we will investigate are as follows: 
 
+```{r, echo=FALSE}
+devtools::load_all()
+print(interventions$longname)
+```
 
+```{r}
 
- 
+```
+
