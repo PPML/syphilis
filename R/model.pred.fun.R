@@ -20,7 +20,8 @@
 #' 
 prediction.epi <- function(theta) {
   e <- constructSimulationEnvironment(theta)
-  e <- runSimulation(e)
+	modify_simulation_environment_for_an_intervention(e)
+  runSimulation(e)
   summarizeSimulation(e)
 }
 
@@ -144,7 +145,7 @@ runSimulation <- function(e) {
 						aging.nsa)
 		return(sim)
 	})
-	return(e)
+	return(invisible(NULL))
 }
 
 summarizeSimulation <- function(e) {
