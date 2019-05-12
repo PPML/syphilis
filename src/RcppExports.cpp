@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // mv_mult
 arma::vec mv_mult(arma::mat& lhs, arma::vec& rhs);
-RcppExport SEXP _syphLAMA_mv_mult(SEXP lhsSEXP, SEXP rhsSEXP) {
+RcppExport SEXP _syphilis_mv_mult(SEXP lhsSEXP, SEXP rhsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,7 +20,7 @@ END_RCPP
 }
 // mat_mult
 arma::mat mat_mult(arma::mat& a, arma::mat& b);
-RcppExport SEXP _syphLAMA_mat_mult(SEXP aSEXP, SEXP bSEXP) {
+RcppExport SEXP _syphilis_mat_mult(SEXP aSEXP, SEXP bSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,7 +32,7 @@ END_RCPP
 }
 // syphSim
 List syphSim(List x, double dt, List cm, NumericVector pabx, NumericVector rep_count, int nYrs, NumericVector initPop, NumericVector n_sa, arma::mat births, arma::mat births_sa, arma::mat births_nsa, arma::mat aging, arma::mat aging_nsa);
-RcppExport SEXP _syphLAMA_syphSim(SEXP xSEXP, SEXP dtSEXP, SEXP cmSEXP, SEXP pabxSEXP, SEXP rep_countSEXP, SEXP nYrsSEXP, SEXP initPopSEXP, SEXP n_saSEXP, SEXP birthsSEXP, SEXP births_saSEXP, SEXP births_nsaSEXP, SEXP agingSEXP, SEXP aging_nsaSEXP) {
+RcppExport SEXP _syphilis_syphSim(SEXP xSEXP, SEXP dtSEXP, SEXP cmSEXP, SEXP pabxSEXP, SEXP rep_countSEXP, SEXP nYrsSEXP, SEXP initPopSEXP, SEXP n_saSEXP, SEXP birthsSEXP, SEXP births_saSEXP, SEXP births_nsaSEXP, SEXP agingSEXP, SEXP aging_nsaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -55,13 +55,13 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_syphLAMA_mv_mult", (DL_FUNC) &_syphLAMA_mv_mult, 2},
-    {"_syphLAMA_mat_mult", (DL_FUNC) &_syphLAMA_mat_mult, 2},
-    {"_syphLAMA_syphSim", (DL_FUNC) &_syphLAMA_syphSim, 13},
+    {"_syphilis_mv_mult", (DL_FUNC) &_syphilis_mv_mult, 2},
+    {"_syphilis_mat_mult", (DL_FUNC) &_syphilis_mat_mult, 2},
+    {"_syphilis_syphSim", (DL_FUNC) &_syphilis_syphSim, 13},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_syphLAMA(DllInfo *dll) {
+RcppExport void R_init_syphilis(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
