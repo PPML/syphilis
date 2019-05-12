@@ -16,9 +16,10 @@ load_globals <- function() {
   tstep <<- 1/52  #weekly time step
 	cal.period <<- 5 #duration of calibration period (2012-2016 currently)
 	cal.start <<- 100 #time at which start calibration 
-	model.end <<- cal.start + cal.period + 1
-  end.year <<- 2016
-  start.year <<- 2012
+	model.end <<- 110 # end of the simulation
+  start.year <<- 2012 # data calibration start
+  end.year <<- 2016 # data calibration end
+	intervention_years <<- 105:109
 
   # background antibiotic treatment
   p.abx.init <- 0.15 #set this to 0 if want to turn off abx treatment -- this implements a period (pre-cal) with high rates of abx use, to represent the intro of penicillin in the pop, which decreases to abx.background 
@@ -64,6 +65,15 @@ load_globals <- function() {
   nsa.index <<- index*20+1:index           #not sexually active population
   d4.index <<- index*21+1:index            #diagnosed latent latent
   dr.index <<- index*22+1:index            #diagnosed primary, secondary, and early latent, previously treated
+	tested.index <<- index*23+1:index        #tested for syphilis
+
+	# index for all infected individuals
+	infected.index <<- c(e.index, prim.index, sec.index, early.index,
+	  latent.index, er.index, primr.index, secr.index, earlyr.index, latentr.index)
+	
+	# index for all sexually active individuals
+	allpop.index <<- c(infected.index, s.index, treated.inf.index, treated.early.index, treated.late.index, sr.index)
+	
   
   pop1 <<- c(1:4,21:24) #subpop1
   pop2 <<- c(5:8,25:28) # subpop2
@@ -116,12 +126,25 @@ load_globals <- function() {
 								l = c('young', 'old'),
 								i = c('black', 'white', 'hispanic', 'msm-hivneg', 'msm-hivpos'),
 								j = c('male', 'female')
-							   								 )
-							 )
+						   ))
 
   # Flatten the pop array into a lookup table (data frame)
 	# with columns j, k, l, i, index.
 	pop <<- as.data.frame.table(pop_array, responseName = 'index')
+
+	# Define screening interventions
+	interventions <<- tibble::tribble(
+									~codename,                ~longname,      ~target,  ~freq,
+										'annual',                 'Annual',        'all',      1,
+							'twice_annual',           'Twice Annual',        'all',      2,
+								'msm_annual',             'MSM Annual',        'msm',      1,
+					'msm_twice_annual',       'MSM Twice Annual',        'msm',      2,
+				 'msm_hivpos_annual',        'HIV+ MSM Annual', 'msm-hivpos',      1,
+	 'msm_hivpos_twice_annual',  'HIV+ MSM Twice Annual', 'msm-hivpos',      2,
+				 'msm_hivneg_annual',        'HIV- MSM Annual', 'msm-hivneg',      1,
+	 'msm_hivneg_twice_annual',  'HIV- MSM Twice Annual', 'msm-hivneg',      2
+	)
+	
 
 	return(invisible(NULL))
 }
