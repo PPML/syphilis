@@ -1,4 +1,4 @@
-Package: syphLAMA
+Package: syphilis
 Type: Package
 Title: An Ordinary Differential Equations Model of Syphilis in Louisiana and Massachusetts
 Version: 0.1
@@ -27,7 +27,8 @@ Imports:
     fitR,
     bezier,
     plyr,
-    reshape
+    reshape,
+		tibble
 Suggests:
     here,
     testthat
