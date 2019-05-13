@@ -21,6 +21,9 @@ load_globals <- function() {
   end.year <<- 2016 # data calibration end
 	intervention_years <<- 105:109
 
+	# the term such that cal.start + model_to_gregorian_difference == start.year
+	model_to_gregorian_difference <<- start.year - cal.start 
+
   # background antibiotic treatment
   p.abx.init <- 0.15 #set this to 0 if want to turn off abx treatment -- this implements a period (pre-cal) with high rates of abx use, to represent the intro of penicillin in the pop, which decreases to abx.background 
   p.abx.background <- 0.01
