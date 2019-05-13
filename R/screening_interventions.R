@@ -163,7 +163,24 @@ simulate_interventions <- function(theta) {
 #'	 scale_y_continuous(trans = symlog_trans()) + 
 #'	 coord_flip() + 
 #'	 theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), legend.position = 'none')
-
+#'
+#' 
+#' # incident infections in each
+#' ggplot(df, aes(x = year, y = incidents, color = intervention)) + 
+#'   geom_line()
+#'
+#' # prevalent infections averted
+#' ggplot(df, aes(x = year, y = -1 * chg_prevalent_infs, color = intervention)) + 
+#'   geom_line() +
+#'   scale_y_continuous(trans = symlog_trans())
+#' 
+#' # prevalent infections averted in 2021
+#' ggplot(filter(df, year == 2021), aes(x=intervention, y = -chg_prevalent_infs, fill = intervention, color = intervention)) + 
+#'	 geom_bar(stat='identity', alpha = 0.6) + 
+#'	 geom_text(aes(x = intervention, label = intervention, y = -chg_prevalent_infs*.1 + .5), color = 'black', alpha = 0.5, size=4) + # , angle = 25) + 
+#'	 scale_y_continuous(trans = symlog_trans()) + 
+#'	 coord_flip() + 
+#'	 theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), legend.position = 'none')
 format_intervention_statistics <- function(df) {
 	basecase <- df %>% dplyr::filter(intervention == 'basecase') %>% dplyr::select(-intervention)
 	df <- merge(df, basecase, by=c('year'), suffixes = c('', '.basecase'))
