@@ -21,6 +21,8 @@ LinkingTo:
 Imports: 
     Rcpp,
     deSolve,
+		dplyr,
+		ggplot2,
     scales,
     lattice,
     latticeExtra,
