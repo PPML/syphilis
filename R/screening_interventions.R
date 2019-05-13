@@ -5,14 +5,12 @@
 #' column). Then use a switch on the intervention to call the
 #' adjust_screening_for_intervention function with the right arguments.
 #' 
-modify_simulation_environment_for_an_intervention <- function(e) {
+modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 
-  # return e unmodified if no intervention is specified
-  if (! exists('intervention') || (exists('intervention') && intervention == 'basecase')) return(e)
+	if (intervention == 'basecase') return(e)
 
-  # if the intervention is not among those defined in interventions, error
-	if (exists('intervention') && 
-	    ! intervention %in% interventions$codename) {
+	# if the intervention is not among those defined in interventions, error
+	if (! intervention %in% interventions$codename) {
 		stop("the intervention must be defined in interventions definition dataframe")
 	}
 
@@ -25,7 +23,7 @@ modify_simulation_environment_for_an_intervention <- function(e) {
 			 msm_hivpos_annual = adjust_screening_for_intervention(e, pop_indices = m5, new_level = 1),
  msm_hivpos_twice_annual = adjust_screening_for_intervention(e, pop_indices = m5, new_level = 2),
 			 msm_hivneg_annual = adjust_screening_for_intervention(e, pop_indices = m4, new_level = 1),
-		msm_hiv_twice_annual = adjust_screening_for_intervention(e, pop_indices = m4, new_level = 2),
+ msm_hivneg_twice_annual = adjust_screening_for_intervention(e, pop_indices = m4, new_level = 2),
 	)
 
   return(invisible(NULL))
@@ -82,11 +80,22 @@ intervention period.")
 #' 
 #' In order to calculate these, we will extract the following data from a
 #' simulation: prevalent_infections, incidents, tests (per year).
-#'
+#' 
+#' @example 
+#' devtools::load_all()
+#' state <- c('LA', 'MA')[sample.int(2,1)]
+#' load.start()
+#' theta <- get(paste0('theta_', tolower(state)))
+#' e <- constructSimulationEnvironment(theta)
+#' intervention <- interventions$codename[sample.int(length(interventions$codename),1)]
+#' modify_simulation_environment_for_an_intervention(e, intervention = intervention)
+#' runSimulation(e)
+#' df <- extractInterventionStatistics(e, intervention = intervention)
 extractInterventionStatistics <- function(e, intervention) {
+	intervention_years <- c(min(intervention_years) - 1, intervention_years)
 	data.frame(
 		intervention = intervention,
-		year = 2017:2021,
+		year = intervention_years + model_to_gregorian_difference,
 		prevalent_infections = rowSums(e$sim$out[1+intervention_years, 1+infected.index]),
 		incidents = rowSums(e$sim$out[1+intervention_years, 1+c(inc.index, incr.index)]) - 
 			rowSums(e$sim$out[intervention_years, 1+c(inc.index, incr.index)]),
@@ -101,11 +110,18 @@ extractInterventionStatistics <- function(e, intervention) {
 #' Go through each of the interventions (including the basecase),
 #' simulate them, extract the Intervention Statistics, and 
 #' construct a dataframe with the results.
+#'
+#' @example 
+#' devtools::load_all()
+#' state <- c('LA', 'MA')[sample.int(2,1)]
+#' load.start()
+#' theta <- get(paste0('theta_', tolower(state)))
+#' df <- simulate_interventions(theta)
 simulate_interventions <- function(theta) {
 	intervention_outcomes <- list()
 	for (intervention in c('basecase', interventions$codename)) {
 		e <- constructSimulationEnvironment(theta)
-		modify_simulation_environment_for_an_intervention(e)
+		modify_simulation_environment_for_an_intervention(e, intervention)
 		runSimulation(e)
 		intervention_outcomes[[length(intervention_outcomes)+1]] <- 
 			extractInterventionStatistics(e, intervention)
@@ -122,5 +138,46 @@ simulate_interventions <- function(theta) {
 #' - Calculate Change in 
 #' 
 #' @param df A dataframe resulting from simulate_interventions.
+#'
+#' @example 
+#' devtools::load_all()
+#' state <- c('LA', 'MA')[sample.int(2,1)]
+#' load.start()
+#' theta <- get(paste0('theta_', tolower(state)))
+#' df <- simulate_interventions(theta)
+#' df <- format_intervention_statistics(df)
+#' 
+#' # prevalent infections in each
+#' ggplot(df, aes(x = year, y = prevalent_infections, color = intervention)) + 
+#'   geom_line()
+#'
+#' # prevalent infections averted
+#' ggplot(df, aes(x = year, y = -1 * chg_prevalent_infs, color = intervention)) + 
+#'   geom_line() +
+#'   scale_y_continuous(trans = symlog_trans())
+#' 
+#' # prevalent infections averted in 2021
+#' ggplot(filter(df, year == 2021), aes(x=intervention, y = -chg_prevalent_infs, fill = intervention, color = intervention)) + 
+#'	 geom_bar(stat='identity', alpha = 0.6) + 
+#'	 geom_text(aes(x = intervention, label = intervention, y = -chg_prevalent_infs*.1 + .5), color = 'black', alpha = 0.5, size=4) + # , angle = 25) + 
+#'	 scale_y_continuous(trans = symlog_trans()) + 
+#'	 coord_flip() + 
+#'	 theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), legend.position = 'none')
+
 format_intervention_statistics <- function(df) {
+	basecase <- df %>% dplyr::filter(intervention == 'basecase') %>% dplyr::select(-intervention)
+	df <- merge(df, basecase, by=c('year'), suffixes = c('', '.basecase'))
+	df <- df %>% dplyr::mutate(
+	    chg_prevalent_infs = prevalent_infections - prevalent_infections.basecase,
+			chg_prevalent_infs_pct = chg_prevalent_infs / prevalent_infections.basecase,
+			chg_incident_infs = incidents - incidents.basecase,
+			chg_incident_infs_pct = chg_incident_infs / incidents.basecase,
+			chg_tests = tests - tests.basecase,
+			chg_tests_pct = chg_tests / tests.basecase,
+			nnt_prevalent = -chg_prevalent_infs / chg_tests,
+			nnt_incident = -chg_incident_infs / chg_tests
+	  )
+	df <- dplyr::select(df, -c('prevalent_infections.basecase', 'incidents.basecase', 'tests.basecase'))
+	df <- dplyr::arrange(df, intervention, year)
+	return(df)
 }
