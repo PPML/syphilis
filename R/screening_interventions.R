@@ -36,12 +36,15 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 #' time period and among the targeted population which are less than 
 #' the new_level of screening and update them to the new_level.
 #'
-adjust_screening_for_intervention <- function(e, intervention_years = 105:109, pop_indices, new_level) {
+adjust_screening_for_intervention <- function(e, intervention_start = 105, pop_indices, new_level) {
+
+	e$params[['output_weekly']] <- TRUE
 
 	# First check that the intervention years are within the modeled time period
 	# and that the time varying parameters extend to at least the end of the
 	# intervention period.
-	max_year <- max(intervention_years)
+	max_year <- nrow(e$screen)
+	intervention_years <- intervention_start:max_year
 
 	if (any(c(e$model.end, nrow(e$screen), length(e$behav),
 							nrow(e$rep.trend)) < max_year )) {
@@ -56,6 +59,7 @@ intervention period.")
 	# selected populations (pop_indices) are below the new_level of 
 	# screening and then replace those entries' values with the 
 	# new_level.
+	intervention_timesteps = seq(from=min(intervention_years)*52, to=max(intervention_years))
 	need_increase <- e$screen[intervention_years, pop_indices] < new_level
 	e$screen[intervention_years, pop_indices][need_increase] <- new_level
   
@@ -92,15 +96,17 @@ intervention period.")
 #' runSimulation(e)
 #' df <- extractInterventionStatistics(e, intervention = intervention)
 extractInterventionStatistics <- function(e, intervention) {
-	intervention_years <- c(min(intervention_years) - 1, intervention_years)
+	intervention_start <- min(intervention_years)
+	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
+
 	data.frame(
 		intervention = intervention,
-		year = intervention_years + model_to_gregorian_difference,
-		prevalent_infections = rowSums(e$sim$out[1+intervention_years, 1+infected.index]),
-		incidents = rowSums(e$sim$out[1+intervention_years, 1+c(inc.index, incr.index)]) - 
-			rowSums(e$sim$out[intervention_years, 1+c(inc.index, incr.index)]),
-		tests = rowSums(e$sim$out[1+intervention_years,1+tested.index]) - 
-			rowSums(e$sim$out[intervention_years,1+tested.index]) 
+		year = intervention_period/52 + model_to_gregorian_difference,
+		prevalent_infections = rowSums(e$sim$out[1+intervention_period, 1+infected.index]),
+		incidents_per_year = rowSums(e$sim$out[1+intervention_period, 1+c(inc.index, incr.index)]) - 
+			rowSums(e$sim$out[intervention_period, 1+c(inc.index, incr.index)]),
+		tests_per_year = rowSums(e$sim$out[1+intervention_period,1+tested.index]) - 
+			rowSums(e$sim$out[intervention_period,1+tested.index]) 
 		)
 }
 
@@ -189,12 +195,12 @@ format_intervention_statistics <- function(df) {
 			chg_prevalent_infs_pct = chg_prevalent_infs / prevalent_infections.basecase,
 			chg_incident_infs = incidents - incidents.basecase,
 			chg_incident_infs_pct = chg_incident_infs / incidents.basecase,
-			chg_tests = tests - tests.basecase,
-			chg_tests_pct = chg_tests / tests.basecase,
+			chg_tests = tests_per_year - tests_per_year.basecase,
+			chg_tests_pct = chg_tests / tests_per_year.basecase,
 			nnt_prevalent = -chg_prevalent_infs / chg_tests,
 			nnt_incident = -chg_incident_infs / chg_tests
 	  )
-	df <- dplyr::select(df, -c('prevalent_infections.basecase', 'incidents.basecase', 'tests.basecase'))
+	df <- dplyr::select(df, -c('prevalent_infections.basecase', 'incidents.basecase', 'tests_per_year.basecase'))
 	df <- dplyr::arrange(df, intervention, year)
 	return(df)
 }

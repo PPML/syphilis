@@ -4,6 +4,7 @@
 
 load.start <- function(){
   
+	state <- toupper(state)
   initial.files(state) #load required data files
 
   omega.t <<- if(state=="MA") matrix(c(0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0),nrow=5,byrow=T) else matrix(c(0,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0),nrow=5,byrow=T)

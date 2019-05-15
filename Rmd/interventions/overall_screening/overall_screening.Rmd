@@ -1,0 +1,455 @@
+---
+title: Analyzing Screening Guidelines Scenarios
+author: Christian Testa
+output: html_document
+--
+
+In this document, we'll set the minimum level screening rates for the
+entire population and measure the impact this has. 
+
+### Annual Screening 
+
+Let's do annual screening first, as an example. 
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+devtools::load_all()
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(RColorBrewer)
+library(ggrepel)
+```
+
+```{r define helper fn, echo=FALSE}
+simulate_annual_and_basecase <- function(theta) {
+	intervention_outcomes <- list()
+	for (intervention in c('basecase', 'annual')) {
+		e <- constructSimulationEnvironment(theta)
+		modify_simulation_environment_for_an_intervention(e, intervention)
+		runSimulation(e)
+		intervention_outcomes[[length(intervention_outcomes)+1]] <- 
+			extractInterventionStatistics(e, intervention)
+	}
+	do.call(rbind.data.frame, intervention_outcomes)
+}
+```
+
+```{r simulate and tidy data, echo = FALSE, cache=TRUE}
+
+for (state in c('LA', 'MA')) { 
+
+	# set the number of years to run out the model to 2050
+	load_globals(model.end = 140)
+
+	# parametrize the model
+	load.start()
+
+	# get optimized for the model in the specified state.
+	theta <- get(paste0('theta_', tolower(state)))
+
+	# simmulate the annual and basecase scenarios getting
+	# - prevalent cases, incidents, and number of tests done
+	assign(paste0(tolower(state), '_df'),
+				 simulate_annual_and_basecase(theta))
+}
+
+for (state in c('LA', 'MA')) { 
+	df <- get(paste0(tolower(state), '_df'))
+	df <- filter(df, year >= 2015 & year <= 2050) 
+	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
+	assign(paste0(tolower(state), '_df'), df)
+}
+```
+
+```{r plot data, fig.width=12, echo=FALSE}
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df'))
+	df <- filter(df, variable != 'tests_per_year')
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention, 
+						linetype=intervention)) +
+			 geom_line() + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(paste0("Annual vs. Basecase in ", statenames[[state]])) + 
+			 theme_bw() + 
+			 guides(linetype = guide_legend(title='Baseline Rate of Screening'),
+							color = guide_legend(title='Baseline Rate of Screening')) + 
+			 scale_color_manual(values = c(basecase = 'black', annual = 'red')) +
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+```
+
+
+### Increasing Baseline Screening to Every 4 years, 2 years, 1.5 years, and once a year year
+
+```{r simulate_8_levels, echo = FALSE, cache=TRUE}
+simulate_5_levels <- function(theta) {
+	intervention_outcomes <- list()
+	for (intervention_level in seq(0,1,.25)) {
+		e <- constructSimulationEnvironment(theta)
+		adjust_screening_for_intervention(e, pop_indices = 1:32, new_level = intervention_level)
+		runSimulation(e)
+		intervention_outcomes[[length(intervention_outcomes)+1]] <- 
+			extractInterventionStatistics(e, intervention_level)
+	}
+	do.call(rbind.data.frame, intervention_outcomes)
+}
+
+
+for (state in c('LA', 'MA')) { 
+
+	# set the number of years to run out the model to 2050
+	load_globals(model.end = 140)
+
+	# parametrize the model
+	load.start()
+
+	# get optimized for the model in the specified state.
+	theta <- get(paste0('theta_', tolower(state)))
+
+	# simmulate the annual and basecase scenarios getting
+	# - prevalent cases, incidents, and number of tests done
+	assign(paste0(tolower(state), '_df5'),
+				 simulate_5_levels(theta))
+}
+
+for (state in c('LA', 'MA')) { 
+	df <- get(paste0(tolower(state), '_df5'))
+	df <- filter(df, year >= 2015 & year <= 2050) 
+	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
+	assign(paste0(tolower(state), '_df5'), df)
+}
+```
+
+```{r plot 8 levels, fig.width=12, echo=FALSE}
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df5'))
+	df <- filter(df, intervention %in% c(0, 0.25, 0.5, 0.75, 1), variable != 'tests_per_year')
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention,
+						group = intervention)) + 
+			 geom_line() + 
+			 geom_text_repel(
+				data = filter(df, year == max(year)),
+				mapping = aes(
+						x=year + 3.5,
+						y=value,
+						color = intervention,
+						label = intervention),
+					size = 3,
+					show.legend=FALSE,
+					nudge_x = 4, direction='y') + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(paste0(" ", statenames[[state]])) + 
+			 scale_color_gradient() + 
+			 guides(color = guide_legend('Baseline Level of Screening')) + 
+			 theme_bw() + 
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+```
+
+```{r plot 8 levels relative, fig.width=12, echo=FALSE}
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df5'))
+	df <- filter(df, intervention %in% c(0, 0.25, 0.5, 0.75, 1), variable != 'tests_per_year')
+	df <- reshape2::dcast(
+		data = df, 
+		formula = intervention + year ~ variable)
+	basecase <- filter(df, intervention == 0) %>% select(-intervention)
+	df <- merge(df, basecase, by=c('year'), suffixes = c('', '.basecase'))
+	df <- df %>% 
+		mutate(
+		  prevalent_infections = prevalent_infections - prevalent_infections.basecase,
+      incidents_per_year = incidents_per_year - incidents_per_year.basecase
+			) %>% 
+		select(-c(prevalent_infections.basecase, incidents_per_year.basecase))
+
+	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
+
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention,
+						group = intervention)) + 
+			 geom_line() + 
+			 geom_text_repel(
+				 data = filter(df, year == max(year)),
+				 mapping = aes(
+				 		x=year + 3.5,
+				 		y=value,
+				 		color = intervention,
+				 		label = intervention),
+				 size = 3,
+				 show.legend=FALSE,
+				 nudge_x = 4, direction='y') + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(paste0("Outcomes As Change from the Basecase - ", statenames[[state]])) + 
+			 scale_color_gradient() + 
+			 guides(color = guide_legend('Baseline Rate of Screening')) + 
+			 theme_bw() + 
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+```
+
+
+# Now 4 Levels for MSM
+
+
+```{r simulate_8_levels_msm, echo = FALSE, cache=TRUE}
+simulate_5_levels_msm <- function(theta) {
+	intervention_outcomes <- list()
+	for (intervention_level in seq(0,4,.25)) {
+		e <- constructSimulationEnvironment(theta)
+		adjust_screening_for_intervention(e, pop_indices = c(m4,m5), new_level = intervention_level)
+		runSimulation(e)
+		intervention_outcomes[[length(intervention_outcomes)+1]] <- 
+			extractInterventionStatistics(e, intervention_level)
+	}
+	do.call(rbind.data.frame, intervention_outcomes)
+}
+
+
+for (state in c('LA', 'MA')) { 
+
+	# set the number of years to run out the model to 2050
+	load_globals(model.end = 140)
+
+	# parametrize the model
+	load.start()
+
+	# get optimized for the model in the specified state.
+	theta <- get(paste0('theta_', tolower(state)))
+
+	# simmulate the annual and basecase scenarios getting
+	# - prevalent cases, incidents, and number of tests done
+	assign(paste0(tolower(state), '_df5msm'),
+				 simulate_5_levels_msm(theta))
+}
+
+for (state in c('LA', 'MA')) { 
+	df <- get(paste0(tolower(state), '_df5msm'))
+	df <- filter(df, year >= 2015 & year <= 2050) 
+	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
+	assign(paste0(tolower(state), '_df5msm'), df)
+}
+```
+
+```{r plot 8 levels msm, fig.width=12, echo=FALSE}
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df5msm'))
+	df <- filter(df, intervention %in% c(0, 0.25, 0.5, 0.75, 1), variable != 'tests_per_year')
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention,
+						group = intervention)) + 
+			 geom_line() + 
+			 geom_text_repel(
+				data = filter(df, year == max(year)),
+				mapping = aes(
+						x=year + 3.5,
+						y=value,
+						color = intervention,
+						label = intervention),
+					size = 3,
+					show.legend=FALSE,
+					nudge_x = 4, direction='y') + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(paste0(" ", statenames[[state]])) + 
+			 scale_color_gradient() + 
+			 guides(color = guide_legend('Baseline Level of Screening')) + 
+			 theme_bw() + 
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+```
+
+```{r plot 8 levels msm relative, fig.width=12, echo=FALSE}
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df5msm'))
+	df <- filter(df, intervention %in% c(0, 0.25, 0.5, 0.75, 1), variable != 'tests_per_year')
+	df <- reshape2::dcast(
+		data = df, 
+		formula = intervention + year ~ variable)
+	basecase <- filter(df, intervention == 0) %>% select(-intervention)
+	df <- merge(df, basecase, by=c('year'), suffixes = c('', '.basecase'))
+	df <- df %>% 
+		mutate(
+		  prevalent_infections = prevalent_infections - prevalent_infections.basecase,
+      incidents_per_year = incidents_per_year - incidents_per_year.basecase
+			) %>% 
+		select(-c(prevalent_infections.basecase, incidents_per_year.basecase))
+
+	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
+
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention,
+						group = intervention)) + 
+			 geom_line() + 
+			 geom_text_repel(
+				 data = filter(df, year == max(year)),
+				 mapping = aes(
+				 		x=year + 3.5,
+				 		y=value,
+				 		color = intervention,
+				 		label = intervention),
+				 size = 3,
+				 show.legend=FALSE,
+				 nudge_x = 4, direction='y') + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(paste0("Outcomes As Change from the Basecase - ", statenames[[state]])) + 
+			 scale_color_gradient() + 
+			 guides(color = guide_legend('Baseline Rate of Screening')) + 
+			 theme_bw() + 
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+```
+
+
+We can observe that in Louisiana, it appears that screening levels at or above 0.5 times yearly
+cause an increase in prevalence.
+
+Does it ever start to decrease?
+
+
+
+
+```{r plot more msm interventions, echo=FALSE, fig.width=12}
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df5msm'))
+	df <- filter(df, variable != 'tests_per_year')
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention,
+						group = intervention)) + 
+			 geom_line() + 
+			 geom_text_repel(
+				data = filter(df, year == max(year)),
+				mapping = aes(
+						x=year + 3.5,
+						y=value,
+						color = intervention,
+						label = intervention),
+					size = 1.5,
+					show.legend=FALSE,
+					nudge_x = 4, direction='y') + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(paste0(" ", statenames[[state]])) + 
+			 scale_color_gradient() + 
+			 guides(color = guide_legend('Baseline Level of Screening')) + 
+			 theme_bw() + 
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+
+
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df5msm'))
+	df <- filter(df, variable != 'tests_per_year')
+	df <- reshape2::dcast(
+		data = df, 
+		formula = intervention + year ~ variable)
+	basecase <- filter(df, intervention == 0) %>% select(-intervention)
+	df <- merge(df, basecase, by=c('year'), suffixes = c('', '.basecase'))
+	df <- df %>% 
+		mutate(
+		  prevalent_infections = prevalent_infections - prevalent_infections.basecase,
+      incidents_per_year = incidents_per_year - incidents_per_year.basecase
+			) %>% 
+		select(-c(prevalent_infections.basecase, incidents_per_year.basecase))
+
+	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
+
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention,
+						group = intervention)) + 
+			 geom_line() + 
+			 geom_text_repel(
+				 data = filter(df, year == max(year)),
+				 mapping = aes(
+				 		x=year + 3.5,
+				 		y=value,
+				 		color = intervention,
+				 		label = intervention),
+				 size = 1.5,
+				 show.legend=FALSE,
+				 nudge_x = 4, direction='y') + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(paste0("Outcomes As Change from the Basecase - ", statenames[[state]])) + 
+			 scale_color_gradient() + 
+			 guides(color = guide_legend('Baseline Rate of Screening')) + 
+			 theme_bw() + 
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+```
+```

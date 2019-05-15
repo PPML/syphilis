@@ -4,7 +4,10 @@
 #' for the syphLAMA package that do not depend on the 
 #' state (LA or MA) having been declared. 
 
-load_globals <- function() {
+load_globals <- function(model.end = 110) {
+
+	statenames <<- c(LA = 'Louisiana', MA = 'Massachusetts')
+
   ### set up different subpopulations, sexes, and activity classes ###
   i<<-5 #number of subpopulations, 1= Black, 2=White, 3=Hispanic, 4=MSM-HIVneg, 5=MSM-HIVpos
   j<<-2 # number of sexes, 1=male, 2=female
@@ -13,10 +16,10 @@ load_globals <- function() {
   index <<- i*j*k*l
 
   #### model time steps and calibration period ####
-  tstep <<- 1/52  #weekly time step
+  tstep <<- 1/(7*52)  #weekly time step
 	cal.period <<- 5 #duration of calibration period (2012-2016 currently)
 	cal.start <<- 100 #time at which start calibration 
-	model.end <<- 110 # end of the simulation
+	model.end <<- model.end # end of the simulation
   start.year <<- 2012 # data calibration start
   end.year <<- 2016 # data calibration end
 	intervention_years <<- 105:109
