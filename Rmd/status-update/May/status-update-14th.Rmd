@@ -1,0 +1,138 @@
+---
+title: Syphilis Project Update
+author: Christian Testa
+output: word_document
+---
+
+Since our last STD meeting, I've run some MCMC calibrations (attached) and
+started to implement the interventions we described last time.
+
+Those interventions are as follows: 
+
+		- All Population or MSM Focused
+		- Annual or Twice Annual
+		- (Amongst MSM Interventions) HIV-negative, positive, or all focused
+
+We will refine the interventions and their analysis further. 
+
+**Input requested:** I think we will want to simulate quite a few more
+interventions to better understand the underlying dynamics. (Agree/Disagree?)
+In light of this, how can we improve the readability of the plots? 
+
+**Proposition:** If we have a lot of interventions, maybe sorting them into 
+"low, medium, and high" based on total number of additional tests compared
+to the basecase done during the intervention period and presenting other results 
+filtered by this categorization makes sense. (Agree/disagree?)
+
+We can have some really large plots with lots of details for internal usage, but
+it's useful to think about how the material will be best presented later on in 
+a manuscript.
+
+Next steps: 
+
+		- Preparing for our DSTDP Meeting
+				- Improved intervention analysis
+				- Breakdown of the modeled epidemics in each location
+				- What next steps do we want to convey?
+		- Sensitivity Analysis on Duration of Immunity 
+		- Waiting on Kathy for Contact Tracing Denominator Data, Reinfection Data
+		- Simultaneous Calibration for Natural History Parameters
+		- Interventions Targeted to Reinfection History
+
+Questions spurred by the following plots already on my radar: 
+
+		- What explains the differing levels of effectiveness
+			of interventions in each location?
+		- Why does the annual number of tests appear to decrease for 2021?
+		- How many frequency levels do we need for our interventions? 
+			(annual, semi-annual, 1.5x annual, 4x annual, etc...)
+
+```{r, echo=FALSE, eval=FALSE}
+devtools::load_all()
+for (state in c('LA', 'MA')) { 
+	load.start()
+	theta <- get(paste0('theta_', tolower(state)))
+	df <- simulate_interventions(theta)
+	df <- format_intervention_statistics(df)
+	saveRDS(df, paste0("data/", tolower(state), "_intv_stats.rds"))
+}
+```
+
+```{r, echo=FALSE}
+suppressWarnings(suppressMessages(library(dplyr)))
+# I don't think these are totally correct, but the first three seem to be
+variable_list <- c('Yearly Prevalent Infections',
+									 'Yearly Incidents', 
+									 'Yearly Number of Tests Additional to the Basecase', 
+									 'Change in Prevalent Infections from Basecase',
+									 'Change in Prevalent Infections from Basecase (%)', 
+									 'Change in Incident Infections from Basecase',
+									 'Change in Incident Infections from Basecase (%)',
+									 'Change in Tests from Basecase',
+									 'Change in Tests from Basecase (%)',
+									 'Number Needed to Test To Avert One Additional Prevalent Infection',
+									 'Number Needed to Test To Avert One Additional Incident Infection')
+
+variable_shortnames <- c("prevalent_infections",
+												 "incidents",
+												 "chg_tests",
+												 "chg_tests_pct",
+												 "tests",
+												 "nnt_prevalent",
+												 "chg_prevalent_infs",
+												 "nnt_incident",
+												 "chg_prevalent_infs_pct",
+												 "chg_incident_infs",
+												 "chg_incident_infs_pct")
+
+variable_converter <- setNames(variable_shortnames, nm = variable_list) 
+
+for (state in c('LA', 'MA')) {
+	df <- readRDS(paste0("data/", tolower(state), "_intv_stats.rds"))
+	df <- reshape2::melt(df, id.vars = c('year', 'intervention'))
+	df$variable <- factor(df$variable, labels = variable_list)
+	basecase_vals <- filter(df, year == 2016, intervention == 'basecase', variable %in% variable_list[1:3]) %>% `[[`('value')
+	for (i in 1:3) { 
+		var <- variable_list[i]
+		df[df$year==2016 &df$intervention != 'basecase' & df$variable == var, 'value'] <- basecase_vals[[i]]
+	}
+	df <- filter(df, variable %in% variable_list[1:3])
+	assign(x = paste0(tolower(state), '_df'), df)
+}
+```
+
+```{r, echo=FALSE, dpi=300, fig.height = 3}
+library(ggplot2)
+library(dplyr)
+library(ggrepel)
+
+statenames <- c(LA = 'Louisiana', MA = 'Massachusetts')
+
+for (var in variable_list[1:3]) {
+	for (state in c('LA', 'MA')) {
+		last_year_vals <- filter(get(paste0(tolower(state), '_df')), variable == var, year == max(year))
+
+		p <- ggplot(
+			data = filter(get(paste0(tolower(state), '_df')), variable == var),
+			mapping = aes(x = year, y = value, color = intervention)) + 
+      geom_line() + 
+			geom_label_repel(
+				data = last_year_vals, 
+				mapping = aes(x = year, 
+											y = value, 
+											label = intervention, 
+											color = intervention), 
+				size = 1.75, nudge_x = 4, direction = 'y',
+				segment.size = .25, segment.color = 'dimgrey') +  
+			theme_bw() + 
+			expand_limits(x = c(2016, 2027)) + 
+			scale_x_continuous(breaks = seq(2016, 2021, by = 1)) + 
+			theme(legend.position = 'none') + 
+			ggtitle(var, subtitle = statenames[[state]]) + 
+			ylab(variable_converter[[var]])
+		print(p)
+	}
+}
+```
+
+
