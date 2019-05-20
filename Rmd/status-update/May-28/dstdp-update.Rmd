@@ -1,0 +1,64 @@
+---
+title: Syphilis Project Update
+author: Christian Testa
+date: "May 28th, 2019"
+output: |
+  html_document
+---
+
+In this project we are modeling syphilis in Louisiana and Massachusetts. 
+
+In each of these two states, we have calibrated the model and can use it to
+simulate hypothetical scenarios which may yield useful insight into effective
+health policy. 
+
+This document will walk readers through the background of the model, an analysis of
+hypothetical interventions, and our intentions for future developments.
+
+## Model Background 
+
+#### Data Being Used
+
+Calibration targets include: 
+
+- Reported Cases by Stage, Sex, Race
+- Proportion of Male Cases Among MSM
+- Proportion of Cases Among MSM with HIV Coinfection
+- Subpopulation Assortative Mixing (Age, Race)
+
+<!-- ![](img/Calibration Plots/LA/Case Rates.png =250) ![](img/Calibration Plots/MA/Case Rates.png =250) -->
+<!--
+<table>
+<tr>
+<th>
+Louisiana 
+<img src="img/Calibration Plots/LA/Case Rates.png" width="375px" />
+</th>
+<th>
+Massachusetts
+<img src="img/Calibration Plots/MA/Case Rates.png" width="375px" />
+</th>
+</tr>
+</table>
+-->
+
+|Louisiana|Massachusetts|
+|---------|-------------|
+|![](img/Calibration Plots/LA/Case Rates.png){ width=4.5in }|![](img/Calibration Plots/MA/Case Rates.png){ width=4.5in }|
+<!--|![](img/Calibration Plots/LA/Relative Cases by Stage.png){ width=4.5in }|![](img/Calibration Plots/MA/Relative Cases by Stage.png){ width=4.5in }|-->
+<!--|![](img/Calibration Plots/LA/Proportion of Cases in MSM.png){ width=4.5in }|![](img/Calibration Plots/MA/Proportion of Cases in MSM.png){ width=4.5in }|-->
+<!--|![](img/Calibration Plots/LA/Mixing and Proportion Early or Late.png){ width=4.5in }|![](img/Calibration Plots/MA/Mixing and Proportion Early or Late.png){ width=4.5in }|-->
+
+#### Model Structure
+#### Calibration Results
+#### Visualizations of the Modeled Epidemiology
+
+## Analysis of Interventions
+
+The primary research question we have been investigating has been: 
+
+> How do interventions which are focused on raising the baseline level of
+> screening in the entire population compare to interventions targeted on men who have sex
+> with men (MSM) populations? 
+
+## Future Plans
