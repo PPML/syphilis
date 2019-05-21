@@ -17,10 +17,6 @@ hypothetical interventions, and our intentions for future developments.
 
 ## Model Background 
 
-![](../../../img/model population structure white_bg.png){ width=6in }
-
-![](../../../img/disease staging.png){ width=6in }
-
 #### Data Being Used
 
 Calibration targets include: 
@@ -30,31 +26,25 @@ Calibration targets include:
 - Proportion of Cases Among MSM with HIV Coinfection
 - Subpopulation Assortative Mixing (Age, Race)
 
-<!-- ![](img/Calibration Plots/LA/Case Rates.png =250) ![](img/Calibration Plots/MA/Case Rates.png =250) -->
-<!--
-<table>
-<tr>
-<th>
-Louisiana 
-<img src="img/Calibration Plots/LA/Case Rates.png" width="375px" />
-</th>
-<th>
-Massachusetts
-<img src="img/Calibration Plots/MA/Case Rates.png" width="375px" />
-</th>
-</tr>
-</table>
--->
 
 |Louisiana|Massachusetts|
 |---------|-------------|
 |![](img/Calibration Plots/LA/Case Rates.png){ width=4.5in }|![](img/Calibration Plots/MA/Case Rates.png){ width=4.5in }|
-<!--|![](img/Calibration Plots/LA/Relative Cases by Stage.png){ width=4.5in }|![](img/Calibration Plots/MA/Relative Cases by Stage.png){ width=4.5in }|-->
-<!--|![](img/Calibration Plots/LA/Proportion of Cases in MSM.png){ width=4.5in }|![](img/Calibration Plots/MA/Proportion of Cases in MSM.png){ width=4.5in }|-->
-<!--|![](img/Calibration Plots/LA/Mixing and Proportion Early or Late.png){ width=4.5in }|![](img/Calibration Plots/MA/Mixing and Proportion Early or Late.png){ width=4.5in }|-->
 
 #### Model Structure
-#### Calibration Results
+
+![](../../../img/model population structure white_bg.png){ width=6in }
+
+![](../../../img/disease staging.png){ width=6in }
+
+#### Calibration 
+
+In order to calibrate our model, we run an optimization algorithm to determine
+several parameter vectors which optimize the model fit to the prior and
+likelihood distributions.  These parameter vectors are then used as the
+starting places for multiple Monte Carlo Markov Chains which are used to
+estimate model uncertainty.
+
 #### Visualizations of the Modeled Epidemiology
 
 ## Analysis of Interventions
