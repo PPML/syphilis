@@ -52,7 +52,7 @@ optim_vals <- sapply(1:length(optim_chain), function(x) dLogPosterior_for_optim(
 max_idx <- which(optim_vals == max(optim_vals))
 theta <- orig_theta <- optim_chain[[max_idx]]$par
 
-# dLogPosterior_val <- dLogPosterior_for_optim(theta)
+dLogPosterior_val <- dLogPosterior_for_optim(theta)
 
 print(paste0("starting with dLogPosterior_val: ", max(optim_vals)))
 print(paste0("confirming dLogPosterior_val matches:", dLogPosterior_val))
