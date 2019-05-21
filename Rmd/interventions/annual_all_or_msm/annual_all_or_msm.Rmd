@@ -2,7 +2,13 @@
 title: Analyzing Screening Guidelines Scenarios
 author: Christian Testa
 output: html_document
---
+---
+
+The following outputs are in measures of infections per 100,000. 
+
+For reference, the assumed population sizes of Louisiana and Massachusetts 
+are 2,787,423 and 4,230,601 respectively (assumed from 2015 census estimates).
+
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 devtools::load_all()
@@ -27,7 +33,7 @@ simulate_annual_and_basecase <- function(theta) {
 }
 ```
 
-```{r simulate and tidy data, echo = FALSE, cache=TRUE}
+```{r simulate and tidy data, echo = FALSE}
 
 for (state in c('LA', 'MA')) { 
 
@@ -49,13 +55,16 @@ for (state in c('LA', 'MA')) {
 for (state in c('LA', 'MA')) { 
 	df <- get(paste0(tolower(state), '_df'))
 	df <- filter(df, year >= 2015 & year <= 2050) 
-	df <- mutate(df, prevalence_per_100 = prevalent_infections / popsize * 100,
-							 incidence_per_100 = incidents_per_year / popsize * 100) %>% 
+	df <- mutate(df, prevalence_per_100000 = prevalent_infections / popsize * 100000,
+							 incidence_per_100000 = incidents_per_year / popsize * 100000) %>% 
 		select(-c(prevalent_infections, incidents_per_year, tests_per_year, popsize))
 	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
 	assign(paste0(tolower(state), '_df'), df)
 }
 ```
+
+### Prevalence and Incidence 
+### Basecase, Annual, and MSM Annual Screening Scenarios
 
 ```{r plot data, fig.width=12, echo=FALSE}
 for (state in c('LA', 'MA')) {
@@ -86,3 +95,91 @@ for (state in c('LA', 'MA')) {
 	print(plt)
 }
 ```
+
+
+### Infectious and Noninfectious Prevalence 
+### Basecase, Annual, and MSM Annual Screening Scenarios
+
+```{r define helper fn 2, echo=FALSE, fig.width=12}
+extractInterventionStatisticsWithInfectiousness <- function(e, intervention) {
+	intervention_start <- min(intervention_years)
+	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
+
+	data.frame(
+		intervention = intervention,
+		year = intervention_period/52 + model_to_gregorian_difference,
+		prevalent_infectious_infections = rowSums(e$sim$out[1+intervention_period, 1+infectious_index]),
+		prevalent_noninfectious_infections = rowSums(e$sim$out[1+intervention_period, 1+noninfectious_index]),
+		popsize = rowSums(e$sim$out[1+intervention_period, 1+allpop.index])
+		)
+}
+
+simulate_annual_and_basecase2 <- function(theta) {
+	intervention_outcomes <- list()
+	for (intervention in c('basecase', 'annual', 'msm_annual')) {
+		e <- constructSimulationEnvironment(theta)
+		modify_simulation_environment_for_an_intervention(e, intervention)
+		runSimulation(e)
+		intervention_outcomes[[length(intervention_outcomes)+1]] <- 
+			extractInterventionStatisticsWithInfectiousness(e, intervention)
+	}
+	do.call(rbind.data.frame, intervention_outcomes)
+}
+
+for (state in c('LA', 'MA')) { 
+
+	# set the number of years to run out the model to 2050
+	load_globals(model.end = 140)
+
+	# parametrize the model
+	load.start()
+
+	# get optimized for the model in the specified state.
+	theta <- get(paste0('theta_', tolower(state)))
+
+	# simmulate the annual and basecase scenarios getting
+	# - prevalent cases, incidents, and number of tests done
+	assign(paste0(tolower(state), '_df2'),
+				 simulate_annual_and_basecase2(theta))
+}
+
+for (state in c('LA', 'MA')) { 
+	df <- get(paste0(tolower(state), '_df2'))
+	df <- filter(df, year >= 2015 & year <= 2050) 
+	df <- mutate(df, 
+							 infectious_prevalence_per_100000 = prevalent_infectious_infections / popsize * 100000,
+							 noninfectious_prevalence_per_100000 = prevalent_noninfectious_infections / popsize * 100000
+							 ) %>% 
+		select(-c(prevalent_infectious_infections, prevalent_noninfectious_infections, popsize))
+	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
+	assign(paste0(tolower(state), '_df2'), df)
+}
+
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df2'))
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention, 
+						linetype = intervention)) +
+			 geom_line() + 
+			 expand_limits(y=c(0,0)) + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(statenames[[state]]) + 
+			 theme_bw() + 
+			 guides(linetype = guide_legend(title='Baseline Rate of Screening'),
+							color = guide_legend(title='Baseline Rate of Screening')) + 
+			 scale_color_manual(values = c(basecase = 'black', annual = 'red', msm_annual='blue')) +
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+```
+
