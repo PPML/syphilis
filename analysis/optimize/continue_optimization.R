@@ -83,7 +83,7 @@ while (!done) {
     saveRDS(optim_list,
             paste0(
               output_directory,
-              site,
+              state,
               "_optim_list_",
               nth_sim,
               ".rds"
