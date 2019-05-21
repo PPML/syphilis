@@ -16,7 +16,7 @@ load_globals <- function(model.end = 110) {
   index <<- i*j*k*l
 
   #### model time steps and calibration period ####
-  tstep <<- 1/(7*52)  #weekly time step
+  tstep <<- 1/(52)  #weekly time step
 	cal.period <<- 5 #duration of calibration period (2012-2016 currently)
 	cal.start <<- 100 #time at which start calibration 
 	model.end <<- model.end # end of the simulation
@@ -79,7 +79,9 @@ load_globals <- function(model.end = 110) {
 	
 	# index for all sexually active individuals
 	allpop.index <<- c(infected.index, s.index, treated.inf.index, treated.early.index, treated.late.index, sr.index)
-	
+
+	infectious_index <<- c(prim.index, sec.index, primr.index, secr.index)
+	noninfectious_index <<- c(e.index, early.index, latent.index, er.index, earlyr.index, latentr.index)
   
   pop1 <<- c(1:4,21:24) #subpop1
   pop2 <<- c(5:8,25:28) # subpop2
