@@ -20,7 +20,7 @@
 #' 
 prediction.epi <- function(theta) {
   e <- constructSimulationEnvironment(theta)
-	modify_simulation_environment_for_an_intervention(e)
+	modify_simulation_environment_for_an_intervention(e, intervention = 'basecase')
   runSimulation(e)
   summarizeSimulation(e)
 }

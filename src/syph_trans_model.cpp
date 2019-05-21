@@ -148,7 +148,24 @@ List syphSim(
   /// year loop
   for(int y=0; y<nYrs; y++){
     for(int w=0; w<52; w++){
-			for (int d=0; d<7; d++){
+
+			if (output_weekly) {
+					// fill results table every week 
+					outputs(y*52 + w, 0) = y + w/52; //year
+					for(int n=0; n<dim*24; n++) {
+						outputs(y*52 + w, 1+n) = Pop[n]; // 
+						}
+			} else {
+					// fill results table with annual outputs
+				if(w==0) {
+					outputs(y,0) = y; //year
+					for(int n=0; n<dim*24; n++) {
+						outputs(y,1+n) = Pop[n]; // 
+						}
+					}
+			}
+
+			/* for (int d=0; d<7; d++){ */
       
 				//updata reporting (in screened), transmission rr, and background abx use
 				double c_rr = c_msm[y];
@@ -429,25 +446,6 @@ List syphSim(
 				}
 				}
 					
-				if (d == 0) {
-					if (output_weekly) {
-							// fill results table every week 
-							outputs(y*52 + w, 0) = y + w/52; //year
-							for(int n=0; n<dim*24; n++) {
-								outputs(y*52 + w, 1+n) = Pop[n]; // 
-								}
-					} else {
-							// fill results table with annual outputs
-						if(w==0) {
-							outputs(y,0) = y; //year
-							for(int n=0; n<dim*24; n++) {
-								outputs(y,1+n) = Pop[n]; // 
-								}
-							}
-					}
-				}
-
-			} // end of day loop
     } /// end of week loop
   } /// end of year loop
   

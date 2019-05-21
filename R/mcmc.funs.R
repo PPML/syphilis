@@ -15,7 +15,7 @@ likelihood <- function(theta){
 dLogPosterior <-function(theta) {
   if (length(names(theta)) == 0) stop("theta must have names.")
   tryCatch({
-		log.prior <- log(prior(theta))
+		log.prior <- sum(prior_components(theta))
 		log.likelihood <- unlist(likelihood(theta)$LogLL)
 		log.posterior <- log.prior + log.likelihood
 		if (is.na(log.posterior)||is.nan(log.posterior)) log.posterior <- -1e32
