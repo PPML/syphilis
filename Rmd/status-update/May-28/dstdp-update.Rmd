@@ -65,4 +65,6 @@ The primary research question we have been investigating has been:
 > screening in the entire population compare to interventions targeted on men who have sex
 > with men (MSM) populations? 
 
+![](../../../img/annual all or msm.png){ width=8in }
+
 ## Future Plans
