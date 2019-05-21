@@ -17,6 +17,10 @@ hypothetical interventions, and our intentions for future developments.
 
 ## Model Background 
 
+![](../../../img/model population structure white_bg.png){ width=6in }
+
+![](../../../img/disease staging.png){ width=6in }
+
 #### Data Being Used
 
 Calibration targets include: 

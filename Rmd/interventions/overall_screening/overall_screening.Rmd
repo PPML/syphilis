@@ -23,7 +23,7 @@ library(ggrepel)
 ```{r define helper fn, echo=FALSE}
 simulate_annual_and_basecase <- function(theta) {
 	intervention_outcomes <- list()
-	for (intervention in c('basecase', 'annual')) {
+	for (intervention in c('basecase', 'annual', 'msm_annual')) {
 		e <- constructSimulationEnvironment(theta)
 		modify_simulation_environment_for_an_intervention(e, intervention)
 		runSimulation(e)
@@ -79,7 +79,7 @@ for (state in c('LA', 'MA')) {
 			 theme_bw() + 
 			 guides(linetype = guide_legend(title='Baseline Rate of Screening'),
 							color = guide_legend(title='Baseline Rate of Screening')) + 
-			 scale_color_manual(values = c(basecase = 'black', annual = 'red')) +
+			 scale_color_manual(values = c(basecase = 'black', annual = 'red', msm_annual='blue')) +
 			 if (state == 'LA') {
 				 theme(legend.position = 'none')
 			 } else {
@@ -355,6 +355,7 @@ for (state in c('LA', 'MA')) {
 }
 ```
 
+### Screening MSM with Baseline Screening Rates of seq(0, 4, .25)
 
 We can observe that in Louisiana, it appears that screening levels at or above 0.5 times yearly
 cause an increase in prevalence.
