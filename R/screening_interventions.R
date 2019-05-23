@@ -38,8 +38,6 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 #'
 adjust_screening_for_intervention <- function(e, intervention_start = 105, pop_indices, new_level) {
 
-	e$params[['output_weekly']] <- TRUE
-
 	# First check that the intervention years are within the modeled time period
 	# and that the time varying parameters extend to at least the end of the
 	# intervention period.
@@ -59,7 +57,7 @@ intervention period.")
 	# selected populations (pop_indices) are below the new_level of 
 	# screening and then replace those entries' values with the 
 	# new_level.
-	intervention_timesteps = seq(from=min(intervention_years)*52, to=max(intervention_years))
+	intervention_timesteps = seq(from=min(intervention_years), to=max(intervention_years))
 	need_increase <- e$screen[intervention_years, pop_indices] < new_level
 	e$screen[intervention_years, pop_indices][need_increase] <- new_level
   

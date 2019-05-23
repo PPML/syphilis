@@ -17,6 +17,7 @@ library(ggplot2)
 library(reshape2)
 library(RColorBrewer)
 library(ggrepel)
+library(here)
 ```
 
 ```{r define helper fn, echo=FALSE}
@@ -38,13 +39,15 @@ simulate_annual_and_basecase <- function(theta) {
 for (state in c('LA', 'MA')) { 
 
 	# set the number of years to run out the model to 2050
-	load_globals(model.end = 140)
+	load_globals(model.end = 115)
 
 	# parametrize the model
 	load.start()
 
 	# get optimized for the model in the specified state.
 	theta <- get(paste0('theta_', tolower(state)))
+
+
 
 	# simmulate the annual and basecase scenarios getting
 	# - prevalent cases, incidents, and number of tests done
@@ -66,7 +69,7 @@ for (state in c('LA', 'MA')) {
 ### Prevalence and Incidence 
 ### Basecase, Annual, and MSM Annual Screening Scenarios
 
-```{r plot data, fig.width=12, echo=FALSE}
+```{r plot data, fig.width=6, fig.height=3, echo=FALSE}
 for (state in c('LA', 'MA')) {
 	df <- get(paste0(tolower(state), '_df'))
 	df <- filter(df, variable != 'tests_per_year')
@@ -100,7 +103,7 @@ for (state in c('LA', 'MA')) {
 ### Infectious and Noninfectious Prevalence 
 ### Basecase, Annual, and MSM Annual Screening Scenarios
 
-```{r define helper fn 2, echo=FALSE, fig.width=12}
+```{r define helper fn 2, echo=FALSE, fig.width=6, fig.height=4}
 extractInterventionStatisticsWithInfectiousness <- function(e, intervention) {
 	intervention_start <- min(intervention_years)
 	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
@@ -129,7 +132,7 @@ simulate_annual_and_basecase2 <- function(theta) {
 for (state in c('LA', 'MA')) { 
 
 	# set the number of years to run out the model to 2050
-	load_globals(model.end = 140)
+	load_globals(model.end = 115)
 
 	# parametrize the model
 	load.start()

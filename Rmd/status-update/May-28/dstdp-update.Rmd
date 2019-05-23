@@ -27,10 +27,6 @@ Calibration targets include:
 - Subpopulation Assortative Mixing (Age, Race)
 
 
-|Louisiana|Massachusetts|
-|---------|-------------|
-|![](img/Calibration Plots/LA/Case Rates.png){ width=4.5in }|![](img/Calibration Plots/MA/Case Rates.png){ width=4.5in }|
-
 #### Model Structure
 
 ![](../../../img/model population structure white_bg.png){ width=6in }
@@ -45,6 +41,9 @@ likelihood distributions.  These parameter vectors are then used as the
 starting places for multiple Monte Carlo Markov Chains which are used to
 estimate model uncertainty.
 
+|Louisiana|Massachusetts|
+|---------|-------------|
+|![](img/Calibration Plots/LA/Case Rates.png){ width=4.5in }|![](img/Calibration Plots/MA/Case Rates.png){ width=4.5in }|
 #### Visualizations of the Modeled Epidemiology
 
 [More content intended to go here, e.g. proportion of prevalence among race/gender/age/MSM/hiv-status/etc.]
