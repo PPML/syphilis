@@ -1,0 +1,98 @@
+---
+title: Plotting Prevalence by Compartment
+date: "May 24th, 2019"
+output: html_document
+---
+
+```{r, messages=FALSE, echo=FALSE, fig.width=8, fig.height=5}
+suppressMessages(devtools::load_all())
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+
+# sum up each of the 1:index populations in the matrix
+# given.
+sum_populations <- function(mat) {
+	stopifnot(is.matrix(mat))
+
+	n_pops <- dim(mat)[[2]] / index
+	stopifnot(n_pops %% 1 == 0) # stop if the index doesn't divide exactly
+
+	if (n_pops == 1) return(mat) # exit early 
+
+	summed_pops <- mat[, 1:index]
+	for (idx in 1:(n_pops-1)) {
+		next_pop <- mat[, idx*index + 1:index]
+		summed_pops <- summed_pops + next_pop
+	}
+	return(summed_pops)
+}
+
+make_prevalence_plot <- function(sol) {
+	plot_period <- seq(
+										 start.year - model_to_gregorian_difference + 1,
+										 model.end + 1)
+	denominators <- sol[1+plot_period, 1+allpop.index]
+	numerators <- sol[1+plot_period, 1+infected.index]
+	prevalence <- sum_populations(numerators) / sum_populations(denominators)
+
+	# remove female msm
+	prevalence <- prevalence[,1:32]
+	popnames <- apply(pop[,c('i','l','j','k')], 1, paste0, collapse=' ')
+	popnames <- unname(sapply(popnames, function(x) paste0(c(x, ' activity'), collapse='')))
+	colnames(prevalence) <- popnames[1:32]
+
+  
+	# add a year column
+	prevalence <- cbind.data.frame(year = seq(start.year, start.year + 10), prevalence)
+	# melt
+	prevalence2 <- reshape2::melt(prevalence, id.vars='year', variable.name = 'population', value.name = 'prevalence')
+
+	# get just 2016 and 2012
+	prevalence_2016 <- dplyr::filter(prevalence2, year == 2016)
+	prevalence_2012 <- dplyr::filter(prevalence2, year == 2012)
+
+
+	# order prevalence nicely visually for plots
+	prevalence_2012$population <- with(prevalence_2012, reorder(population, prevalence))
+
+	# render plot
+	plt <- ggplot2::ggplot(
+			data = prevalence_2012,
+			mapping = aes(
+				x = population, 
+				y = prevalence * 100, 
+				group = population,
+				fill = population)) + 
+    geom_bar(stat='identity', alpha=0.5) + 
+		geom_point(
+			data = prevalence_2016,
+			mapping = aes(x = population,
+										y = prevalence * 100, color = "Prevalence in 2016")) + 
+		ggtitle("Prevalence % By Population, Change from 2012 to 2016",
+						subtitle = statenames[[state]]) + 
+		scale_color_discrete("") + 
+		ylab("Prevalence (%)") + 
+		theme_bw() + 
+		guides(fill = FALSE) +
+		coord_flip() + 
+		if (state == 'LA') {
+			theme(legend.position = 'none')
+		} else {
+			theme(legend.position = 'bottom')
+		} 
+
+	print(plt)
+}
+
+for (state in c("LA", "MA")) {
+  load.start()
+	theta <- get(paste0('theta_', tolower(state)))
+	e <- constructSimulationEnvironment(theta)
+	e$params$output_weekly <- TRUE
+  runSimulation(e)
+	make_prevalence_plot(e$sim$out)
+}
+
+```
+
