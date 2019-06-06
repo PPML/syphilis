@@ -154,7 +154,7 @@ load_globals <- function(model.end = 110) {
 	)
 	
 	# Natural History Parameters used in Simultaneous Calibration
-	natural_history_parameters <- 
+	natural_history_parameters <<- 
 		c('logit.b.m', 'logit.b.f', 'logit.b.msm', 'log.dur.incub', 'log.dur.prim',
 			'log.dur.sec', 'log.dur.imm.inf', 'log.dur.imm.early', 'log.dur.immune')
 
