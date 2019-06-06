@@ -58,12 +58,14 @@ for (state in c('LA', 'MA')) {
 dLogPosterior_by_state <- function(theta, state) {
 	state_env <- get(paste0(tolower(state), '_env'))
 	attach(state_env) 
+	names(theta) <- orig_theta_names
 	val <- dLogPosterior(theta)
 	detach(state_env)
 	return(val)
 }
 
 theta <- c(theta_la, theta_ma)
+
 dLogPosterior_simultaneous <- function(theta) {
 	# overwrite the natural history parameters to be the same for each state in theta
 	theta[1:(length(theta)/2)][natural_history_parameters] <- 
