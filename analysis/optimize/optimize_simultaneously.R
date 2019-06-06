@@ -7,7 +7,7 @@ if (is.null(nth_sim)) nth_sim <- 1
 
 # script config
 N_loops <- 20
-output_directory <- here("inst/optim/6-6-19/")
+output_directory <- here("inst/optims/6-6-19/")
 
 # save orig_theta_names for use in dLogPosterior_by_state
 orig_theta_names <- names(theta_la)
