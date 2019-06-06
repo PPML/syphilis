@@ -1,0 +1,92 @@
+---
+title: Simultaneous Calibration of our Model to the Louisiana and Massachusetts Settings
+author: Christian Testa
+date: June 5, 2019
+output: html_document
+---
+
+This document aims to address the question: 
+
+> Can we calibrate our model to both Louisiana and Massachusetts using shared
+> natural history parameters?
+
+In order to do this, we will change how we use the MCMC algorithm.
+
+Instead of having a parametrization of the model for Louisiana and another 
+for Massachusetts, we will only have one parametrization, which includes 
+parameters for just Lousiana, just Massachusetts, and shared parameters 
+(the natural history parameters). 
+
+Those natural history parameters are the following: 
+
+	- Transmission Probability (F to M, M to F, M to M)
+	- Latent Period
+	- Duration (Primary, Secondary),
+	- Duration of Immunity (treated P&S, early latent, late latent) 
+
+I think there's a way to do this without re-writing a lot of our code.
+Namely, we can load the model twice, saving each parametrization into their
+own environments, and toggling between the two for simulations.
+
+```{r}
+devtools::load_all()
+
+orig_theta_names <- names(theta)
+globals <- ls()
+
+# construct a new environment and save everything into it for each state
+for (state in c('LA', 'MA')) {
+	# parametrize the model 
+	load.start()
+
+	# construct an environment for the state
+	state_env <- new.env()
+
+	# save each of the parametrizing variables into the new environment
+	for (obj in setdiff(ls(), c(globals, 'state', 'state_env', 'globals', 'la_env', 'ma_env'))) { 
+		assign(x = obj, value = get(obj), envir = state_env)
+	}
+
+	# export the state env with la_env or ma_env naming
+	assign(x = paste0(tolower(state), '_env'), value = state_env)
+
+	# remove all of the parametrizing variables except as they're stored in the state_env
+	rm(list=setdiff(ls(), c(globals, 'globals', 'la_env', 'ma_env')))
+}
+
+
+dLogPosterior_by_state <- function(theta, state) {
+	state_env <- get(paste0(tolower(state), '_env'))
+	attach(state_env) 
+	val <- dLogPosterior(theta)
+	detach(state_env)
+	return(val)
+}
+
+theta <- c(theta_la, theta_ma)
+dLogPosterior_simultaneous <- function(theta) {
+	# overwrite the natural history parameters to be the same for each state in theta
+	theta[1:(length(theta)/2)][natural_history_parameters] <- 
+		theta[length(theta)/2 + 1:(length(theta)/2)][natural_history_parameters]
+
+	la_val <- suppressMessages(dLogPosterior_by_state(theta[1:(length(theta)/2)], 'LA'))
+	ma_val <- suppressMessages(dLogPosterior_by_state(theta[length(theta)/2 + 1:(length(theta)/2)], 'MA'))
+
+	if (-1e20 %in% c(la_val, ma_val)) {  # try again, for some reason dLogPosterior occasionally returns -1e20 for the same values
+		la_val <- suppressMessages(dLogPosterior_by_state(theta[1:(length(theta)/2)], 'LA'))
+		ma_val <- suppressMessages(dLogPosterior_by_state(theta[length(theta)/2 + 1:(length(theta)/2)], 'MA'))
+	}
+	return(la_val + ma_val)
+}
+
+
+
+	# get the best parametrization of that state
+	# optim_trace <- readRDS(system.file('optims', paste0(tolower(state), '_top5_pars.rds'), package='syphLAMA'))
+	# dLogPosterior_vals <- apply(optim_trace, 1, dLogPosterior)
+	# max_idx <- which(dLogPosterior_vals == max(dLogPosterior_vals))
+	# assign(x = paste0('theta_', tolower(state)), value = unlist(optim_trace[max_idx, ]))
+
+
+```
+

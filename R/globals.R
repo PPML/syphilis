@@ -153,6 +153,10 @@ load_globals <- function(model.end = 110) {
 	 'msm_hivneg_twice_annual',  'HIV- MSM Twice Annual', 'msm-hivneg',      2
 	)
 	
+	# Natural History Parameters used in Simultaneous Calibration
+	natural_history_parameters <- 
+		c('logit.b.m', 'logit.b.f', 'logit.b.msm', 'log.dur.incub', 'log.dur.prim',
+			'log.dur.sec', 'log.dur.imm.inf', 'log.dur.imm.early', 'log.dur.immune')
 
 	return(invisible(NULL))
 }
