@@ -67,7 +67,7 @@ List syphSim(
   NumericVector cmhigh3 = as<NumericVector>(cm["cm.high3"]); //contact matrix high activity, Hispanic 
   NumericVector cmhigh4 = as<NumericVector>(cm["cm.high4"]); //contact matrix high activity, HIV- MSM
   NumericVector cmhigh5 = as<NumericVector>(cm["cm.high5"]); //contact matrix high activity, HIV+ MSM
-	LogicalVector output_weekly = as<LogicalVector>(x["output_weekly"]); // output every timestep or only yearly (default)
+	bool output_weekly = as<LogicalVector>(x["output_weekly"])[0] == TRUE; // output every timestep or only yearly (default)
   arma::mat birth_rate = births; //birth rate
   arma::mat aging_rate = aging; //aging rate
   arma::vec S(dim);  //susceptible
@@ -148,22 +148,6 @@ List syphSim(
   /// year loop
   for(int y=0; y<nYrs; y++){
     for(int w=0; w<52; w++){
-
-			if (output_weekly) {
-					// fill results table every week 
-					outputs(y*52 + w, 0) = y + w/52; //year
-					for(int n=0; n<dim*24; n++) {
-						outputs(y*52 + w, 1+n) = Pop[n]; // 
-						}
-			} else {
-					// fill results table with annual outputs
-				if(w==0) {
-					outputs(y,0) = y; //year
-					for(int n=0; n<dim*24; n++) {
-						outputs(y,1+n) = Pop[n]; // 
-						}
-					}
-			}
 
 			/* for (int d=0; d<7; d++){ */
       
@@ -446,6 +430,22 @@ List syphSim(
 				}
 				}
 					
+			if (output_weekly) {
+					// fill results table every week 
+					outputs(y*52 + w, 0) = y + (w+1)/52; //year
+					for(int n=0; n<dim*24; n++) {
+						outputs(y*52 + w, 1+n) = Pop[n]; // 
+						}
+			} else {
+					// fill results table with annual outputs
+				if(w==0) {
+					outputs(y,0) = y; //year
+					for(int n=0; n<dim*24; n++) {
+						outputs(y,1+n) = Pop[n]; // 
+						}
+					}
+			}
+
     } /// end of week loop
   } /// end of year loop
   
