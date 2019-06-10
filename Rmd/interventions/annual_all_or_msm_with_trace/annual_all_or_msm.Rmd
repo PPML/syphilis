@@ -20,7 +20,7 @@ library(ggrepel)
 library(here)
 ```
 
-```{r define helper fn, echo=FALSE, fig.height=4, fig.width=6}
+```{r define helper fn, echo=FALSE, fig.height=3.5, fig.width=6}
 simulate_annual_and_basecase <- function(theta) {
 	intervention_outcomes <- list()
 	for (intervention in c('basecase', 'annual', 'msm_annual')) {
@@ -80,8 +80,8 @@ for (state in c('LA', 'MA')) {
 for (state in c('LA', 'MA')) { 
 	df <- get(paste0(tolower(state), '_df'))
 	df <- filter(df, year >= 2015 & year <= 2050) 
-	df <- mutate(df, prevalence_per_100000 = prevalent_infections / popsize * 100000,
-							 incidence_per_100000 = incidents_per_year / popsize * 100000) %>% 
+	df <- mutate(df, Prevalence = prevalent_infections / popsize * 100000,
+							 Incidence = incidents_per_year / popsize * 100000) %>% 
 		select(-c(prevalent_infections, incidents_per_year, tests_per_year, popsize))
 	df <- reshape2::melt(df, id.vars = c('sim', 'intervention', 'year'))
 	assign(paste0(tolower(state), '_df'), df)
@@ -91,7 +91,7 @@ for (state in c('LA', 'MA')) {
 ### Prevalence and Incidence 
 ### Basecase, Annual, and MSM Annual Screening Scenarios
 
-```{r plot data, fig.width=6, fig.height=3, echo=FALSE}
+```{r plot data, fig.width=6, fig.height=3.5, echo=FALSE}
 for (state in c('LA', 'MA')) {
 	df <- get(paste0(tolower(state), '_df'))
 	df <- filter(df, variable != 'tests_per_year')
@@ -141,7 +141,7 @@ for (state in c('LA', 'MA')) {
 ### Infectious and Noninfectious Prevalence 
 ### Basecase, Annual, and MSM Annual Screening Scenarios
 
-```{r define helper fn 2, echo=FALSE, fig.width=6, fig.height=4}
+```{r define helper fn 2, echo=FALSE, fig.width=6, fig.height=3.5}
 extractInterventionStatisticsWithInfectiousness <- function(e, intervention) {
 	intervention_start <- min(intervention_years)
 	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
@@ -211,8 +211,8 @@ for (state in c('LA', 'MA')) {
 	df <- get(paste0(tolower(state), '_df2'))
 	df <- filter(df, year >= 2015 & year <= 2050) 
 	df <- mutate(df, 
-							 infectious_prevalence_per_100000 = prevalent_infectious_infections / popsize * 100000,
-							 noninfectious_prevalence_per_100000 = prevalent_noninfectious_infections / popsize * 100000
+							 `Infectious Prevalence` = prevalent_infectious_infections / popsize * 100000,
+							 `Noninfectious Prevalence` = prevalent_noninfectious_infections / popsize * 100000
 							 ) %>% 
 		select(-c(prevalent_infectious_infections, prevalent_noninfectious_infections, popsize))
 	df <- reshape2::melt(df, id.vars = c('sim', 'intervention', 'year'))
@@ -250,6 +250,7 @@ for (state in c('LA', 'MA')) {
 			 scale_color_manual(values = c(basecase = 'black', annual = 'red', msm_annual='blue')) +
 			 scale_fill_manual(values = c(basecase = 'black', annual = 'red', msm_annual='blue')) +
 			 scale_x_discrete(limits = seq(2016, 2026, 2), breaks = seq(2016, 2026, 2)) + 
+			 ylab("Infections per 100,000") + 
 			 if (state == 'LA') {
 				 theme(legend.position = 'none')
 			 } else {
