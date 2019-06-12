@@ -4,48 +4,57 @@ author: Christian Testa
 date: June 12, 2019
 ---
 
+## Smoothing the Data with Linear Models
+
 Let's try to estimate the impact of contact tracing during the 2012 to 2016 time period.
 
 Our first challenge is to smooth the data.
 
+
 ```{r}
+# dependencies 
 devtools::load_all()
 library(dplyr)
 library(ggplot2)
-
 library(MASS)
+library(magrittr)
 
+# read in data tables
 ct_el_ma <- read.csv(system.file('extdata', 'ct_ma_rates_el.txt', package='syphilis'), sep='\t') %>% filter(year %in% 2012:2016)
 ct_el_la <- read.csv(system.file('extdata', 'ct_la_rates_el.txt', package='syphilis'), sep='\t') %>% filter(year %in% 2012:2016)
 ct_ps_ma <- read.csv(system.file('extdata', 'ct_ma_rates_ps.txt', package='syphilis'), sep='\t') %>% filter(year %in% 2012:2016)
 ct_ps_la <- read.csv(system.file('extdata', 'ct_la_rates_ps.txt', package='syphilis'), sep='\t') %>% filter(year %in% 2012:2016)
 
+# reshape data tables to a long format, demographic goes from a colname to a variable
 ct_el_ma <- reshape2::melt(ct_el_ma, id.vars = 'year', variable = 'demographic', value.name = 'ct_fraction')
 ct_el_la <- reshape2::melt(ct_el_la, id.vars = 'year', variable = 'demographic', value.name = 'ct_fraction')
 ct_ps_ma <- reshape2::melt(ct_ps_ma, id.vars = 'year', variable = 'demographic', value.name = 'ct_fraction')
 ct_ps_la <- reshape2::melt(ct_ps_la, id.vars = 'year', variable = 'demographic', value.name = 'ct_fraction')
 
+# merge dataframes with labels
 df <- rbind.data.frame(
 	cbind.data.frame(stage = 'el', state = 'MA', ct_el_ma),
 	cbind.data.frame(stage = 'el', state = 'LA', ct_el_la),
 	cbind.data.frame(stage = 'ps', state = 'MA', ct_ps_ma),
 	cbind.data.frame(stage = 'ps', state = 'LA', ct_ps_la))
 
-df$stage <- c(el = 'Early or Late Latent', ps = 'Primary or Secondary')[df$stage]
+# Turn the staging information into factors
+df$stage <- as.factor(df$stage)
+levels(df$stage) <- c(el = "Early or Late Latent", ps = "Primary or Secondary")[levels(df$stage)]
 
+# Plot a linear model fit to each of the demographic's fraction of cases detected via contact tracing
 ggplot(df, aes(x=year, y=ct_fraction, color = demographic)) + 
 	geom_line() + 
 	geom_smooth(method = 'lm', se = FALSE, linetype = 'dashed') + 
-	facet_grid(stage ~ state + demographic) + 
-	ggtitle("Fraction of Cases Detected Via Contact Tracing by Stage and State") + 
+	facet_wrap(stage ~ state + demographic) + 
+	ggtitle("Fraction of Cases Detected Via Contact Tracing by State, Stage and Demographic") + 
 	theme_bw() +
 	theme(legend.position = 'none', axis.text.x = element_text(angle = 45, vjust = 0.5)) + 
 	ylab("Fraction of Diagnoses Detected Via Contact Tracing")
 ```
 
-Now that we can see how the linear model compares to the data, and it appears 
-to do a good job of fitting the overall trends without swinging wildly from 
-year to year, we can construct our smoothed proportionate estimates.
+After visualizing how smoothing our data appears to change it, let's store the linear 
+models' fits in a dataframe of the same format as our original data.
 
 ```{r}
 smoothed_df_list <- list()
@@ -73,45 +82,85 @@ for (demographic_x in unique(df$demographic)) {
 
 smoothed_df <- do.call(rbind.data.frame, smoothed_df_list)
 
-
-ggplot(df, aes(x=year, y=ct_fraction, color = demographic)) + 
-	geom_line() + 
-	geom_line(data = smoothed_df, mapping = aes(x=year, y=ct_fraction, color = demographic), linetype = 'dashed') + 
-	facet_grid(stage ~ state + demographic) + 
-	ggtitle("Fraction of Cases Detected Via Contact Tracing by Stage and State") + 
-	theme_bw() +
-	theme(legend.position = 'none', axis.text.x = element_text(angle = 45, vjust = 0.5)) + 
-	ylab("Fraction of Diagnoses Detected Via Contact Tracing")
+# Plot to verify that the linear models look the same saved into a df as compared to those produced by geom_smooth
+# ggplot(df, aes(x=year, y=ct_fraction, color = demographic)) + 
+# 	geom_line() + 
+# 	geom_line(data = smoothed_df, mapping = aes(x=year, y=ct_fraction, color = demographic), linetype = 'dashed') + 
+# 	facet_grid(stage ~ state + demographic) + 
+# 	ggtitle("Fraction of Cases Detected Via Contact Tracing by Stage and State") + 
+# 	theme_bw() +
+# 	theme(legend.position = 'none', axis.text.x = element_text(angle = 45, vjust = 0.5)) + 
+# 	ylab("Fraction of Diagnoses Detected Via Contact Tracing")
 ```
 
-In order to be able to assume a proportion of screening due to contact 
-tracing for the MSM HIV+ and HIV- populations in the model, we will 
-use a weighted average based on the population sizes of the 
-black, hispanic, and other demographic groups. 
+We will assume the overall male fraction of cases detected due to partner notification
+by stage per year for the fraction of MSM cases detected due to partner notification by 
+stage per year.
 
 ```{r}
-state <- 'MA'
-load.start()
-ma_male_demographic_popsizes <- apply(n.dist.sa[1,,,], MARGIN = 3, sum)[1:3]
+
+la_male_cases <- 
+	tibble::tribble(
+		~All.Male.Cases, ~Male.Contact.Traced,
+									 268,                        144,
+									 212,                        107,
+									 308,                        170,
+									 443,                        205,
+									 507,                        242,
+									 558,                        305,
+									 493,                        253
+  )
+
+ma_male_cases <- 
+	tibble::tribble(
+		 ~year,  ~Male.Contact.Traced,  ~All.Male.Cases,
+		2012,   64,   423,
+		2013,   77,   613,
+		2014,   17,   528,
+		2015,   83,   713,
+		2016,   89,   901
+		)
+
+la_male_cases$year <- 2011:2017
+la_male_cases %<>% filter(year %in% 2012:2016)
+
+la_male_cases %<>% mutate(ct_fraction = Male.Contact.Traced / All.Male.Cases)
+ma_male_cases %<>% mutate(ct_fraction = Male.Contact.Traced / All.Male.Cases)
+
+la_male_ct_fraction <- la_male_cases %>% dplyr::select(year, ct_fraction)
+ma_male_ct_fraction <- ma_male_cases %>% dplyr::select(year, ct_fraction)
+
+# state <- 'MA'
+# load.start()
+# ma_male_demographic_popsizes <- apply(n.dist.sa[1,,,], MARGIN = 3, sum)[1:3]
 
 
-state <- 'LA'
-load.start()
-la_male_demographic_popsizes <- apply(n.dist.sa[1,,,], MARGIN = 3, sum)[1:3]
+# state <- 'LA'
+# load.start()
+# la_male_demographic_popsizes <- apply(n.dist.sa[1,,,], MARGIN = 3, sum)[1:3]
 
-ma_df <- filter(df, state == 'MA') %>% dplyr::select(-state)
-ma_df <- reshape2::dcast(ma_df, stage + year ~ demographic)
-ma_df_men <- dplyr::select(ma_df, c('stage', 'year', 'black.men', 'hispanic.men', 'other.men'))
-ma_df_men$msm <- apply(ma_df_men[,c('black.men', 'other.men', 'hispanic.men')], 1, 
-											 function(x) weighted.mean(x = x, w = ma_male_demographic_popsizes))
+# ma_df <- filter(df, state == 'MA') %>% dplyr::select(-state)
+# ma_df <- reshape2::dcast(ma_df, stage + year ~ demographic)
+# ma_df_men <- dplyr::select(ma_df, c('stage', 'year', 'black.men', 'hispanic.men', 'other.men'))
+# ma_df_men$msm <- apply(ma_df_men[,c('black.men', 'other.men', 'hispanic.men')], 1, 
+# 											 function(x) weighted.mean(x = x, w = ma_male_demographic_popsizes))
 
 
-la_df <- filter(df, state == 'LA') %>% dplyr::select(-state)
-la_df <- reshape2::dcast(la_df, stage + year ~ demographic)
-la_df_men <- dplyr::select(la_df, c('stage', 'year', 'black.men', 'hispanic.men', 'other.men'))
-la_df_men$msm <- apply(la_df_men[,c('black.men', 'other.men', 'hispanic.men')], 1, 
-											 function(x) weighted.mean(x = x, w = la_male_demographic_popsizes))
+# la_df <- filter(df, state == 'LA') %>% dplyr::select(-state)
+# la_df <- reshape2::dcast(la_df, stage + year ~ demographic)
+# la_df_men <- dplyr::select(la_df, c('stage', 'year', 'black.men', 'hispanic.men', 'other.men'))
+# la_df_men$msm <- apply(la_df_men[,c('black.men', 'other.men', 'hispanic.men')], 1, 
+# 											 function(x) weighted.mean(x = x, w = la_male_demographic_popsizes))
 
+# ma_df <- reshape2::melt(ma_df_men, id.vars = c('stage', 'year'), variable = 'demographic', value.name = 'ct_fraction')
+# la_df <- reshape2::melt(la_df_men, id.vars = c('stage', 'year'), variable = 'demographic', value.name = 'ct_fraction')
+
+# df_men <- rbind.data.frame(cbind.data.frame(state = 'LA', la_df), cbind.data.frame(state = 'MA', ma_df))
+
+# ggplot(df_men, aes(x=year, y=ct_fraction, fill = demographic)) + 
+# 	geom_bar(stat='identity', position = 'dodge') + 
+# 	facet_wrap(stage ~ state) + 
+# 	theme_bw()
 
 ```
 
