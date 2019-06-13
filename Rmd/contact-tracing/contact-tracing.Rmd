@@ -2,16 +2,50 @@
 title: Estimating the Impact of Contact Tracing 
 author: Christian Testa
 date: June 12, 2019
+echo: FALSE
 ---
 
-## Smoothing the Data with Linear Models
 
-Let's try to estimate the impact of contact tracing during the 2012 to 2016 time period.
+In this document, we're going to estimate the impact on prevalence 
+of contact tracing in the 2012 to 2016 time period. 
 
-Our first challenge is to smooth the data.
+In order to do this, we will: 
+
+1. Smooth the yearly data on fractions of cases detected due to contact tracing. 
+We use smoothed data from all male cases detected due to contact tracing 
+as our estimate for a fraction of cases in MSM detected due to contact tracing 
+because the contact tracing data provided does not disaggregate MSM.
+
+2. Use this data to take out the fraction of screening attributable 
+to contact tracing. 
+
+3. Run a basecase and counterfactual (not including the screening attributable to 
+contact tracing) simulations. 
+
+4. Plot the comparison, in raw prevalence numbers as well as by percentage difference
+between the basecase and counterfactual. 
 
 
-```{r}
+Conclusions:
+
+- In Louisiana, prevalence in the basecase in 2016 is 764.6 per 100,000. 
+	In the counterfactual scenario (without contact tracing), prevalence 
+	is 918.5 per 100,000. In a percentage, the basecase prevalence in 
+	2016 is 16.8% lower than in the counterfactual. 
+
+- In Massachusetts, prevalence in the basecase in 2016 is 127.4 per 100,000. 
+	In the counterfactual scenario (without contact tracing), prevalence 
+	is 137.6 per 100,000. In a percentage, the basecase prevalence in 
+	2016 is 7.44% lower than in the counterfactual. 
+
+
+## Smoothing our Data with Linear Models
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
+```
+
+```{r fig.width = 12, fig.height = 4}
 # dependencies 
 devtools::load_all()
 library(dplyr)
@@ -43,20 +77,30 @@ df$stage <- as.factor(df$stage)
 levels(df$stage) <- c(el = "Early or Late Latent", ps = "Primary or Secondary")[levels(df$stage)]
 
 # Plot a linear model fit to each of the demographic's fraction of cases detected via contact tracing
-ggplot(df, aes(x=year, y=ct_fraction, color = demographic)) + 
+ggplot(filter(df, state == 'LA'), aes(x=year, y=ct_fraction, color = demographic)) + 
 	geom_line() + 
 	geom_smooth(method = 'lm', se = FALSE, linetype = 'dashed') + 
-	facet_wrap(stage ~ state + demographic) + 
-	ggtitle("Fraction of Cases Detected Via Contact Tracing by State, Stage and Demographic") + 
+	facet_grid(stage ~ demographic) + 
+	ggtitle("Fraction of Cases Detected Via Contact Tracing by Stage and Demographic", subtitle = "Louisiana") + 
+	theme_bw() +
+	theme(legend.position = 'none', axis.text.x = element_text(angle = 45, vjust = 0.5)) + 
+	ylab("Fraction of Diagnoses Detected Via Contact Tracing")
+
+ggplot(filter(df, state == 'MA'), aes(x=year, y=ct_fraction, color = demographic)) + 
+	geom_line() + 
+	geom_smooth(method = 'lm', se = FALSE, linetype = 'dashed') + 
+	facet_grid(stage ~ demographic) + 
+	ggtitle("Fraction of Cases Detected Via Contact Tracing by Stage and Demographic", subtitle = "Massachusetts") + 
 	theme_bw() +
 	theme(legend.position = 'none', axis.text.x = element_text(angle = 45, vjust = 0.5)) + 
 	ylab("Fraction of Diagnoses Detected Via Contact Tracing")
 ```
 
-After visualizing how smoothing our data appears to change it, let's store the linear 
-models' fits in a dataframe of the same format as our original data.
 
 ```{r}
+# After visualizing how smoothing our data appears to change it, let's store the linear 
+# models' fits in a dataframe of the same format as our original data.
+
 smoothed_df_list <- list()
 
 for (demographic_x in unique(df$demographic)) { 
@@ -93,11 +137,12 @@ smoothed_df <- do.call(rbind.data.frame, smoothed_df_list)
 # 	ylab("Fraction of Diagnoses Detected Via Contact Tracing")
 ```
 
-We will assume the overall male fraction of cases detected due to partner notification
-by stage per year for the fraction of MSM cases detected due to partner notification by 
-stage per year.
 
 ```{r}
+
+# We will assume the overall male fraction of cases detected due to partner notification
+# by stage per year for the fraction of MSM cases detected due to partner notification by 
+# stage per year.
 
 la_male_cases <- 
 	tibble::tribble(
@@ -130,37 +175,536 @@ ma_male_cases %<>% mutate(ct_fraction = Male.Contact.Traced / All.Male.Cases)
 la_male_ct_fraction <- la_male_cases %>% dplyr::select(year, ct_fraction)
 ma_male_ct_fraction <- ma_male_cases %>% dplyr::select(year, ct_fraction)
 
-# state <- 'MA'
-# load.start()
-# ma_male_demographic_popsizes <- apply(n.dist.sa[1,,,], MARGIN = 3, sum)[1:3]
+# louisiana
+fit_model <- lm(ct_fraction ~ year, la_male_ct_fraction)
+intercept <- fit_model$coefficients[['(Intercept)']]
+year_coef <- fit_model$coefficients[['year']]
+f <- function(x) year_coef*x + intercept
+la_smoothed_male_ct_fraction <- f(2012:2016)
 
+# massachusetts
+fit_model <- lm(ct_fraction ~ year, ma_male_ct_fraction)
+intercept <- fit_model$coefficients[['(Intercept)']]
+year_coef <- fit_model$coefficients[['year']]
+f <- function(x) year_coef*x + intercept
+ma_smoothed_male_ct_fraction <- f(2012:2016)
 
-# state <- 'LA'
-# load.start()
-# la_male_demographic_popsizes <- apply(n.dist.sa[1,,,], MARGIN = 3, sum)[1:3]
+# ggplot(la_male_ct_fraction, aes(x=year, y=ct_fraction)) +
+# 	geom_line() + 
+# 	geom_smooth(method = 'lm', se = FALSE, linetype = 'dashed') + 
+# 	ggtitle("Smoothing Male Fraction of Cases Detected Via Contact Tracing",
+# 	"Massachusetts") + 
+#   theme_bw()
 
-# ma_df <- filter(df, state == 'MA') %>% dplyr::select(-state)
-# ma_df <- reshape2::dcast(ma_df, stage + year ~ demographic)
-# ma_df_men <- dplyr::select(ma_df, c('stage', 'year', 'black.men', 'hispanic.men', 'other.men'))
-# ma_df_men$msm <- apply(ma_df_men[,c('black.men', 'other.men', 'hispanic.men')], 1, 
-# 											 function(x) weighted.mean(x = x, w = ma_male_demographic_popsizes))
-
-
-# la_df <- filter(df, state == 'LA') %>% dplyr::select(-state)
-# la_df <- reshape2::dcast(la_df, stage + year ~ demographic)
-# la_df_men <- dplyr::select(la_df, c('stage', 'year', 'black.men', 'hispanic.men', 'other.men'))
-# la_df_men$msm <- apply(la_df_men[,c('black.men', 'other.men', 'hispanic.men')], 1, 
-# 											 function(x) weighted.mean(x = x, w = la_male_demographic_popsizes))
-
-# ma_df <- reshape2::melt(ma_df_men, id.vars = c('stage', 'year'), variable = 'demographic', value.name = 'ct_fraction')
-# la_df <- reshape2::melt(la_df_men, id.vars = c('stage', 'year'), variable = 'demographic', value.name = 'ct_fraction')
-
-# df_men <- rbind.data.frame(cbind.data.frame(state = 'LA', la_df), cbind.data.frame(state = 'MA', ma_df))
-
-# ggplot(df_men, aes(x=year, y=ct_fraction, fill = demographic)) + 
-# 	geom_bar(stat='identity', position = 'dodge') + 
-# 	facet_wrap(stage ~ state) + 
+# ggplot(ma_male_ct_fraction, aes(x=year, y=ct_fraction)) +
+# 	geom_line() + 
+# 	geom_smooth(method = 'lm', se = FALSE, linetype='dashed') + 
+# 	ggtitle("Smoothing Male Fraction of Cases Detected Via Contact Tracing",
+# 	"Massachusetts") + 
 # 	theme_bw()
+```
+
+## Simulating the Basecase and Counterfactual
+
+```{r}
+
+# Now that we have all the data we need, we need to coerce this into 
+# a format that can be used to multiply (elementwise) against the 
+# original screening matrix to get the screening rates for primary/secondary 
+# and early/late latent. 
+
+# In order to separate these screening rates, we will use a different version 
+# of the C++ transmission model which makes use of distinct screening rates
+# for primary/secondary and early/late latent infections.
+
+# Louisiana 
+state <- 'LA'
+load.start()
+e <- constructSimulationEnvironment(theta_la)
+
+# make a new screen_el and screen_ps matrix which we're going
+# to modify to remove the contact tracing
+e$params$screen_el <- e$params$screen_ps <- e$params$screen
+
+# LOUSIANA - EARLY LATENT - MALE
+
+# black early latent
+e$params$screen_el[105:109, m1] <- 
+	e$params$screen_el[105:109, m1] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'LA', 
+				 demographic == 'black.men') %>% 
+	`[[`('ct_fraction'))
+
+# other early latent
+e$params$screen_el[105:109, m2] <- 
+	e$params$screen_el[105:109, m2] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'LA', 
+				 demographic == 'other.men') %>% 
+	`[[`('ct_fraction'))
+
+# hispanic early latent
+e$params$screen_el[105:109, m3] <- 
+	e$params$screen_el[105:109, m3] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'LA', 
+				 demographic == 'hispanic.men') %>% 
+	`[[`('ct_fraction'))
+
+# msm early latent
+e$params$screen_el[105:109, c(m4, m5)] <- 
+	e$params$screen_el[105:109, c(m4, m5)] * 
+	(1 - la_smoothed_male_ct_fraction)
+
+
+# LOUSIANA - EARLY LATENT - FEMALE
+
+# black early latent
+e$params$screen_el[105:109, f1] <- 
+	e$params$screen_el[105:109, f1] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'LA', 
+				 demographic == 'black.women') %>% 
+	`[[`('ct_fraction'))
+
+# other early latent
+e$params$screen_el[105:109, f2] <- 
+	e$params$screen_el[105:109, f2] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'LA', 
+				 demographic == 'other.women') %>% 
+	`[[`('ct_fraction'))
+
+# hispanic early latent
+e$params$screen_el[105:109, f3] <- 
+	e$params$screen_el[105:109, f3] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'LA', 
+				 demographic == 'hispanic.women') %>% 
+	`[[`('ct_fraction'))
+
+
+# LOUSIANA - PRIMARY / SECONDARY - MALE
+
+# black late latent 
+e$params$screen_ps[105:109, m1] <- 
+	e$params$screen_ps[105:109, m1] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'LA', 
+				 demographic == 'black.men') %>% 
+	`[[`('ct_fraction'))
+
+
+# other early latent
+e$params$screen_ps[105:109, m2] <- 
+	e$params$screen_ps[105:109, m2] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'LA', 
+				 demographic == 'other.men') %>% 
+	`[[`('ct_fraction'))
+
+# hispanic early latent
+e$params$screen_ps[105:109, m3] <- 
+	e$params$screen_ps[105:109, m3] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'LA', 
+				 demographic == 'hispanic.men') %>% 
+	`[[`('ct_fraction'))
+
+# msm early latent
+e$params$screen_ps[105:109, c(m4, m5)] <- 
+	e$params$screen_ps[105:109, c(m4, m5)] * 
+	(1 - la_smoothed_male_ct_fraction)
+
+# LOUSIANA - PRIMARY / SECONDARY - FEMALE
+
+# black late latent 
+e$params$screen_ps[105:109, f1] <- 
+	e$params$screen_ps[105:109, f1] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'LA', 
+				 demographic == 'black.women') %>% 
+	`[[`('ct_fraction'))
+
+
+# other early latent
+e$params$screen_ps[105:109, f2] <- 
+	e$params$screen_ps[105:109, f2] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'LA', 
+				 demographic == 'other.women') %>% 
+	`[[`('ct_fraction'))
+
+# hispanic early latent
+e$params$screen_ps[105:109, f3] <- 
+	e$params$screen_ps[105:109, f3] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'LA', 
+				 demographic == 'hispanic.women') %>% 
+	`[[`('ct_fraction'))
 
 ```
+
+
+```{r}
+  with(e, {
+		### run the transmission model ###
+		sim <- syphSim(
+					  params,
+						tstep,
+						cm.list,
+						p.abx,
+						rep.count, 
+						model.end + 1,
+						yinit, 
+						n.sa,
+						births,
+						births.sa, 
+						births.nsa,
+						aging,
+						aging.nsa)
+
+		sim_counterfactual <- 
+			syphSimCTCounterfactual(
+						params,
+						tstep,
+						cm.list,
+						p.abx,
+						rep.count, 
+						model.end + 1,
+						yinit, 
+						n.sa,
+						births,
+						births.sa, 
+						births.nsa,
+						aging,
+						aging.nsa)
+	})
+
+denom <- rowSums(e$sim$out[105:109, allpop.index])
+num <- rowSums(e$sim$out[105:109, infected.index])
+
+years <- 2012:2016
+prevalence_basecase <- num/denom
+
+denom <- rowSums(e$sim_counterfactual$out[105:109, allpop.index])
+num <- rowSums(e$sim_counterfactual$out[105:109, infected.index])
+
+prevalence_counterfactual <- num/denom
+
+counterfactual_df <- cbind.data.frame(year = years, prevalence_basecase, prevalence_counterfactual)
+
+counterfactual_df <- reshape2::melt(counterfactual_df, id.vars = c('year'), 
+																		variable = 'scenario', value.name = 'prevalence')
+
+la_counterfactual_df <- counterfactual_df
+
+# ggplot(counterfactual_df, aes(x=year, y=prevalence * 100000, color = scenario)) + 
+# 			 geom_line() + 
+# 			 theme_bw() + 
+# 			 expand_limits(y=0) + 
+# 			 ggtitle(
+# 				"Prevalence with Contact Tracing (basecase) and Without (counterfactual)",
+# 				"Louisiana") + 	
+# 			 ylab("Prevalence per 100,000")
+
+
+prevalence_averted <- (prevalence_counterfactual - prevalence_basecase) / prevalence_counterfactual
+
+prevalence_averted_df <- cbind.data.frame(years, prevalence_averted)
+
+la_prevalence_averted_df <- prevalence_averted_df
+
+# ggplot(prevalence_averted_df, aes(x=years, y=prevalence_averted * 100)) + 
+# 			 geom_line() + 
+# 			 ggtitle("Prevalence Averted (%) Compared to Counterfactual",
+# 			 "Louisiana") + 
+# 			theme_bw() + 
+# 			ylab("Prevalence Averted from Counterfactual (%)")
+```
+
+
+
+```{r}
+
+
+# Massachusetts 
+state <- 'MA'
+load.start()
+e <- constructSimulationEnvironment(theta_ma)
+
+# make a new screen_el and screen_ps matrix which we're going
+# to modify to remove the contact tracing
+e$params$screen_el <- e$params$screen_ps <- e$params$screen
+
+# MASSACHUSETTS - EARLY LATENT - MALE
+
+# black early latent
+e$params$screen_el[105:109, m1] <- 
+	e$params$screen_el[105:109, m1] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'MA', 
+				 demographic == 'black.men') %>% 
+	`[[`('ct_fraction'))
+
+# other early latent
+e$params$screen_el[105:109, m2] <- 
+	e$params$screen_el[105:109, m2] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'MA', 
+				 demographic == 'other.men') %>% 
+	`[[`('ct_fraction'))
+
+# hispanic early latent
+e$params$screen_el[105:109, m3] <- 
+	e$params$screen_el[105:109, m3] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'MA', 
+				 demographic == 'hispanic.men') %>% 
+	`[[`('ct_fraction'))
+
+# msm early latent
+e$params$screen_el[105:109, c(m4, m5)] <- 
+	e$params$screen_el[105:109, c(m4, m5)] * 
+	(1 - ma_smoothed_male_ct_fraction)
+
+
+# MASSACHUSETTS - EARLY LATENT - FEMALE
+
+# black early latent
+e$params$screen_el[105:109, f1] <- 
+	e$params$screen_el[105:109, f1] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'MA', 
+				 demographic == 'black.women') %>% 
+	`[[`('ct_fraction'))
+
+# other early latent
+e$params$screen_el[105:109, f2] <- 
+	e$params$screen_el[105:109, f2] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'MA', 
+				 demographic == 'other.women') %>% 
+	`[[`('ct_fraction'))
+
+# hispanic early latent
+e$params$screen_el[105:109, f3] <- 
+	e$params$screen_el[105:109, f3] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Early or Late Latent', 
+				 state == 'MA', 
+				 demographic == 'hispanic.women') %>% 
+	`[[`('ct_fraction'))
+
+
+# MASSACHUSETTS - PRIMARY / SECONDARY - MALE
+
+# black late latent 
+e$params$screen_ps[105:109, m1] <- 
+	e$params$screen_ps[105:109, m1] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'MA', 
+				 demographic == 'black.men') %>% 
+	`[[`('ct_fraction'))
+
+
+# other early latent
+e$params$screen_ps[105:109, m2] <- 
+	e$params$screen_ps[105:109, m2] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'MA', 
+				 demographic == 'other.men') %>% 
+	`[[`('ct_fraction'))
+
+# hispanic early latent
+e$params$screen_ps[105:109, m3] <- 
+	e$params$screen_ps[105:109, m3] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'MA', 
+				 demographic == 'hispanic.men') %>% 
+	`[[`('ct_fraction'))
+
+# msm early latent
+e$params$screen_ps[105:109, c(m4, m5)] <- 
+	e$params$screen_ps[105:109, c(m4, m5)] * 
+	(1 - ma_smoothed_male_ct_fraction)
+
+# MASSACHUSETTS - PRIMARY / SECONDARY - FEMALE
+
+# black late latent 
+e$params$screen_ps[105:109, f1] <- 
+	e$params$screen_ps[105:109, f1] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'MA', 
+				 demographic == 'black.women') %>% 
+	`[[`('ct_fraction'))
+
+
+# other early latent
+e$params$screen_ps[105:109, f2] <- 
+	e$params$screen_ps[105:109, f2] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'MA', 
+				 demographic == 'other.women') %>% 
+	`[[`('ct_fraction'))
+
+# hispanic early latent
+e$params$screen_ps[105:109, f3] <- 
+	e$params$screen_ps[105:109, f3] * 
+	(1 - filter(smoothed_df, 
+				 stage == 'Primary or Secondary', 
+				 state == 'MA', 
+				 demographic == 'hispanic.women') %>% 
+	`[[`('ct_fraction'))
+```
+
+
+```{r}
+
+  with(e, {
+		### run the transmission model ###
+		sim <- syphSim(
+					  params,
+						tstep,
+						cm.list,
+						p.abx,
+						rep.count, 
+						model.end + 1,
+						yinit, 
+						n.sa,
+						births,
+						births.sa, 
+						births.nsa,
+						aging,
+						aging.nsa)
+
+		sim_counterfactual <- 
+			syphSimCTCounterfactual(
+						params,
+						tstep,
+						cm.list,
+						p.abx,
+						rep.count, 
+						model.end + 1,
+						yinit, 
+						n.sa,
+						births,
+						births.sa, 
+						births.nsa,
+						aging,
+						aging.nsa)
+	})
+
+denom <- rowSums(e$sim$out[105:109, allpop.index])
+num <- rowSums(e$sim$out[105:109, infected.index])
+
+years <- 2012:2016
+prevalence_basecase <- num/denom
+
+denom <- rowSums(e$sim_counterfactual$out[105:109, allpop.index])
+num <- rowSums(e$sim_counterfactual$out[105:109, infected.index])
+
+prevalence_counterfactual <- num/denom
+
+counterfactual_df <- cbind.data.frame(year = years, prevalence_basecase, prevalence_counterfactual)
+
+counterfactual_df <- reshape2::melt(counterfactual_df, id.vars = c('year'), 
+																		variable = 'scenario', value.name = 'prevalence')
+
+ma_counterfactual_df <- counterfactual_df
+
+# ggplot(counterfactual_df, aes(x=year, y=prevalence * 100000, color = scenario)) + 
+# 			 geom_line() + 
+# 			 theme_bw() + 
+# 			 expand_limits(y=0) + 
+# 			 ggtitle(
+# 				"Prevalence with Contact Tracing (basecase) and Without (counterfactual)",
+# 				"Massachusetts") + 	
+# 			 ylab("Prevalence per 100,000")
+
+
+prevalence_averted <- (prevalence_counterfactual - prevalence_basecase) / prevalence_counterfactual
+
+prevalence_averted_df <- cbind.data.frame(years, prevalence_averted)
+
+ma_prevalence_averted_df <- prevalence_averted_df
+
+# ggplot(prevalence_averted_df, aes(x=years, y=prevalence_averted * 100)) + 
+# 			 geom_line() + 
+# 			 ggtitle("Prevalence Averted (%) Compared to Counterfactual",
+# 			 "Massachusetts") + 
+# 			theme_bw() + 
+# 			ylab("Prevalence Averted from Counterfactual (%)")
+
+```
+
+
+```{r}
+
+# counterfactual_df <- rbind.data.frame(cbind.data.frame(state = 'LA', la_counterfactual_df),
+# 																			cbind.data.frame(state = 'MA', ma_counterfactual_df))
+
+# prevalence_averted_df <- rbind.data.frame(cbind.data.frame(state = 'LA', la_prevalence_averted_df),
+# 																					cbind.data.frame(state = 'MA', ma_prevalence_averted_df))
+
+
+ggplot(la_counterfactual_df, aes(x=year, y=prevalence * 100000, color = scenario)) + 
+			 geom_line() + 
+			 theme_bw() + 
+			 expand_limits(y=0) + 
+			 ggtitle(
+				"Prevalence with Contact Tracing (basecase) and Without (counterfactual)",
+				"Louisiana") + 	
+			 ylab("Prevalence per 100,000") 
+
+
+ggplot(ma_counterfactual_df, aes(x=year, y=prevalence * 100000, color = scenario)) + 
+			 geom_line() + 
+			 theme_bw() + 
+			 expand_limits(y=0) + 
+			 ggtitle(
+				"Prevalence with Contact Tracing (basecase) and Without (counterfactual)",
+				"Massachusetts") + 	
+			 ylab("Prevalence per 100,000") 
+
+
+ggplot(la_prevalence_averted_df, aes(x=years, y=prevalence_averted * 100)) + 
+			 geom_line() + 
+			 ggtitle("Prevalence Averted (%) Compared to Counterfactual",
+			 "Louisiana") + 
+			theme_bw() + 
+			ylab("Prevalence Averted from Counterfactual (%)")
+
+
+ggplot(ma_prevalence_averted_df, aes(x=years, y=prevalence_averted * 100)) + 
+			 geom_line() + 
+			 ggtitle("Prevalence Averted (%) Compared to Counterfactual",
+			 "Massachusetts") + 
+			theme_bw() + 
+			ylab("Prevalence Averted from Counterfactual (%)")
+```
+
 
