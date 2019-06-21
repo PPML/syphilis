@@ -64,7 +64,7 @@ dLogPosterior_simultaneous <- function(theta) {
 	la_val <- suppressMessages(dLogPosterior_by_state(theta[1:(length(theta)/2)], 'LA'))
 	ma_val <- suppressMessages(dLogPosterior_by_state(theta[length(theta)/2 + 1:(length(theta)/2)], 'MA'))
 
-	if (any(-1e20 >= c(la_val, ma_val)) { 
+	if (any(-1e20 >= c(la_val, ma_val))) { 
 		# try again, for some reason dLogPosterior occasionally returns -1e20 for the same values
 		la_val <- suppressMessages(dLogPosterior_by_state(theta[1:(length(theta)/2)], 'LA'))
 		ma_val <- suppressMessages(dLogPosterior_by_state(theta[length(theta)/2 + 1:(length(theta)/2)], 'MA'))
@@ -97,8 +97,7 @@ while (!done) {
     saveRDS(optim_list,
             paste0(
               output_directory,
-              site,
-              "_optim_list_",
+              "optim_list_",
               nth_sim,
               ".rds"
             )
@@ -106,16 +105,3 @@ while (!done) {
   }
 }
 
-
-dLogPosterior_simultaneous_print <- function(x) {
-	val <- dLogPosterior_simultaneous(x)
-	print(val)
-	return(val)
-}
-
-  out <- optim(
-    par = theta,
-    fn = dLogPosterior_simultaneous_print,
-    method = c("BFGS", "Nelder-Mead")[[if (n_done > 15) 1 else 2]],
-    control = list(fnscale = -1, maxit=10)
-  )

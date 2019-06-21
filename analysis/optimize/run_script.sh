@@ -1,5 +1,4 @@
 #!/bin/bash
-#SBATCH -p shared
 #SBATCH -N 1
 #SBATCH --ntasks=1
 #SBATCH --array=1-25
@@ -9,5 +8,7 @@
 #SBATCH --error=sbatch-out/%x_%A_%a.err
 #SBATCH --output=sbatch-out/%x_%A_%a.out
 
-source ~/load-gcc-and-R.sh
-srun Rscript optimize.R $1 ${SLURM_ARRAY_TASK_ID}
+module load gcc/7.1.0-fasrc01
+module load R/3.5.1-fasrc02
+module load bzip2/1.0.6-fasrc01
+srun Rscript optimize_simultaneously.R ${SLURM_ARRAY_TASK_ID}
