@@ -6,7 +6,7 @@ library(here)
 files_path <- here('inst/optims/6-6-19/')
 
 # list the files
-files <- list.files(files_path, full.names=T)
+files <- grep("optim_list", list.files(files_path, full.names=T), value=T)
 
 # read each file into a list
 optims <- lapply(files, readRDS)
@@ -28,7 +28,7 @@ optim_vals <- lapply(optims, get_optim_vals)
 maxs <- sapply(optim_vals, max) 
 max_idxs <- sapply(optim_vals, function(x) which(x==max(x))[[1]])
 
-print(sort(maxs, decreasing=T))
+# print(sort(maxs, decreasing=T))
 
 last <- function(x) { x[[length(x)]] }
 
