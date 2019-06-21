@@ -13,3 +13,7 @@ syphSim <- function(x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, bir
     .Call('_syphilis_syphSim', PACKAGE = 'syphilis', x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, births_sa, births_nsa, aging, aging_nsa)
 }
 
+syphSimCTCounterfactual <- function(x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, births_sa, births_nsa, aging, aging_nsa) {
+    .Call('_syphilis_syphSimCTCounterfactual', PACKAGE = 'syphilis', x, dt, cm, pabx, rep_count, nYrs, initPop, n_sa, births, births_sa, births_nsa, aging, aging_nsa)
+}
+
