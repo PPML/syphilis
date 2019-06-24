@@ -57,6 +57,13 @@ constructSimulationEnvironment <- function(theta) {
 			screen,
 			screen[rep(nrow(screen), times = model.end - (cal.start - 11 + nrow(screen))),])
 
+		# Set up duplicate screening rates to be used for different screening interventions
+		# these are un-modified in the basecase, but to simulate a counterfactual where 
+		# contact tracing didn't happen, we modify screen_ps and screen_el, and to 
+		# simulate screening individuals with prior infection history, we modify 
+		# screen_repeat. This is done after 
+		screen_ps <- screen_el <- screen_repeat <- screen 
+
 		b <- ilogit(c(theta["logit.b.m"], theta["logit.b.f"], theta["logit.b.msm"])) #transmission rates
 		delta <- 365/((exp(theta["log.dur.incub"]))) #1/incubation period
 		dur.inf <- c(exp(theta["log.dur.prim"]), exp(theta["log.dur.sec"]),365-(exp(theta["log.dur.prim"])+exp(theta["log.dur.sec"]))) #infectious durations from primary, secondary, and early latent sypilis (early latent dur = 365 d - dur prim - dur sec)
@@ -123,6 +130,7 @@ constructSimulationEnvironment <- function(theta) {
 									p.trt.3=p.trt.3,p.trt.4=p.trt.4, rep=rep.trend,rep.symp=rep.symp,
 									screen=screen, behav=behav,dur.imm=dur.imm,
 									p.s.1=p.s.1, p.s.2 = p.s.2, p.s.3 = p.s.3,
+									screen_ps = screen_ps, screen_el = screen_el, screen_repeat = screen_repeat,
 		              output_weekly = FALSE) #parameters used by transmission model
 	})
 	return(e)

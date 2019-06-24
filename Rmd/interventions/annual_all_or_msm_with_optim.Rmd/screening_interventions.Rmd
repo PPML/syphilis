@@ -1,0 +1,275 @@
+---
+title: Analyzing Screening Guidelines Scenarios
+author: Christian Testa
+output: html_document
+---
+
+The following outputs are in measures of infections per 100,000. 
+
+For reference, the assumed population sizes of Louisiana and Massachusetts 
+are 2,787,423 and 4,230,601 respectively (assumed from 2015 census estimates).
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+devtools::load_all()
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(RColorBrewer)
+library(ggrepel)
+library(here)
+```
+
+```{r define helper fn, echo=FALSE}
+simulate_annual_and_basecase <- function(theta) {
+	intervention_outcomes <- list()
+	for (intervention in c('basecase', 'annual', 'msm_annual', 'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly')) {
+		e <- constructSimulationEnvironment(theta)
+		modify_simulation_environment_for_an_intervention(e, intervention)
+		e$params$output_weekly <- TRUE
+		runSimulation(e)
+		intervention_outcomes[[length(intervention_outcomes)+1]] <- 
+			extractInterventionStatistics(e, intervention)
+	}
+	do.call(rbind.data.frame, intervention_outcomes)
+}
+```
+
+```{r simulate and tidy data, echo = FALSE}
+
+for (state in c('LA', 'MA')) { 
+
+	# set the number of years to run out the model to 2050
+	load_globals(model.end = 115)
+
+	# parametrize the model
+	load.start()
+
+	# get optimized for the model in the specified state.
+	theta <- get(paste0('theta_', tolower(state)))
+
+
+
+	# simmulate the annual and basecase scenarios getting
+	# - prevalent cases, incidents, and number of tests done
+	assign(paste0(tolower(state), '_df'),
+				 simulate_annual_and_basecase(theta))
+}
+
+for (state in c('LA', 'MA')) { 
+	df <- get(paste0(tolower(state), '_df'))
+	df <- filter(df, year >= 2015 & year <= 2026) 
+	df <- mutate(df, prevalence_per_100000 = prevalent_infections / popsize * 100000,
+							 incidence_per_100000 = incidents_per_year / popsize * 100000) %>% 
+		select(-c(prevalent_infections, incidents_per_year, tests_per_year, popsize))
+	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
+	assign(paste0(tolower(state), '_df'), df)
+}
+```
+
+### Prevalence and Incidence 
+### Basecase, Annual, and MSM Annual Screening Scenarios
+
+```{r plot data, fig.width=9, fig.height=4, echo=FALSE, dpi = 300}
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df'))
+	df <- filter(df, variable != 'tests_per_year')
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention, 
+						linetype=intervention)) +
+			 geom_line() + 
+			 expand_limits(y=c(0,0)) + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(statenames[[state]]) + 
+			 theme_bw() + 
+			 guides(linetype = guide_legend(title='Baseline Rate of Screening'),
+							color = guide_legend(title='Baseline Rate of Screening')) + 
+			 scale_color_manual(values = c(basecase = 'black', annual = 'red',
+																		 msm_annual='blue',
+																		 msm_annual_hr_msm_quarterly = 'forestgreen',
+																		 prior_diagnosis_quarterly = 'purple')) +
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+```
+
+
+### Infectious and Noninfectious Prevalence 
+### Basecase, Annual, and MSM Annual Screening Scenarios
+
+```{r define helper fn 2, echo=FALSE, fig.width=9, fig.height=4, dpi=300}
+extractInterventionStatisticsWithInfectiousness <- function(e, intervention) {
+	intervention_start <- min(intervention_years)
+	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
+
+	data.frame(
+		intervention = intervention,
+		year = intervention_period/52 + model_to_gregorian_difference,
+		prevalent_infectious_infections = rowSums(e$sim$out[1+intervention_period, 1+infectious_index]),
+		prevalent_noninfectious_infections = rowSums(e$sim$out[1+intervention_period, 1+noninfectious_index]),
+		popsize = rowSums(e$sim$out[1+intervention_period, 1+allpop.index])
+		)
+}
+
+simulate_annual_and_basecase2 <- function(theta) {
+	intervention_outcomes <- list()
+	for (intervention in c('basecase', 'annual', 'msm_annual', 'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly')) {
+		e <- constructSimulationEnvironment(theta)
+		modify_simulation_environment_for_an_intervention(e, intervention)
+		e$params$output_weekly <- TRUE
+		runSimulation(e)
+		intervention_outcomes[[length(intervention_outcomes)+1]] <- 
+			extractInterventionStatisticsWithInfectiousness(e, intervention)
+	}
+	do.call(rbind.data.frame, intervention_outcomes)
+}
+
+for (state in c('LA', 'MA')) { 
+
+	# set the number of years to run out the model to 2050
+	load_globals(model.end = 115)
+
+	# parametrize the model
+	load.start()
+
+	# get optimized for the model in the specified state.
+	theta <- get(paste0('theta_', tolower(state)))
+
+	# simmulate the annual and basecase scenarios getting
+	# - prevalent cases, incidents, and number of tests done
+	assign(paste0(tolower(state), '_df2'),
+				 simulate_annual_and_basecase2(theta))
+}
+
+for (state in c('LA', 'MA')) { 
+	df <- get(paste0(tolower(state), '_df2'))
+	df <- filter(df, year >= 2015 & year <= 2026) 
+	df <- mutate(df, 
+							 infectious_prevalence_per_100000 = prevalent_infectious_infections / popsize * 100000,
+							 noninfectious_prevalence_per_100000 = prevalent_noninfectious_infections / popsize * 100000
+							 ) %>% 
+		select(-c(prevalent_infectious_infections, prevalent_noninfectious_infections, popsize))
+	df <- reshape2::melt(df, id.vars = c('intervention', 'year'))
+	assign(paste0(tolower(state), '_df2'), df)
+}
+
+for (state in c('LA', 'MA')) {
+	df <- get(paste0(tolower(state), '_df2'))
+	plt <- 
+		ggplot(
+					data = df, 
+					mapping = aes(
+						x=year, 
+						y=value, 
+						color = intervention, 
+						linetype = intervention)) +
+			 geom_line() + 
+			 expand_limits(y=c(0,0)) + 
+			 facet_wrap(~variable, scales='free_y') + 
+			 ggtitle(statenames[[state]]) + 
+			 theme_bw() + 
+			 guides(linetype = guide_legend(title='Baseline Rate of Screening'),
+							color = guide_legend(title='Baseline Rate of Screening')) + 
+			 scale_color_manual(values = c(basecase = 'black', annual = 'red', msm_annual='blue',
+																		 msm_annual_hr_msm_quarterly = 'forestgreen',
+																		 prior_diagnosis_quarterly = 'purple')) +
+			 if (state == 'LA') {
+				 theme(legend.position = 'none')
+			 } else {
+				 theme(legend.position = 'bottom')
+			 }
+
+	print(plt)
+}
+```
+
+Let's look at the incidence rate among those with prior infections vs. all incidence.
+
+Let's also look at what fraction of incidence is occuring among those with a prior 
+infection in the past two years.
+
+```{r what fraction is among prior diagnoses, echo = FALSE, fig.width = 9, dpi=300}
+for (state in c('LA', 'MA')) { 
+	theta <- get(paste0('theta_', tolower(state)))
+	e <- constructSimulationEnvironment(theta)
+	runSimulation(e)
+	out <- e$sim$out
+	allpop_cumulative_incidence <- rowSums(out[, inc.index])
+	reinfected_cumulative_incidence <- rowSums(out[, incr.index])
+
+	allpop_yearly_incidence <- allpop_cumulative_incidence - lag(allpop_cumulative_incidence)
+	reinfected_yearly_incidence <- reinfected_cumulative_incidence - lag(reinfected_cumulative_incidence)
+
+	allpop_size <- rowSums(out[, allpop.index])
+	resusceptible_size <- rowSums(out[, resusceptible.index])
+
+	allpop_incidence <- allpop_yearly_incidence / allpop_size
+	reinfection_incidence <- reinfected_yearly_incidence / resusceptible_size
+
+	incidence <- rbind.data.frame(
+																cbind.data.frame(
+																								 variable = 'all_infection_incidence',
+	  value = allpop_incidence[95:length(allpop_incidence)]),
+																cbind.data.frame(
+																								 variable = 'prior_diagnosis_incidence',
+		value = reinfection_incidence[95:length(reinfection_incidence)]))
+
+	incidence$year <- 95:length(allpop_incidence) + model_to_gregorian_difference
+
+	plt <- ggplot(incidence, aes(x = year, y = value, color = variable)) + geom_line() + scale_y_log10() + 
+		theme_bw() + 
+		ggtitle("Incidence Rate Among All Infections and Those with Prior Diagnosis History (past 2 years)", 
+		subtitle = statenames[[state]]) + 
+		theme(legend.position = 'bottom')
+
+	print(plt)
+
+	incidence_ratio <- cbind.data.frame(
+		year = 95:length(allpop_incidence) + model_to_gregorian_difference,
+		ratio = (reinfected_yearly_incidence / allpop_yearly_incidence)[95:length(allpop_incidence)]
+		)
+
+	plt <- ggplot(incidence_ratio, aes(x = year, y = ratio)) + 
+		geom_line() + 
+		theme_bw() + 
+		ggtitle("Fraction of Incidence Among Those with Prior Diagnosis in the Past Two Years",
+		subtitle = statenames[[state]])
+
+	print(plt)
+
+  all_diagnoses <- rowSums(out[, c(d1.index, d2.index, d3.index, d4.index)])
+	repeat_diagnoses <- rowSums(out[, dr.index])
+
+	all_yearly_diagnoses <- all_diagnoses - lag(all_diagnoses)
+	repeat_yearly_diagnoses <- repeat_diagnoses - lag(repeat_diagnoses)
+
+	repeat_yearly_diagnoses_fraction <- repeat_yearly_diagnoses / all_yearly_diagnoses
+
+	repeat_diagnoses_fraction <- cbind.data.frame(
+		year = 95:length(allpop_incidence) + model_to_gregorian_difference,
+		ratio = repeat_yearly_diagnoses_fraction[95:length(repeat_yearly_diagnoses)])
+
+	plt <- ggplot(repeat_diagnoses_fraction, aes(x=year, y=ratio)) + 
+		geom_line() + 
+		theme_bw() + 
+		ggtitle("Fraction of Diagnoses Among Those with Prior Diagnosis in the Past Two Years",
+						subtitle = statenames[[state]])
+
+	print(plt)
+
+
+	
+}
+
+```
+

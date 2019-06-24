@@ -82,6 +82,9 @@ load_globals <- function(model.end = 110) {
 
 	infectious_index <<- c(prim.index, sec.index, primr.index, secr.index)
 	noninfectious_index <<- c(e.index, early.index, latent.index, er.index, earlyr.index, latentr.index)
+
+	# index for resusceptible (all)
+  resusceptible.index <<- c(sr.index, primr.index, secr.index, earlyr.index, latentr.index)
   
   pop1 <<- c(1:4,21:24) #subpop1
   pop2 <<- c(5:8,25:28) # subpop2

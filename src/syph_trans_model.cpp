@@ -54,6 +54,8 @@ List syphSim(
   NumericMatrix report_symp = as<NumericMatrix>(x["rep.symp"]); //reporting probability matrix, case seeking care
   NumericMatrix screen = as<NumericMatrix>(x["screen"]); //screening rate matrix
   NumericVector alpha(dim); //screening rate (updated annually)
+	NumericMatrix screen_repeat = as<NumericMatrix>(x["screen_repeat"]); // screening rates for individuals with diagnosis history
+	NumericVector alpha_repeat(dim); // screening rate (updated annually) for individuals with diagnosis history 
   NumericVector rep_s(dim); //reporting probabilities (updataed annually)
   NumericVector c_msm = as<NumericVector>(x["behav"]); //transmission rr in MSM 
   NumericVector dur_imm = as<NumericVector>(x["dur.imm"]); //duration immunity after treatment
@@ -189,6 +191,7 @@ List syphSim(
 					D4[n] =  Pop[n+21*dim];
 					DR[n] =  Pop[n+22*dim];
 					alpha[n] = screen(y,n);  //update screening and reporting
+					alpha_repeat[n] = screen_repeat(y,n);
 					rep_s[n] = report_symp(y,n);
 				}
 				
@@ -409,24 +412,37 @@ List syphSim(
 					Pop[n+dim*3] += ( gamma1*I1[n] - gamma2*I2[n] - p_trt2[n]*I2[n] -alpha[n]*I2[n] - abx*I2[n] + agingI2[n]) * dt; //dI2/dt
 					Pop[n+dim*4] += (gamma2*I2[n] - gamma3*L1[n] - p_trt3[n]*L1[n] -alpha[n]*L1[n] - abx*L1[n] + agingL1[n]) * dt; //dL1/dt
 					Pop[n+dim*5] += (gamma3*L1[n] - p_trt4[n]*L2[n] -alpha[n]*L2[n] - abx*L2[n] + agingL2[n] ) * dt; //dL2/dt
-					Pop[n+dim*6] += (p_trt1[n]*(I1[n]+IR1[n]) + p_trt2[n]*(I2[n] + IR2[n]) + alpha[n]*(I1[n]+I2[n]+IR1[n]+IR2[n]) + abx*(I1[n]+I2[n]+IR1[n]+IR2[n]) - lambda1*T1[n] + agingT1[n])*dt ; //dT1/dt
-					Pop[n+dim*7] += (p_trt3[n]*(L1[n] + LR1[n]) + alpha[n]*(L1[n]+LR1[n]) + abx*(L1[n]+LR1[n]) - lambda2*T2[n] + agingT2[n])*dt; //dT2/dt
-					Pop[n+dim*8] += (p_trt4[n]*(L2[n] + LR2[n]) + alpha[n]*(L2[n]+LR2[n]) + abx*(L2[n]+LR2[n]) - lambda3*T3[n] + agingT3[n])*dt ; //dT3/dt
+
+					//dT1/dt
+					Pop[n+dim*6] += (p_trt1[n]*(I1[n]+IR1[n]) + // treatment seeking for infected primary
+							             p_trt2[n]*(I2[n]+IR2[n]) + // treatment seeking for infected secondary
+							alpha[n]*(I1[n]+I2[n])+ // screening for first infection
+							alpha_repeat[n]*(IR1[n]+IR2[n]) + // screening for repeat infection after diagnosis
+							abx*(I1[n]+I2[n]+IR1[n]+IR2[n]) - // background antibiotics usage
+							lambda1*T1[n] + agingT1[n])*dt; // treatment exit rate and aging out
+
+					Pop[n+dim*7] += (p_trt3[n]*(L1[n] + LR1[n]) + alpha[n]*L1[n]+alpha_repeat[n]*LR1[n] + abx*(L1[n]+LR1[n]) - lambda2*T2[n] + agingT2[n])*dt; //dT2/dt
+					Pop[n+dim*8] += (p_trt4[n]*(L2[n] + LR2[n]) + alpha[n]*L2[n]+alpha_repeat[n]*LR2[n] + abx*(L2[n]+LR2[n]) - lambda3*T3[n] + agingT3[n])*dt ; //dT3/dt
 					Pop[n+dim*9] += (-lambda[n]*SR[n] + abx*ER[n] + rep_on*(lambda1*T1[n] + lambda2*T2[n] + lambda3*T3[n])  + agingSR[n])*dt;  // dSR/dt
 					Pop[n+dim*10] += (lambda[n]*SR[n] - delta*ER[n] - abx*ER[n] + agingER[n])*dt; // dER/dt
-					Pop[n+dim*11] += (delta*ER[n] - gamma1*IR1[n] - p_trt1[n]*IR1[n] -alpha[n]*IR1[n] - abx*IR1[n]  + agingIR1[n])*dt; //dIR1/dt
-					Pop[n+dim*12] += (gamma1*IR1[n] - gamma2*IR2[n] - p_trt2[n]*IR2[n] -alpha[n]*IR2[n] - abx*IR2[n]  + agingIR2[n]) * dt; //dIR2/dt
-					Pop[n+dim*13] += (gamma2*IR2[n] - gamma3*LR1[n] - p_trt3[n]*LR1[n] -alpha[n]*LR1[n] - abx*LR1[n] + agingLR1[n]) * dt; //dLR1/dt
-					Pop[n+dim*14] += (gamma3*LR1[n] - p_trt4[n]*LR2[n] -alpha[n]*LR2[n] - abx*LR2[n]  + agingLR2[n]) * dt; //dLR2/dt
+					Pop[n+dim*11] += (delta*ER[n] - gamma1*IR1[n] - p_trt1[n]*IR1[n] -alpha_repeat[n]*IR1[n] - abx*IR1[n]  + agingIR1[n])*dt; //dIR1/dt
+					Pop[n+dim*12] += (gamma1*IR1[n] - gamma2*IR2[n] - p_trt2[n]*IR2[n] -alpha_repeat[n]*IR2[n] - abx*IR2[n]  + agingIR2[n]) * dt; //dIR2/dt
+					Pop[n+dim*13] += (gamma2*IR2[n] - gamma3*LR1[n] - p_trt3[n]*LR1[n] -alpha_repeat[n]*LR1[n] - abx*LR1[n] + agingLR1[n]) * dt; //dLR1/dt
+					Pop[n+dim*14] += (gamma3*LR1[n] - p_trt4[n]*LR2[n] -alpha_repeat[n]*LR2[n] - abx*LR2[n]  + agingLR2[n]) * dt; //dLR2/dt
 					Pop[n+dim*15] += (lambda[n]*(S[n]+SR[n])) * dt; //dInc/dt
 					Pop[n+dim*16] += (lambda[n]*SR[n]) * dt; //dIncr/dt
-					Pop[n+dim*17] += (rep_s[n]*p_trt1[n]*(I1[n]+IR1[n]) + rep*alpha[n]*(I1[n] + IR1[n])) * dt; //dD1/dt
-					Pop[n+dim*18] += (rep_s[n]*p_trt2[n]*(I2[n]+IR2[n]) + rep*alpha[n]*(I2[n] + IR2[n])) * dt; //dD2/dt
-					Pop[n+dim*19] += (rep_s[n]*p_trt3[n]*(L1[n]+LR1[n]) + rep*alpha[n]*(L1[n] + LR1[n])) * dt; //dD3/dt
+					Pop[n+dim*17] += (rep_s[n]*p_trt1[n]*(I1[n]+IR1[n]) + rep*(alpha[n]*I1[n] + alpha_repeat[n]*IR1[n])) * dt; //dD1/dt
+					Pop[n+dim*18] += (rep_s[n]*p_trt2[n]*(I2[n]+IR2[n]) + rep*(alpha[n]*I2[n] + alpha_repeat[n]*IR2[n])) * dt; //dD2/dt
+					Pop[n+dim*19] += (rep_s[n]*p_trt3[n]*(L1[n]+LR1[n]) + rep*(alpha[n]*L1[n] + alpha_repeat[n]*LR1[n])) * dt; //dD3/dt
 					Pop[n+dim*20] += (agingNSA[n] + birthsNSA[n]) * dt; //dNSA/dt
-					Pop[n+dim*21] += (rep_s[n]*p_trt4[n]*(L2[n]+LR2[n]) + rep*alpha[n]*(L2[n] + LR2[n])) * dt; //dD4/dt
-					Pop[n+dim*22] += (rep_s[n]*p_trt1[n]*IR1[n] + rep*alpha[n]* IR1[n] + rep_s[n]*p_trt2[n]*IR2[n] + rep*alpha[n]*IR2[n] + rep_s[n]*p_trt3[n]*LR1[n] + rep*alpha[n]* LR1[n] ) * dt; //dDR/dt
-					Pop[n+dim*23] += (alpha[n]*(S[n] + E[n] + SR[n] + ER[n] + I1[n] + IR1[n] + I2[n] + IR2[n] + L1[n] + LR1[n] + L2[n] + LR2[n])) * dt; //dCumulativeTesting/dt
+					Pop[n+dim*21] += (rep_s[n]*p_trt4[n]*(L2[n]+LR2[n]) + rep*(alpha[n]*L2[n] + alpha_repeat[n]*LR2[n])) * dt; //dD4/dt
+
+					Pop[n+dim*22] += (rep_s[n]*p_trt1[n]*IR1[n] + rep*alpha_repeat[n]*
+							IR1[n] + rep_s[n]*p_trt2[n]*IR2[n] + rep*alpha_repeat[n]*IR2[n] +
+							rep_s[n]*p_trt3[n]*LR1[n] + rep*alpha_repeat[n]* LR1[n] ) * dt; //dDR/dt
+
+					Pop[n+dim*23] += (alpha[n]*(S[n] + E[n] + I1[n] + I2[n] + L1[n] + L2[n]) + 
+							alpha_repeat[n]*(SR[n] + ER[n] + IR1[n] + IR2[n] + LR1[n] + LR2[n])) * dt; //dCumulativeTesting/dt
 				}
 				}
 					

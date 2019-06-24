@@ -9,11 +9,6 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 
 	if (intervention == 'basecase') return(e)
 
-	# if the intervention is not among those defined in interventions, error
-	if (! intervention %in% interventions$codename) {
-		stop("the intervention must be defined in interventions definition dataframe")
-	}
-
   # turn the intervention codename into arguments for adjust_screening_for_intervention
 	switch(intervention, 
 									annual = adjust_screening_for_intervention(e, pop_indices = 1:32, new_level = 1),
@@ -24,6 +19,19 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
  msm_hivpos_twice_annual = adjust_screening_for_intervention(e, pop_indices = m5, new_level = 2),
 			 msm_hivneg_annual = adjust_screening_for_intervention(e, pop_indices = m4, new_level = 1),
  msm_hivneg_twice_annual = adjust_screening_for_intervention(e, pop_indices = m4, new_level = 2),
+ msm_annual_hr_msm_quarterly = {
+		adjust_screening_for_intervention(e, pop_indices = c(m4,m5), new_level = 1)
+
+		adjust_screening_for_intervention(
+			e, 
+			pop_indices = # high sexual activity msm
+				setdiff(c(m4, m5), setdiff(1:40, pop$index[pop$k == 'high'])),
+			new_level = 4)
+	 },
+ prior_diagnosis_quarterly = {
+    e$params$screen_repeat[105:nrow(e$params$screen_repeat), ] <- 
+			4
+ }
 	)
 
   return(invisible(NULL))
@@ -36,7 +44,7 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 #' time period and among the targeted population which are less than 
 #' the new_level of screening and update them to the new_level.
 #'
-adjust_screening_for_intervention <- function(e, intervention_start = 105, pop_indices, new_level) {
+adjust_screening_for_intervention <- function(e, intervention_start = 105, pop_indices, new_level, repeat_level = NA) {
 
 	# First check that the intervention years are within the modeled time period
 	# and that the time varying parameters extend to at least the end of the
@@ -64,6 +72,7 @@ intervention period.")
 	# Remember that the version of screen the C++ uses is the one from 
 	# the params list, so be sure to update that as well.
 	e$params$screen <- e$screen
+	e$params$screen_repeat <- e$params$screen
 
 	return(invisible(NULL))
 }
