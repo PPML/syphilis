@@ -10,4 +10,4 @@
 #SBATCH --output=sbatch-out/%x_%A_%a.out
 
 source ~/load-gcc-and-R.sh
-srun Rscript run_amcmc_from_optims.R $1 ${SLURM_ARRAY_TASK_ID}
+srun Rscript run_amcmc_from_optims.R ${SLURM_ARRAY_TASK_ID}
