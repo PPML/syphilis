@@ -13,6 +13,7 @@ are 2,787,423 and 4,230,601 respectively (assumed from 2015 census estimates).
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 devtools::load_all()
 library(dplyr)
+library(magrittr)
 library(ggplot2)
 library(reshape2)
 library(RColorBrewer)
@@ -70,44 +71,77 @@ for (state in c('LA', 'MA')) {
 ### Prevalence and Incidence 
 ### Basecase, Annual, and MSM Annual Screening Scenarios
 
-```{r plot data, fig.width=9, fig.height=4, echo=FALSE, dpi = 300}
-for (state in c('LA', 'MA')) {
-	df <- get(paste0(tolower(state), '_df'))
-	df <- filter(df, variable != 'tests_per_year')
-	plt <- 
-		ggplot(
-					data = df, 
-					mapping = aes(
-						x=year, 
-						y=value, 
-						color = intervention, 
-						linetype=intervention)) +
-			 geom_line() + 
-			 expand_limits(y=c(0,0)) + 
-			 facet_wrap(~variable, scales='free_y') + 
-			 ggtitle(statenames[[state]]) + 
-			 theme_bw() + 
-			 guides(linetype = guide_legend(title='Baseline Rate of Screening'),
-							color = guide_legend(title='Baseline Rate of Screening')) + 
-			 scale_color_manual(values = c(basecase = 'black', annual = 'red',
-																		 msm_annual='blue',
-																		 msm_annual_hr_msm_quarterly = 'forestgreen',
-																		 prior_diagnosis_quarterly = 'purple')) +
-			 if (state == 'LA') {
-				 theme(legend.position = 'none')
-			 } else {
-				 theme(legend.position = 'bottom')
-			 }
+```{r plot data, fig.width=9, fig.height=6, echo=FALSE, dpi = 300}
+# for (state in c('LA', 'MA')) {
+# 	df <- get(paste0(tolower(state), '_df'))
+# 	df <- filter(df, variable != 'tests_per_year')
+# 	plt <- 
+# 		ggplot(
+# 					data = df, 
+# 					mapping = aes(
+# 						x=year, 
+# 						y=value, 
+# 						color = intervention, 
+# 						linetype=intervention)) +
+# 			 geom_line() + 
+# 			 expand_limits(y=c(0,0)) + 
+# 			 facet_wrap(~variable, scales='free_y') + 
+# 			 ggtitle(statenames[[state]]) + 
+# 			 theme_bw() + 
+# 			 guides(linetype = guide_legend(title='Baseline Rate of Screening'),
+# 							color = guide_legend(title='Baseline Rate of Screening')) + 
+# 			 scale_color_manual(values = c(basecase = 'black', annual = 'red',
+# 																		 msm_annual='blue',
+# 																		 msm_annual_hr_msm_quarterly = 'forestgreen',
+# 																		 prior_diagnosis_quarterly = 'purple')) +
+# 			 if (state == 'LA') {
+# 				 theme(legend.position = 'none')
+# 			 } else {
+# 				 theme(legend.position = 'bottom')
+# 			 }
 
-	print(plt)
-}
+# 	print(plt)
+# }
+
+### Alternative Format, one ggplot with two facet dimensions: 
+df <- rbind.data.frame(
+  cbind.data.frame(state = 'Louisiana', la_df),
+	cbind.data.frame(state = 'Massachusetts', ma_df))
+
+df$variable %<>% factor(levels = c('prevalence_per_100000', 'incidence_per_100000'), labels = c('Prevalence', 'Incidence'))
+
+df$intervention %<>% factor(
+	levels = c('basecase', 'annual', 'msm_annual', 'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly'),
+	labels = c('Base Case', 'Annual', 'MSM Annual', 'High Activity MSM Quarterly', 'Prior Diagnosis (Past 2 Years) Quarterly'))
+
+df %<>% filter(variable != 'tests_per_year')
+
+plt <- ggplot(
+			data = df, 
+			mapping = aes(
+				x=year, 
+				y=value, 
+				color = intervention, 
+				linetype=intervention)) +
+	 geom_line() + 
+	 expand_limits(y=c(0,0)) + 
+	 facet_wrap(state~variable, scales='free_y') + 
+	 # ggtitle("Screening Intervention Outcomes") + 
+	 theme_bw() + 
+	 guides(linetype = guide_legend(title='Intervention Scenario Screening Rates'),
+					color = guide_legend(title='Intervention Scenario Screening Rates')) +
+	 ylab("Infections per 100,000") + 
+	 xlab("Year") + 
+	 scale_color_manual(values = c('black', 'red', 'blue', 'forestgreen', 'purple'))
+
+print(plt)
 ```
 
 
 ### Infectious and Noninfectious Prevalence 
 ### Basecase, Annual, and MSM Annual Screening Scenarios
 
-```{r define helper fn 2, echo=FALSE, fig.width=9, fig.height=4, dpi=300}
+```{r define helper fn 2, echo=FALSE, fig.width=9, fig.height=6, dpi=300}
 extractInterventionStatisticsWithInfectiousness <- function(e, intervention) {
 	intervention_start <- min(intervention_years)
 	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
@@ -163,34 +197,67 @@ for (state in c('LA', 'MA')) {
 	assign(paste0(tolower(state), '_df2'), df)
 }
 
-for (state in c('LA', 'MA')) {
-	df <- get(paste0(tolower(state), '_df2'))
-	plt <- 
-		ggplot(
-					data = df, 
-					mapping = aes(
-						x=year, 
-						y=value, 
-						color = intervention, 
-						linetype = intervention)) +
-			 geom_line() + 
-			 expand_limits(y=c(0,0)) + 
-			 facet_wrap(~variable, scales='free_y') + 
-			 ggtitle(statenames[[state]]) + 
-			 theme_bw() + 
-			 guides(linetype = guide_legend(title='Baseline Rate of Screening'),
-							color = guide_legend(title='Baseline Rate of Screening')) + 
-			 scale_color_manual(values = c(basecase = 'black', annual = 'red', msm_annual='blue',
-																		 msm_annual_hr_msm_quarterly = 'forestgreen',
-																		 prior_diagnosis_quarterly = 'purple')) +
-			 if (state == 'LA') {
-				 theme(legend.position = 'none')
-			 } else {
-				 theme(legend.position = 'bottom')
-			 }
+# for (state in c('LA', 'MA')) {
+# 	df <- get(paste0(tolower(state), '_df2'))
+# 	plt <- 
+# 		ggplot(
+# 					data = df, 
+# 					mapping = aes(
+# 						x=year, 
+# 						y=value, 
+# 						color = intervention, 
+# 						linetype = intervention)) +
+# 			 geom_line() + 
+# 			 expand_limits(y=c(0,0)) + 
+# 			 facet_wrap(~variable, scales='free_y') + 
+# 			 ggtitle(statenames[[state]]) + 
+# 			 theme_bw() + 
+# 			 guides(linetype = guide_legend(title='Baseline Rate of Screening'),
+# 							color = guide_legend(title='Baseline Rate of Screening')) + 
+# 			 scale_color_manual(values = c(basecase = 'black', annual = 'red', msm_annual='blue',
+# 																		 msm_annual_hr_msm_quarterly = 'forestgreen',
+# 																		 prior_diagnosis_quarterly = 'purple')) +
+# 			 if (state == 'LA') {
+# 				 theme(legend.position = 'none')
+# 			 } else {
+# 				 theme(legend.position = 'bottom')
+# 			 }
 
-	print(plt)
-}
+# 	print(plt)
+# }
+
+### alternative plotting format with two facet dimensions
+
+df <- rbind.data.frame(
+  cbind.data.frame(state = 'Louisiana', la_df2),
+	cbind.data.frame(state = 'Massachusetts', ma_df2))
+
+df$variable %<>% factor(levels = c('infectious_prevalence_per_100000', 'noninfectious_prevalence_per_100000'),
+												labels = c('Infectious Prevalence', 'Non-Infectious Prevalence'))
+
+df$intervention %<>% factor(
+	levels = c('basecase', 'annual', 'msm_annual', 'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly'),
+	labels = c('Base Case', 'Annual', 'MSM Annual', 'High Activity MSM Quarterly', 'Prior Diagnosis (Past 2 Years) Quarterly'))
+
+plt <- 
+ggplot(
+			data = df, 
+			mapping = aes(
+				x=year, 
+				y=value, 
+				color = intervention, 
+				linetype = intervention)) +
+	 geom_line() + 
+	 expand_limits(y=c(0,0)) + 
+	 facet_wrap(state~variable, scales='free_y') + 
+	 theme_bw() + 
+	 guides(linetype = guide_legend(title='Intervention Scenario Screening Rates'),
+					color = guide_legend(title='Intervention Scenario Screening Rates')) +
+	 ylab("Infections per 100,000") + 
+	 xlab("Year") + 
+	 scale_color_manual(values = c('black', 'red', 'blue', 'forestgreen', 'purple'))
+
+print(plt)
 ```
 
 Let's look at the incidence rate among those with prior infections vs. all incidence.
