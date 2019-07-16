@@ -448,7 +448,7 @@ List syphSim(
 					
 			if (output_weekly) {
 					// fill results table every week 
-					outputs(y*52 + w, 0) = y + (w+1)/52; //year
+					outputs(y*52 + w, 0) = (float) y + ((float) w+1.0)/52.0; //year
 					for(int n=0; n<dim*24; n++) {
 						outputs(y*52 + w, 1+n) = Pop[n]; // 
 						}
@@ -903,7 +903,7 @@ List syphSimCTCounterfactual(
 					
 			if (output_weekly) {
 					// fill results table every week 
-					outputs(y*52 + w, 0) = y + (w+1)/52; //year
+					outputs(y*52 + w, 0) = (float) y + ((float) w+1.0)/52.0; //year
 					for(int n=0; n<dim*24; n++) {
 						outputs(y*52 + w, 1+n) = Pop[n]; // 
 						}

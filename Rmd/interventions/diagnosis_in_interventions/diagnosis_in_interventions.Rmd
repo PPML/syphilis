@@ -1,0 +1,301 @@
+---
+title: What Stages are Being Diagnosed in Each Intervention Scenario
+author: Christian Testa
+date: July 15, 2019
+output: html_document
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+devtools::load_all()
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+library(tidyr)
+library(here)
+theme_set(theme_bw())
+```
+
+
+```{r def breakdown_diagnoses}
+#' Breakdown Diagnoses into Stages
+#' 
+#' Extract from a simulation matrix (sol) the diagnoses by stage.
+
+breakdown_diagnoses_by_stage <- function(sol) { 
+	intervention_start <- min(intervention_years)
+	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
+
+	data.frame(
+		year = intervention_period/52 + model_to_gregorian_difference,
+		popsize = rowSums(sol[intervention_period, allpop.index]),
+		# year = sol[intervention_period, 1],
+		diagnosed_primary = rowSums(sol[intervention_period, d1.index])   - rowSums(sol[intervention_period-52, d1.index]),
+		diagnosed_secondary = rowSums(sol[intervention_period, d2.index]) - rowSums(sol[intervention_period-52, d2.index]),
+		diagnosed_early_latent = rowSums(sol[intervention_period, d3.index]) - rowSums(sol[intervention_period-52, d3.index]),
+		diagnosed_late_latent = rowSums(sol[intervention_period, d4.index]) - rowSums(sol[intervention_period-52, d4.index])
+		) %>% 
+	mutate(diagnosed_primary = diagnosed_primary / popsize * 100000, 
+		diagnosed_secondary = diagnosed_secondary / popsize * 100000, 
+		diagnosed_early_latent = diagnosed_early_latent / popsize * 100000, 
+		diagnosed_late_latent = diagnosed_late_latent / popsize * 100000 
+	) %>% 
+	select(-popsize) %>% 
+	gather(stage, diagnoses, -year) %>% 
+	mutate(stage = gsub("diagnosed_", "", stage)) %>% 
+	as.data.frame() 
+}
+
+
+breakdown_incidence_by_reinfection <- function(sol) { 
+	intervention_start <- min(intervention_years)
+	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
+
+	data.frame(
+		year = intervention_period/52 + model_to_gregorian_difference,
+		popsize = rowSums(sol[intervention_period, allpop.index]),
+		# year = sol[intervention_period, 1],
+		incidence_first_time = rowSums(sol[intervention_period, inc.index]) - rowSums(sol[intervention_period-52, inc.index]),
+		incidence_reinfection = rowSums(sol[intervention_period, incr.index]) - rowSums(sol[intervention_period-52, incr.index])
+		# diagnosed_primary = rowSums(sol[intervention_period, d1.index])   - rowSums(sol[intervention_period-52, d1.index]),
+		# diagnosed_secondary = rowSums(sol[intervention_period, d2.index]) - rowSums(sol[intervention_period-52, d2.index]),
+		# diagnosed_early_latent = rowSums(sol[intervention_period, d3.index]) - rowSums(sol[intervention_period-52, d3.index]),
+		# diagnosed_late_latent = rowSums(sol[intervention_period, d4.index]) - rowSums(sol[intervention_period-52, d4.index])
+		) %>% 
+	mutate(incidence_first_time = incidence_first_time / popsize * 100000, 
+		incidence_reinfection = incidence_reinfection / popsize * 100000 
+	) %>% 
+	select(-popsize) %>% 
+	gather(stage, infections, -year) %>% 
+	as.data.frame() 
+}
+
+
+breakdown_prevalence_by_stage <- function(sol) { 
+	intervention_start <- min(intervention_years)
+	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
+
+	data.frame(
+		year = intervention_period/52 + model_to_gregorian_difference,
+		popsize = rowSums(sol[intervention_period, allpop.index]),
+		# year = sol[intervention_period, 1],
+		primary = rowSums(sol[intervention_period, c(prim.index, primr.index)]),
+		secondary = rowSums(sol[intervention_period, c(sec.index, secr.index)]),
+		early_latent = rowSums(sol[intervention_period, c(early.index, earlyr.index)]),
+		late_latent = rowSums(sol[intervention_period, c(latent.index, latentr.index)])
+		) %>% 
+	mutate(primary = primary / popsize * 100000, 
+		secondary = secondary / popsize * 100000, 
+		early_latent = early_latent / popsize * 100000, 
+		late_latent = late_latent / popsize * 100000) %>% 
+	select(-popsize) %>% 
+	gather(stage, diagnoses, -year) %>% 
+	as.data.frame() 
+}
+
+```
+
+
+# break down diagnoses by stage
+
+```{r def simulate_interventions}
+
+simulate_interventions <- function(theta, info_extractor) {
+	intervention_outcomes <- list()
+	for (intervention in c('basecase', 'annual', 'msm_annual', 'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly')) {
+		e <- constructSimulationEnvironment(theta)
+		e$params$output_weekly <- TRUE
+		modify_simulation_environment_for_an_intervention(e, intervention)
+		runSimulation(e)
+		intervention_outcomes[[length(intervention_outcomes)+1]] <- 
+			cbind.data.frame(intervention = intervention, info_extractor(e$sim$out))
+	}
+	do.call(rbind.data.frame, intervention_outcomes)
+}
+```
+
+```{r compute diagnoses data}
+
+for (state in c('LA', 'MA')) { 
+
+	# set the number of years to run out the model to 2050
+	load_globals(model.end = 116)
+
+	# parametrize the model
+	load.start()
+
+	# get optimized for the model in the specified state.
+	theta <- get(paste0('theta_', tolower(state)))
+
+
+
+	# simmulate the annual and basecase scenarios getting
+	# - prevalent cases, incidents, and number of tests done
+	assign(paste0(tolower(state), '_df'),
+				 simulate_interventions(theta, info_extractor = breakdown_diagnoses_by_stage))
+}
+
+df1 <- rbind.data.frame(
+	cbind.data.frame(state = 'Louisiana', la_df),
+	cbind.data.frame(state = 'Massachusetts', ma_df))
+```
+
+
+
+```{r plotting code, fig.width = 8, fig.height = 8}
+p1 <- ggplot(filter(df1, state == 'Louisiana'), aes(x = year, y = diagnoses, fill = stage)) + 
+	geom_area(colour="black", size=.2, alpha=.4) + 
+	scale_fill_brewer(palette="Greens") + 
+	xlab("Diagnoses per Year") + 
+	facet_wrap(~ intervention) + 
+	ylab("Year") + 
+	scale_x_continuous(breaks = seq(2016, 2027, by = 2)) + 
+	theme(axis.text.x = element_text(angle = 90)) + 
+	ggtitle("Diagnoses per 100,000 per Year by Disease Stage", subtitle = 'Louisiana')
+
+ggsave(plot = p1, filename = "diagnoses_la.png", height = unit(5, 'in'), width = unit(10, 'in'))
+
+
+p2 <- ggplot(filter(df1, state == 'Massachusetts'), aes(x = year, y = diagnoses, fill = stage)) + 
+	geom_area(colour="black", size=.2, alpha=.4) + 
+	scale_fill_brewer(palette="Greens") + 
+	xlab("Diagnoses per Year") + 
+	facet_wrap(~ intervention) + 
+	ylab("Year") + 
+	scale_x_continuous(breaks = seq(2016, 2027, by = 2)) + 
+	theme(axis.text.x = element_text(angle = 90)) + 
+	ggtitle("Diagnoses per 100,000 per Year by Disease Stage", subtitle = 'Massachusetts') 
+
+ggsave(plot = p2, filename = "diagnoses_ma.png", height = unit(5, 'in'), width = unit(10, 'in'))
+```
+
+
+
+# Prevalence 
+
+
+```{r compute prevalence data}
+
+for (state in c('LA', 'MA')) { 
+
+	# set the number of years to run out the model to 2050
+	load_globals(model.end = 116)
+
+	# parametrize the model
+	load.start()
+
+	# get optimized for the model in the specified state.
+	theta <- get(paste0('theta_', tolower(state)))
+
+
+
+	# simmulate the annual and basecase scenarios getting
+	# - prevalent cases, incidents, and number of tests done
+	assign(paste0(tolower(state), '_df'),
+				 simulate_interventions(theta, info_extractor = breakdown_prevalence_by_stage))
+}
+
+df2 <- rbind.data.frame(
+	cbind.data.frame(state = 'Louisiana', la_df),
+	cbind.data.frame(state = 'Massachusetts', ma_df))
+```
+
+
+
+```{r plotting code 2, fig.height = 8, fig.width = 8}
+# ggplot(df2, aes(x = year, y = diagnoses, fill = stage)) + 
+# 	geom_area(colour="black", size=.2, alpha=.4) + 
+# 	scale_fill_brewer(palette="Greens") + 
+# 	xlab("Diagnoses per Year") + 
+# 	facet_grid(intervention ~ state, scales='free_y') + 
+# 	ylab("Year") + 
+# 	scale_x_continuous(breaks = seq(104, 115)) + 
+# 	ggtitle("Prevalent Infections per Year by Disease Stage") %>% 
+# 	print
+
+p3 <- ggplot(filter(df2, state == 'Louisiana'), aes(x = year, y = diagnoses, fill = stage)) + 
+	geom_area(colour="black", size=.2, alpha=.4) + 
+	scale_fill_brewer(palette="Reds") + 
+	xlab("Prevalent Infections") + 
+	facet_wrap(~ intervention) + 
+	ylab("Year") + 
+	scale_x_continuous(breaks = seq(2016, 2027, by = 2)) + 
+	theme(axis.text.x = element_text(angle = 90)) + 
+	ggtitle("Prevalent Infections per 100,000 by Disease Stage", subtitle = 'Louisiana') 
+
+ggsave(plot = p3, filename = 'prevalent_infections_la.png', width = unit(10, 'in'), height = unit(5, 'in'))
+
+p4 <- ggplot(filter(df2, state == 'Massachusetts'), aes(x = year, y = diagnoses, fill = stage)) + 
+	geom_area(colour="black", size=.2, alpha=.4) + 
+	scale_fill_brewer(palette="Reds") + 
+	xlab("Prevalent Infections") + 
+	facet_wrap(~ intervention) + 
+	ylab("Year") + 
+	scale_x_continuous(breaks = seq(2016, 2027, by = 2)) + 
+	theme(axis.text.x = element_text(angle = 90)) + 
+	ggtitle("Prevalent Infections per 100,000 by Disease Stage", subtitle = 'Massachusetts')
+
+ggsave(plot = p4, filename = 'prevalent_infections_ma.png', width = unit(10, 'in'), height = unit(5, 'in'))
+```
+
+
+```{r incidence}
+for (state in c('LA', 'MA')) { 
+
+	# set the number of years to run out the model to 2050
+	load_globals(model.end = 116)
+
+	# parametrize the model
+	load.start()
+
+	# get optimized for the model in the specified state.
+	theta <- get(paste0('theta_', tolower(state)))
+
+
+
+	# simmulate the annual and basecase scenarios getting
+	# - prevalent cases, incidents, and number of tests done
+	assign(paste0(tolower(state), '_df'),
+				 simulate_interventions(theta, info_extractor = breakdown_incidence_by_reinfection))
+}
+
+df3 <- rbind.data.frame(
+	cbind.data.frame(state = 'Louisiana', la_df),
+	cbind.data.frame(state = 'Massachusetts', ma_df))
+
+
+p5 <- ggplot(filter(df3, state == 'Louisiana'), aes(x = year, y = infections, fill = stage)) + 
+	geom_area(colour="black", size=.2, alpha=.4) + 
+	scale_fill_brewer(palette="Blues") + 
+	xlab("Incident Infections Per Year") + 
+	facet_wrap(~ intervention) + 
+	ylab("Year") + 
+	scale_x_continuous(breaks = seq(2016, 2027, by = 2)) + 
+	theme(axis.text.x = element_text(angle = 90)) + 
+	labs(fill = 'reinfection status') + 
+	ggtitle("Incident Infections per 100,000 per Year by Reinfection Status (Past 2 Years)", subtitle = 'Louisiana') 
+
+ggsave(plot = p3, filename = 'incident_infections_la.png', width = unit(10, 'in'), height = unit(5, 'in'))
+
+p6 <- ggplot(filter(df3, state == 'Massachusetts'), aes(x = year, y = infections, fill = stage)) + 
+	geom_area(colour="black", size=.2, alpha=.4) + 
+	scale_fill_brewer(palette="Blues") + 
+	xlab("Incident Infections Per Year") + 
+	facet_wrap(~ intervention) + 
+	ylab("Year") + 
+	scale_x_continuous(breaks = seq(2016, 2027, by = 2)) + 
+	theme(axis.text.x = element_text(angle = 90)) + 
+	labs(fill = 'reinfection status') + 
+	ggtitle("Incident Infections per 100,000 per Year by Reinfection Status (Past 2 Years)", subtitle = 'Massachusetts') 
+
+ggsave(plot = p4, filename = 'incident_infections_ma.png', width = unit(10, 'in'), height = unit(5, 'in'))
+```
+
+
+
+
+```{r}
+library(cowplot)
+plot_grid(p1, p3, p5, p2, p4, p6)
+ggsave("2x3_diagnoses_and_prevalent_infections.png", width = unit(30, 'in'), height = unit(15, 'in'))
+```
+

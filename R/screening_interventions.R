@@ -29,7 +29,7 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 			new_level = 4)
 	 },
  prior_diagnosis_quarterly = {
-    e$params$screen_repeat[105:nrow(e$params$screen_repeat), ] <- 
+    e$params$screen_repeat[106:nrow(e$params$screen_repeat), ] <- 
 			4
  }
 	)
@@ -44,7 +44,7 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 #' time period and among the targeted population which are less than 
 #' the new_level of screening and update them to the new_level.
 #'
-adjust_screening_for_intervention <- function(e, intervention_start = 105, pop_indices, new_level, repeat_level = NA) {
+adjust_screening_for_intervention <- function(e, intervention_start = 106, pop_indices, new_level, repeat_level = NA) {
 
 	# First check that the intervention years are within the modeled time period
 	# and that the time varying parameters extend to at least the end of the
