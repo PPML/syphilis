@@ -73,6 +73,8 @@ load_globals <- function(model.end = 110) {
   dr.index <<- index*22+1:index            #diagnosed primary, secondary, and early latent, previously treated
 	tested.index <<- index*23+1:index        #tested for syphilis
 
+
+
 	# index for all infected individuals
 	infected.index <<- c(e.index, prim.index, sec.index, early.index,
 	  latent.index, er.index, primr.index, secr.index, earlyr.index, latentr.index)
@@ -99,7 +101,7 @@ load_globals <- function(model.end = 110) {
   m4<<-13:16 #M subpop4
   m5<<-17:20 #M subpop5
   msw <<-1:12 #M heterosexual
-  msm <<-13:20 #M men-who-have-sex-with-women 
+	msm <<- c(m4,m5) # M men-who-have-sex-with-men
   f1<<-21:24 #F subpop1
   f2<<-25:28 #F subpop2
   f3<<-29:32 #F subpop3
@@ -128,8 +130,8 @@ load_globals <- function(model.end = 110) {
   y.f.3 <<- 29:30 # young age cat, subpop 3
   o.f.3 <<- 31:32 # old age cat, subpop 3
   y.f.23 <<- c(25:26,29:30) # youngest age cat, subpops 2&3
-	high_activity <<- seq(2,40,2) # low activity
-	low_activity <<- seq(1,39,2) # high activity
+	high_activity <<- seq(2, 40, 2) # high sexual activity
+	low_activity <<- seq(1, 39, 2) # low sexual activity
 
   # Make a 4 dimensional array with each of the model dimensions 
 	# corresponding to the index of the population in their serial 
@@ -163,6 +165,42 @@ load_globals <- function(model.end = 110) {
 	natural_history_parameters <<- 
 		c('logit.b.m', 'logit.b.f', 'logit.b.msm', 'log.dur.incub', 'log.dur.prim',
 			'log.dur.sec', 'log.dur.imm.inf', 'log.dur.imm.early', 'log.dur.immune')
+
+
+	###  Population Indices for Outcomes (diagnosis, incidence, prevalence) by Sex (f, msw, msm), and Risk (high/low activity)
+
+  # Diagnosis by Sex 
+  diagnosed_females <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, females))
+	diagnosed_msm <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, msm))
+	diagnosed_msw <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, msw))
+
+  # Diagnosis by Activity
+  diagnosed_high_activity <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, high_activity))
+  diagnosed_low_activity <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, low_activity))
+
+	# Incidence by Sex
+	incidence_females <<- c(sapply(list(inc.index, incr.index), `[`, females))
+	incidence_msm <<- c(sapply(list(inc.index, incr.index), `[`, msm))
+	incidence_msw <<- c(sapply(list(inc.index, incr.index), `[`, msw))
+
+  # Incidence by Risk
+	incidence_high_activity <<- c(sapply(list(inc.index, incr.index), `[`, high_activity))
+	incidence_low_activity <<- c(sapply(list(inc.index, incr.index), `[`, low_activity))
+
+  # Prevalence by Sex
+	prevalence_females <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
+	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, females))
+	prevalence_msw <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
+	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, msw))
+	prevalence_msm <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
+	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, msm))
+
+	# Prevalence by Risk
+	prevalence_high_activity <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
+	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, high_activity))
+	prevalence_low_activity <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
+	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, low_activity))
+
 
 	return(invisible(NULL))
 }

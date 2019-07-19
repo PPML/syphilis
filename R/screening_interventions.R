@@ -13,6 +13,7 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 	switch(intervention, 
 									annual = adjust_screening_for_intervention(e, pop_indices = 1:32, new_level = 1),
 						twice_annual = adjust_screening_for_intervention(e, pop_indices = 1:32, new_level = 2),
+			 four_times_annual = adjust_screening_for_intervention(e, pop_indices = 1:32, new_level = 4),
 							msm_annual = adjust_screening_for_intervention(e, pop_indices = c(m4,m5), new_level = 1),
 				msm_twice_annual = adjust_screening_for_intervention(e, pop_indices = c(m4,m5), new_level = 2),
 			 msm_hivpos_annual = adjust_screening_for_intervention(e, pop_indices = m5, new_level = 1),
@@ -27,14 +28,20 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 				setdiff(c(m4, m5), setdiff(1:40, pop$index[pop$k == 'high'])),
 			new_level = 4)
 	 },
- msm_8x_yearly = adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 8),
+ msm_8x_annually = adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 8),
+ hr_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1),
+ hr_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1),
+ msm_annual_all_hr_annual = {
+   adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 1)
+   adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1)
+	 },
+ msm_annual_all_hr_half_annual = {
+   adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 1)
+   adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = .5)
+	 },
  prior_diagnosis_quarterly = {
     e$params$screen_repeat[106:nrow(e$params$screen_repeat), ] <- 
 			4
-	 },
- msm_annual_all_hr_half_annual = {
-	 adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = .5)
-	 adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 1)
 	 },
  high_activity_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1),
  high_activity_twice_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1)
