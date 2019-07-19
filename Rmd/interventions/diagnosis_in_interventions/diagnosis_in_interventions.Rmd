@@ -101,7 +101,7 @@ breakdown_prevalence_by_stage <- function(sol) {
 
 simulate_interventions <- function(theta, info_extractor) {
 	intervention_outcomes <- list()
-	for (intervention in c('basecase', 'annual', 'msm_annual', 'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly')) {
+	for (intervention in c('basecase', 'annual', 'msm_annual', 'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly', 'msm_8x_annually')) {
 		e <- constructSimulationEnvironment(theta)
 		e$params$output_weekly <- TRUE
 		modify_simulation_environment_for_an_intervention(e, intervention)
