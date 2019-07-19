@@ -99,6 +99,7 @@ load_globals <- function(model.end = 110) {
   m4<<-13:16 #M subpop4
   m5<<-17:20 #M subpop5
   msw <<-1:12 #M heterosexual
+  msm <<-13:20 #M men-who-have-sex-with-women 
   f1<<-21:24 #F subpop1
   f2<<-25:28 #F subpop2
   f3<<-29:32 #F subpop3
@@ -127,6 +128,8 @@ load_globals <- function(model.end = 110) {
   y.f.3 <<- 29:30 # young age cat, subpop 3
   o.f.3 <<- 31:32 # old age cat, subpop 3
   y.f.23 <<- c(25:26,29:30) # youngest age cat, subpops 2&3
+	high_activity <<- seq(2,40,2) # low activity
+	low_activity <<- seq(1,39,2) # high activity
 
   # Make a 4 dimensional array with each of the model dimensions 
 	# corresponding to the index of the population in their serial 

@@ -21,17 +21,23 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
  msm_hivneg_twice_annual = adjust_screening_for_intervention(e, pop_indices = m4, new_level = 2),
  msm_annual_hr_msm_quarterly = {
 		adjust_screening_for_intervention(e, pop_indices = c(m4,m5), new_level = 1)
-
 		adjust_screening_for_intervention(
 			e, 
 			pop_indices = # high sexual activity msm
 				setdiff(c(m4, m5), setdiff(1:40, pop$index[pop$k == 'high'])),
 			new_level = 4)
 	 },
+ msm_8x_yearly = adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 8),
  prior_diagnosis_quarterly = {
     e$params$screen_repeat[106:nrow(e$params$screen_repeat), ] <- 
 			4
- }
+	 },
+ msm_annual_all_hr_half_annual = {
+	 adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = .5)
+	 adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 1)
+	 },
+ high_activity_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1),
+ high_activity_twice_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1)
 	)
 
   return(invisible(NULL))
