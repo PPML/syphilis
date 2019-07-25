@@ -124,7 +124,7 @@ extractInterventionStatistics <- function(e, intervention) {
 		year = intervention_period/52 + model_to_gregorian_difference,
 		prevalent_infections = rowSums(e$sim$out[1+intervention_period, 1+infected.index]),
 		incidents_per_year = rowSums(e$sim$out[1+intervention_period, 1+c(inc.index, incr.index)]) - 
-			rowSums(e$sim$out[intervention_period, 1+c(inc.index, incr.index)]),
+			rowSums(e$sim$out[1 + intervention_period - 52, 1+c(inc.index, incr.index)]),
 		tests_per_year = rowSums(e$sim$out[1+intervention_period,1+tested.index]) - 
 			rowSums(e$sim$out[intervention_period,1+tested.index]),
 		popsize = rowSums(e$sim$out[1+intervention_period, 1+allpop.index])
