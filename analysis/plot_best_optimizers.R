@@ -11,6 +11,6 @@ plot.posteriors(post.sample, output_dir=here('inst/optims/'))
 
 state <<- 'MA'
 load.start()
-trace.burn.thin <- trace.burn <- trace <- readRDS(system.file('optims', '7-7-19', 'ma_25_best_pars.rds', package='syphilis'))
+trace.burn.thin <- trace.burn <- trace <- readRDS(system.file('optims', '7-19-19', 'ma_25_best_pars.rds', package='syphilis'))
 post.sample <- model.fits(trace, use_trace_without_sampling=T)
 plot.posteriors(post.sample, output_dir=here('inst/optims/'))
