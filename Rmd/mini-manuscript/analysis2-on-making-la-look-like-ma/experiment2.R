@@ -86,11 +86,13 @@ base_df <- simulate_with_param_replacements()
 partnership_params <- grep("c.min|rp", names(theta_la), value=T)
 assortative_params <- grep("theta|epsilon|pi", names(theta_la), value=T)
 msm_assortative_params <- grep("theta.4|theta.5|epsilon.4|epsilon.5|pi.msm|theta.hiv", names(theta_la), value=T)
+non_msm_assortative_params <- setdiff(assortative_params, msm_assortative_params)
 trt_params <- grep("trt", names(theta_la), value=T)
 
 partnership_df <- simulate_with_param_replacements(partnership_params)
 assortative_df <- simulate_with_param_replacements(assortative_params)
 msm_assortative_df <- simulate_with_param_replacements(msm_assortative_params)
+non_msm_assortative_df <- simulate_with_param_replacements(non_msm_assortative_params)
 trt_df <- simulate_with_param_replacements(trt_params)
 
 partnership_assortative_df <- simulate_with_param_replacements(c(partnership_params, assortative_params))
@@ -104,6 +106,7 @@ cbind.data.frame(variable = 'base', base_df),
 cbind.data.frame(variable = 'partnership', partnership_df),
 cbind.data.frame(variable = 'assortative', assortative_df),
 cbind.data.frame(variable = 'msm_assortative', assortative_df),
+cbind.data.frame(variable = 'non_msm_assortative', non_msm_assortative_df),
 cbind.data.frame(variable = 'trt', trt_df),
 cbind.data.frame(variable = 'partnership+assortative', partnership_assortative_df),
 cbind.data.frame(variable = 'assortative+trt', assortative_trt_df),
@@ -118,3 +121,8 @@ p <- ggplot(df2, aes(x = year, y = prevalence_per_100000, color = variable)) +
   geom_line()
 
 ggplotly(p)
+
+
+p2 <- ggplot(filter(df2, variable %in% c('base', 'partnership', 'assortative', 'trt')), 
+  aes(x = year, y = prevalence_per_100000, color = variable)) + 
+  geom_line()
