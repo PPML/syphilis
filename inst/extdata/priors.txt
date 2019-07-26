@@ -1,6 +1,6 @@
 parameter	distribution	param1	param2	mean	sd	sd.prior	transformation	mean.transf	ucl.tranf	sd.transf.1	sd.transf
-epsilon.1	beta	5	1.1	0.5	0.39	0.2398	logit	0	3.47609869	1.77351974	1.551760355
-epsilon.2	beta	5	1.1	0.5	0.39	0.2398	logit	0	3.47609869	1.77351974	1.551760355
+epsilon.1	beta	1.1	1.1	0.5	0.39	0.2398	logit	0	3.47609869	1.77351974	1.551760355
+epsilon.2	beta	1.1	1.1	0.5	0.39	0.2398	logit	0	3.47609869	1.77351974	1.551760355
 epsilon.3	beta	5	1.1	0.5	0.39	0.2398	logit	0	3.47609869	1.77351974	1.551760355
 epsilon.4	beta	5	1.1	0.5	0.39	0.2398	logit	0	3.47609869	1.77351974	1.551760355
 epsilon.5	beta	5	1.1	0.5	0.39	0.2398	logit	0	3.47609869	1.77351974	1.551760355

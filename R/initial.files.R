@@ -39,7 +39,7 @@ initial.files <- function(state) {
     p.el.var <<- as.vector(stage.dat[,c("pEL_var_y_m","pEL_var_o_m","pEL_var_y_f")]) 
     #browser() 
     #read in model priors (used by model.priors.fun.R)
-    priors <<- read.delim(system.file("extdata/priors.txt", package='syphLAMA'))  # read in priors 
+    priors <<- read.delim(system.file("extdata/priors.txt", package='syphilis'))  # read in priors 
     sd.theta <<- priors$sd.transf.1 #starting value for standard deviation associated with each parameter, adapted during fitting
     prior.param1 <<-  priors$param1 #first parameter describing probablity distributions
     names(prior.param1) <<-priors$parameter
