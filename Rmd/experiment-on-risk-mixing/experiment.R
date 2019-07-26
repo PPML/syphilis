@@ -12,6 +12,7 @@ library(ggplot2)
 library(tidyr)
 library(here)
 theme_set(theme_bw())
+library(cowplot)
 
 
 # Breakdown Function
@@ -106,10 +107,10 @@ breakdown_simulation <- function(sol) {
 
 simulate_interventions <- function(theta, info_extractor) {
 	intervention_outcomes <- list()
-	for (intervention in c('basecase', 'annual', 'msm_annual',
+	for (intervention in c('basecase', 'annual', 'twelve_times_annual', 'msm_annual',
 	'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly',
-	'msm_8x_annually', 'twice_annual', 'msm_annual_all_hr_annual',
-	'msm_annual_all_hr_half_annual')) {
+	'msm_8x_annually', 'twice_annual', 'msm_annual_all_hr_annual'
+)) {
 		e <- constructSimulationEnvironment(theta)
 		e$params$output_weekly <- TRUE
 		modify_simulation_environment_for_an_intervention(e, intervention)
@@ -123,14 +124,28 @@ simulate_interventions <- function(theta, info_extractor) {
 
 #### Simulation #####
 
+rm(theta_la)
+rm(theta_ma)
+data(theta_la)
+data(theta_ma)
 # risk_mixing_parameters <- grep('epsilon', names(theta_la), value = T)
 # theta_la[risk_mixing_parameters] <- theta_ma[risk_mixing_parameters]
 
 # subpopulation_mixing_parameters <- grep('theta', names(theta_la), value = T)
 # theta_la[subpopulation_mixing_parameters] <- theta_ma[subpopulation_mixing_parameters]
 
+# treatment_rate_parameters <- grep('trt', names(theta_la), value=T)
+# theta_la[treatment_rate_parameters] <- theta_ma[treatment_rate_parameters]
 
-# Simulate and Breakdown Simulation Statistics for Each State and Intervention
+# partnership_parameters <- grep('c.min|rp', names(theta_la), value=T)
+# theta_la[partnership_parameters] <- theta_ma[partnership_parameters]
+
+# age_assortative_params <- grep('pi', names(theta_la), value=T)
+# theta_la[age_assortative_params] <- theta_ma[age_assortative_params]
+
+# theta_la <- theta_ma
+
+# # Simulate and Breakdown Simulation Statistics for Each State and Intervention
 for (state in c('LA', 'MA')) { 
 	load_globals(model.end = 116) # set the number of years to run out the model to 2050
 	load.start() # parametrize the model
@@ -253,7 +268,22 @@ for (row_i in 1:nrow(combinations_table)) {
 
   assign(plot_name, plt)
 
-	ggsave(filename = paste0('individual_plots/', plot_name, '.png'), plot = plt)
+	# ggsave(filename = paste0('individual_plots/', plot_name, '.png'), plot = plt)
 }
 
 
+# Combine Plots
+for (state in c('la', 'ma')) { 
+	plt <- cowplot::plot_grid(
+		get(paste0('prevalence_by_sex_', state)),
+		get(paste0('incidence_by_sex_', state)),
+		get(paste0('diagnosed_by_sex_', state)),
+		get(paste0('prevalence_by_stage_', state)),
+		get(paste0('incidence_by_reinfection_', state)),
+		get(paste0('diagnosed_by_stage_', state)),
+		get(paste0('prevalence_by_risk_', state)),
+		get(paste0('incidence_by_risk_', state)),
+		get(paste0('diagnosed_by_risk_', state)),
+		ncol = 3)
+	ggsave(plot = plt, paste0('outcomes_', state, '_overwrite_risk_mixing', '.svg'), height = 30, width = 30, dpi = 600)
+}

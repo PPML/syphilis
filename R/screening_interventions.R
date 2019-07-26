@@ -13,7 +13,7 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 	switch(intervention, 
 									annual = adjust_screening_for_intervention(e, pop_indices = 1:32, new_level = 1),
 						twice_annual = adjust_screening_for_intervention(e, pop_indices = 1:32, new_level = 2),
-			 four_times_annual = adjust_screening_for_intervention(e, pop_indices = 1:32, new_level = 4),
+			 twelve_times_annual = adjust_screening_for_intervention(e, pop_indices = 1:32, new_level = 8),
 							msm_annual = adjust_screening_for_intervention(e, pop_indices = c(m4,m5), new_level = 1),
 				msm_twice_annual = adjust_screening_for_intervention(e, pop_indices = c(m4,m5), new_level = 2),
 			 msm_hivpos_annual = adjust_screening_for_intervention(e, pop_indices = m5, new_level = 1),

@@ -36,6 +36,19 @@ last_optims <- lapply(optims, last)
 last_optims <- lapply(last_optims, function(x) x[['par']])
 optim_pars <- do.call(rbind.data.frame, last_optims)
 
+colnames(optim_pars) <- rep(names(theta_la), 2)
+natural_param_idxs <- which(colnames(optim_pars) %in% natural_history_parameters)
+
+
+first_natural_history_idxs <- natural_param_idxs[1:(length(natural_param_idxs)/2)]
+second_natural_history_idxs <- natural_param_idxs[(length(natural_param_idxs)/2 + 1):length(natural_param_idxs)]
+
+optim_pars[,first_natural_history_idxs] <- optim_pars[,second_natural_history_idxs]
+saveRDS(optim_pars, here("inst/optims/6-6-19/top25_best_simultaneous_params.rds"))
+
+optim_pars[,natural_param_idxs[1:length(natural_param_idxs)/2]] <- 
+	optim_pars[,natural_param_idxs[(length(natural_param_idxs)/2 + 1):length(natural_param_idxs)]] 
+
 optim_pars_LA <- optim_pars[, 1:(ncol(optim_pars)/2)]
 optim_pars_MA <- optim_pars[, (ncol(optim_pars)/2) + 1:(ncol(optim_pars)/2)]
 
