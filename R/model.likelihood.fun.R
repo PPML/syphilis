@@ -24,8 +24,13 @@ model.epi.loglik <- function(theta) {
   ll.sec <- sum(dbeta(x=p.sec,beta.params.sec$alpha, beta.params.sec$beta, log=TRUE))/50 #log likelihood for proportion of early syphilis cases with secondary infection
   ll.el <- sum(dbeta(x=p.el,beta.params.el$alpha, beta.params.el$beta, log=TRUE))/50 #log likelihood for proportion of early syphilis cases with early latent infection
   ll.early <- sum(dbeta(x=p.early.dat$mean,beta.params.early$alpha, beta.params.early$beta, log=TRUE)) #log likelihood for proportion of all syphilis cases with early infection (primary, secondary or early latent)
-  ll<-sum(ll.diag.m, ll.diag.f.y, ll.diag.f.o, ll.msm, ll.hiv, ll.el, ll.sec, ll.diag.subpop.f, ll.diag.subpop.m, ll.diag.subpop.f, ll.early*10)
+
+  if (exists("overweight_early_lik")) { ll.early <- ll.early * 100 }
+  if (exists("overweight_msm_lik")) { ll.msm <- ll.msm * 100 } 
+
+  ll<-sum(ll.diag.m, ll.diag.f.y, ll.diag.f.o, ll.msm, ll.hiv, ll.el, ll.sec, ll.diag.subpop.f, ll.diag.subpop.m, ll.diag.subpop.f, ll.early)
   ll[is.na(ll)]<-(-1e20)
+
   
 	c(unlist(pred), ll.age=ll.age, ll.diag.m=ll.diag.m, ll.diag.f.y=ll.diag.f.y, ll.diag.f.o=ll.diag.f.o,ll.rr.subpop.m= ll.diag.subpop.m,ll.diag.subpop.f=ll.diag.subpop.f ,ll.msm=ll.msm,ll.hiv=ll.hiv,ll.sec=ll.sec, ll.el=ll.el,ll.early = ll.early, ll=ll)
   
