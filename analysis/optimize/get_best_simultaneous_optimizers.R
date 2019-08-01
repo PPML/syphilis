@@ -77,3 +77,13 @@ optim_top5_pars_MA <- optim_pars_MA[top5_idxs,]
 saveRDS(optim_top5_pars_LA, file.path(files_path, 'la_top5_best_pars.rds'))
 saveRDS(optim_top5_pars_MA, file.path(files_path, 'ma_top5_best_pars.rds'))
 
+# Get the best simultaneous optimizer
+best_idx <- which(maxs == max(maxs))
+theta_simultaneous <- unlist(optim_pars[best_idx,])
+theta_la <- unlist(optim_pars_LA[best_idx,])
+theta_ma <- unlist(optim_pars_MA[best_idx,])
+
+# Write them into the package
+usethis::use_data(theta_simultaneous, overwrite=TRUE)
+usethis::use_data(theta_la, overwrite=TRUE)
+usethis::use_data(theta_ma, overwrite=TRUE)
