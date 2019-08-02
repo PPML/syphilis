@@ -80,7 +80,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   syph.ratio.y.f <- out.diag.y.f$value/(out.diaglate.y.f$value+ out.diag.y.f$value)
   syph.ratio.o.f <- out.diag.o.f$value/(out.diaglate.o.f$value+ out.diag.o.f$value)
   
-  if(showCounterfactual == TRUE) {
+  if(exists('showCounterfactual') && showCounterfactual == TRUE) {
   out.diag.y.m.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.early.inf.rate.m1:(prev.cf.early.inf.rate.m1+diag.len-1))))  #reported early syph cases by age-sex
   out.diag.o.m.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.early.inf.rate.m1+diag.len):(prev.cf.early.inf.rate.m1+diag.len*2-1))))  
   out.diag.y.f.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.early.inf.rate.f.y1:(prev.cf.early.inf.rate.f.y1+diag.len-1)))) 
@@ -107,7 +107,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   out.p.el.y.f <- reshape::melt(as.matrix(subset(pred, select=(prev.p.diag.el1+diag.len*2):(prev.p.diag.el1+diag.len*3-1)))) #proportion of early cases that are early latent
   out.p.early <- reshape::melt(as.matrix(subset(pred, select=(prev.p.diag.early)))) #proportion of early cases that are early latent
   
-  if(showCounterfactual == TRUE) {
+  if(exists("showCounterfactual") && showCounterfactual == TRUE) {
   out.rr.diag.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.diag.rr1:prev.cf.diag.rr8))) ## reported case relative risk (pooled estimates for last 5 years)
   out.p.msm.y.cf <- reshape::melt(as.matrix(subset(pred, select=prev.cf.p.diag.msm1:(prev.cf.p.diag.msm1+msm.len-1)))) #proportion of male cases in young MSM
   out.p.msm.o.cf <- reshape::melt(as.matrix(subset(pred, select=(prev.cf.p.diag.msm1+msm.len):(prev.cf.p.diag.msm1+msm.len*2-1)))) #proportion of male cases in old MSM
@@ -137,7 +137,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   out.inc.o.f.2 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*13):(prev.n.inc1+cal.period*14-1)))/sum(n.i[o.f.2]))
   out.inc.y.f.3 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*14):(prev.n.inc1+cal.period*15-1)))/sum(n.i[y.f.3]))
   out.inc.o.f.3 <-reshape::melt(100*as.matrix(subset(pred, select=(prev.n.inc1+cal.period*15):(prev.n.inc1+cal.period*16-1)))/sum(n.i[o.f.3]))
-  if(showCounterfactual == TRUE){
+  if(exists("showCounterfactual") && showCounterfactual == TRUE){
   out.inc.y.m.1.cf <-reshape::melt(100*as.matrix(subset(pred, select=prev.cf.n.inc1:(prev.cf.n.inc1+cal.period-1)))/sum(n.i[y.m.1])) #model incidence by age, sex, and subpopulation
   out.inc.o.m.1.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period):(prev.cf.n.inc1+cal.period*2-1)))/sum(n.i[o.m.1]))
   out.inc.y.m.2.cf <-reshape::melt(100*as.matrix(subset(pred, select=(prev.cf.n.inc1+cal.period*2):(prev.cf.n.inc1+cal.period*3-1)))/sum(n.i[y.m.2]))
@@ -177,7 +177,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   out.inc.y.f.3$X2 <- sapply(out.inc.y.f.3$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   out.inc.o.f.3$X2 <- sapply(out.inc.o.f.3$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   
-  if(showCounterfactual == TRUE) {
+  if(exists("showCounterfactual") && showCounterfactual == TRUE) {
   out.inc.y.m.1.cf$X2 <- sapply(out.inc.y.m.1.cf$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   out.inc.o.m.1.cf$X2 <- sapply(out.inc.o.m.1.cf$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   out.inc.y.m.2.cf$X2 <- sapply(out.inc.y.m.2.cf$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
@@ -204,7 +204,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   out.diaglate.y.f$X2 <- sapply(out.diaglate.y.f$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   out.diaglate.o.f$X2 <- sapply(out.diaglate.o.f$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x)) 
   
-  if(showCounterfactual == TRUE) {
+  if(exists("showCounterfactual") && showCounterfactual == TRUE) {
   out.diag.y.m.cf$X2 <- sapply(out.diag.y.m.cf$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   out.diag.o.m.cf$X2 <- sapply(out.diag.o.m.cf$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   out.diag.y.f.cf$X2 <- sapply(out.diag.y.f.cf$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x)) 
@@ -225,7 +225,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   out.p.el.o.m$X2 <- sapply(out.p.el.o.m$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   out.p.el.y.f$X2 <- sapply(out.p.el.y.f$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   
-  if(showCounterfactual == TRUE) {
+  if(exists("showCounterfactual") && showCounterfactual == TRUE) {
   out.p.msm.y.cf$X2 <- sapply(out.p.msm.y.cf$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   out.p.msm.o.cf$X2 <- sapply(out.p.msm.o.cf$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
   out.p.hiv.y.cf$X2 <- sapply(out.p.hiv.y.cf$X2, function(x) gsub("([a-zA-Z.])([0-9])$","\\10\\2",x))
@@ -296,7 +296,7 @@ plot.posteriors <- function(post.sample, output_dir) {
     ##expand_limits(y=0)+
     scale_x_discrete(labels=seq((end.year-diag.len+1),end.year,1))
   
-  if(showCounterfactual == TRUE) {
+  if(exists("showCounterfactual") && showCounterfactual == TRUE) {
   plot.diag.y.m.cf <- ggplot(data=out.diag.y.m.cf)+
     geom_line(aes(x=X2, y=value, group=X1), color="grey") +
     stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
@@ -612,7 +612,7 @@ plot.posteriors <- function(post.sample, output_dir) {
     scale_x_discrete(labels=seq((end.year-cal.period+1),end.year,1))
   
   # for the no-contact-tracing counterfactual
-  if(showCounterfactual == TRUE) {
+  if(exists("showCounterfactual") && showCounterfactual == TRUE) {
   plot.inc.y.m.1.cf <- ggplot(data=out.inc.y.m.1.cf)+
     geom_line(aes(x=X2, y=value, group=X1), color="grey") +
     stat_summary(aes(x=X2, y=value, group=1), geom="line", fun.y="median", color="black", size=1) +
@@ -1862,7 +1862,7 @@ plot.posteriors <- function(post.sample, output_dir) {
                bottom=textGrob("Priors/posteriors (4/4)", x=0.01, y=1, just="left"),
                ncol=5)
   
-  if(showCounterfactual == TRUE) {
+  if(exists("showCounterfactual") && showCounterfactual == TRUE) {
   grid.arrange(plot.diag.y.m.cf, plot.diag.o.m.cf, 
                plot.diag.y.f.cf, plot.diag.o.f.cf, 
                bottom=textGrob("Calibration targets", x=0.01, y=1, just="left"),
