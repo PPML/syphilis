@@ -47,7 +47,7 @@ output_dir_extension <-
     stop("Neither overweight_msm_lik nor overweight_early_lik exist!")
   }
 
-output_dir <- here(paste0(output_dir_base, output_dir_extension))
+output_directory <- here(paste0(output_dir_base, output_dir_extension))
 
          #############################################
          #    construct dLogPosterior_simultaneous   # 
