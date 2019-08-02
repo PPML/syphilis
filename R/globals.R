@@ -1,7 +1,7 @@
 #' Load Global Variables
 
 #' This function loads the global variables necessary 
-#' for the syphLAMA package that do not depend on the 
+#' for the syphilis package that do not depend on the 
 #' state (LA or MA) having been declared. 
 
 load_globals <- function(model.end = 110) {

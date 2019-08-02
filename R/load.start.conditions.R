@@ -34,20 +34,20 @@ load.start <- function(){
   
   # contact tracing probabilities and whether it is turned on
   p.ct.primsec <<- if(state == "MA") { # Black M, Hispanic M, NBNH M, Black F, Hispanic F, NBNH F
-                      ct.data.ps <- read.delim(system.file("extdata/ct_ma_rates_ps.txt",package='syphLAMA'))
+                      ct.data.ps <- read.delim(system.file("extdata/ct_ma_rates_ps.txt",package='syphilis'))
                       t(rbind(ct.data.ps$black.men, ct.data.ps$hispanic.men, ct.data.ps$other.men, 
                                            ct.data.ps$black.women, ct.data.ps$hispanic.women, ct.data.ps$other.women))
                   } else {
-                      ct.data.ps <- read.delim(system.file("extdata/ct_la_rates_ps.txt",package='syphLAMA'))
+                      ct.data.ps <- read.delim(system.file("extdata/ct_la_rates_ps.txt",package='syphilis'))
                       t(rbind(ct.data.ps$black.men, ct.data.ps$hispanic.men, ct.data.ps$other.men, 
                                            ct.data.ps$black.women, ct.data.ps$hispanic.women, ct.data.ps$other.women))
                   }
   p.ct.el <<- if(state == "MA") { # Black M, Hispanic M, NBNH M, Black F, Hispanic F, NBNH F
-                ct.data.el <- read.delim(system.file("extdata/ct_ma_rates_el.txt",package='syphLAMA'))
+                ct.data.el <- read.delim(system.file("extdata/ct_ma_rates_el.txt",package='syphilis'))
                 t(rbind(ct.data.el$black.men, ct.data.el$hispanic.men, ct.data.el$other.men, 
                                      ct.data.el$black.women, ct.data.el$hispanic.women, ct.data.el$other.women))
               } else {
-                ct.data.el <- read.delim(system.file("extdata/ct_la_rates_el.txt",package='syphLAMA'))
+                ct.data.el <- read.delim(system.file("extdata/ct_la_rates_el.txt",package='syphilis'))
                 t(rbind(ct.data.el$black.men, ct.data.el$hispanic.men, ct.data.el$other.men, 
                         ct.data.el$black.women, ct.data.el$hispanic.women, ct.data.el$other.women))
               }
