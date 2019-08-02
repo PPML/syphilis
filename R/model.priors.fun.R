@@ -30,9 +30,9 @@ old_prior <- function(theta) {
   dbeta(ilogit(theta["logit.b.m"]), prior.param1["b.m"],prior.param2["b.m"]) *
   dbeta(ilogit(theta["logit.b.f"]), prior.param1["b.f"],prior.param2["b.f"]) *
   dbeta(ilogit(theta["logit.b.msm"]), prior.param1["b.msm"],prior.param2["b.msm"])*
-  dunif(exp(theta["log.dur.incub"]),prior.param1["dur.incub"],prior.param2["dur.incub"]) * 
-  dunif(exp(theta["log.dur.prim"]),prior.param1["dur.prim"],prior.param2["dur.prim"]) * 
-  dunif(exp(theta["log.dur.sec"]),prior.param1["dur.sec"],prior.param2["dur.sec"]) *
+  dnorm(exp(theta["log.dur.incub"]),prior.param1["dur.incub"],prior.param2["dur.incub"]) * 
+  dnorm(exp(theta["log.dur.prim"]),prior.param1["dur.prim"],prior.param2["dur.prim"]) * 
+  dnorm(exp(theta["log.dur.sec"]),prior.param1["dur.sec"],prior.param2["dur.sec"]) *
   dnorm(exp(theta["log.dur.imm.inf"]),prior.param1["dur.imm.inf"],prior.param2["dur.imm.inf"]) * 
   dunif(exp(theta["log.dur.imm.early"]),prior.param1["dur.imm.early"],prior.param2["dur.imm.early"]) * 
   dnorm(exp(theta["log.dur.immune"]),prior.param1["dur.immune"],prior.param2["dur.immune"]) *
@@ -138,9 +138,9 @@ return(c(
   dbeta(ilogit(theta["logit.b.m"]), prior.param1["b.m"],prior.param2["b.m"], log=T),
   dbeta(ilogit(theta["logit.b.f"]), prior.param1["b.f"],prior.param2["b.f"], log=T),
   dbeta(ilogit(theta["logit.b.msm"]), prior.param1["b.msm"],prior.param2["b.msm"], log=T),
-  dunif(exp(theta["log.dur.incub"]),prior.param1["dur.incub"],prior.param2["dur.incub"], log=T),
-  dunif(exp(theta["log.dur.prim"]),prior.param1["dur.prim"],prior.param2["dur.prim"], log=T),
-  dunif(exp(theta["log.dur.sec"]),prior.param1["dur.sec"],prior.param2["dur.sec"], log=T),
+  dnorm(exp(theta["log.dur.incub"]),prior.param1["dur.incub"],prior.param2["dur.incub"], log=T),
+  dnorm(exp(theta["log.dur.prim"]),prior.param1["dur.prim"],prior.param2["dur.prim"], log=T),
+  dnorm(exp(theta["log.dur.sec"]),prior.param1["dur.sec"],prior.param2["dur.sec"], log=T),
   dnorm(exp(theta["log.dur.imm.inf"]),prior.param1["dur.imm.inf"],prior.param2["dur.imm.inf"], log=T),
   dunif(exp(theta["log.dur.imm.early"]),prior.param1["dur.imm.early"],prior.param2["dur.imm.early"], log=T),
   dnorm(exp(theta["log.dur.immune"]),prior.param1["dur.immune"],prior.param2["dur.immune"], log=T),
