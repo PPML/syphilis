@@ -5,7 +5,7 @@ devtools::load_all()
 
 args <- commandArgs(trailingOnly = T)
 array_id <- args[[1]]
-output_dir <- here("inst/mcmc/8-1-19/")
+output_dir <- here("inst/mcmc/8-2-19/")
 
 
 ### Construct dLogPosterior_simultaneous to calibrate to both 
@@ -30,7 +30,7 @@ sample <- MCMC(
   p = dLogPosterior_simultaneous,
   n = 25000,
   init = theta,
-  scale = sd_optims / 10,
+  scale = sd_optims / 1000,
   adapt = T,
   acc.rate = .234, showProgressBar = T)
 
