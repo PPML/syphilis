@@ -1,7 +1,7 @@
 #' Load Global Variables
 
 #' This function loads the global variables necessary 
-#' for the syphLAMA package that do not depend on the 
+#' for the syphilis package that do not depend on the 
 #' state (LA or MA) having been declared. 
 
 load_globals <- function(model.end = 110) {
@@ -79,12 +79,12 @@ load_globals <- function(model.end = 110) {
 
 
 
-  # index for all infected individuals
-  infected.index <<- c(e.index, prim.index, sec.index, early.index,
-    latent.index, er.index, primr.index, secr.index, earlyr.index, latentr.index)
-  
-  # index for all sexually active individuals
-  allpop.index <<- c(infected.index, s.index, treated.inf.index, treated.early.index, treated.late.index, sr.index)
+	# index for all infected individuals
+	infected.index <<- c(prim.index, sec.index, early.index,
+	  latent.index, primr.index, secr.index, earlyr.index, latentr.index)
+	
+	# index for all sexually active individuals
+	allpop.index <<- c(infected.index, s.index, treated.inf.index, treated.early.index, treated.late.index, sr.index, nsa.index)
 
   infectious_index <<- c(prim.index, sec.index, primr.index, secr.index)
   noninfectious_index <<- c(e.index, early.index, latent.index, er.index, earlyr.index, latentr.index)

@@ -1,0 +1,3 @@
+sbatch run_script.sh overweight_msm_lik
+sbatch run_script.sh overweight_early_lik
+sbatch run_script.sh overweight_msm_lik overweight_early_lik

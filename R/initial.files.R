@@ -8,15 +8,15 @@
 
 #' Load Initial Files by State (LA/MA)
 initial.files <- function(state) {
-    age.dist.dat <<- read.delim(system.file("extdata/age_nsfg.txt", package='syphLAMA')) #proportion of partnerships with person of same age group
-    diag.age.sex.dat <<-as.matrix(read.delim(system.file(paste("extdata/diag_age_sex_rate_", state, ".txt", sep=""), package='syphLAMA'), row.names=1)) #case rates by age sex only, 2000-2015, per 100,000 population
-    diag.rr <<- read.delim(system.file(paste("extdata/case_subpop_rr_", state, ".txt", sep=""),package='syphLAMA')) ##RR of diagnosis rate for black and Hispanic, relative to overall population of same age and sex (5-yr avg, 2012-2016)
-    msm.dat <<- as.matrix(read.delim(system.file(paste("extdata/msm_hiv_proportions_", state, ".txt", sep=""), package='syphLAMA'), row.names=1)) #proportion of males cases in MSM, and proportion of HIV+ among MSM cases, 2007-2016
-    stage.dat <<- as.matrix(read.delim(system.file(paste("extdata/stage_diag_", state, ".txt", sep=""), package='syphLAMA'), row.names=1)) #proportion of cases diagnosed as secondary or early latent, 2000-2016, excluding F 45+ due to small case numbers
-    p.early.dat <<- read.delim(system.file(paste("extdata/p_early_", state, ".txt", sep=""), package='syphLAMA')) #proportion of diagnosed syphilis that are early (of all cases, including late latent, 2011-2015 for all cases in given state from cdc)
-    diag.subpop <<- tibble::rownames_to_column(as.data.frame(read.delim(system.file(paste("extdata/subpop_diag_", state, ".txt", sep=""), package='syphLAMA'), row.names=1)), "year" )#diagnosis rates by subpop
+    age.dist.dat <<- read.delim(system.file("extdata/age_nsfg.txt", package='syphilis')) #proportion of partnerships with person of same age group
+    diag.age.sex.dat <<-as.matrix(read.delim(system.file(paste("extdata/diag_age_sex_rate_", state, ".txt", sep=""), package='syphilis'), row.names=1)) #case rates by age sex only, 2000-2015, per 100,000 population
+    diag.rr <<- read.delim(system.file(paste("extdata/case_subpop_rr_", state, ".txt", sep=""),package='syphilis')) ##RR of diagnosis rate for black and Hispanic, relative to overall population of same age and sex (5-yr avg, 2012-2016)
+    msm.dat <<- as.matrix(read.delim(system.file(paste("extdata/msm_hiv_proportions_", state, ".txt", sep=""), package='syphilis'), row.names=1)) #proportion of males cases in MSM, and proportion of HIV+ among MSM cases, 2007-2016
+    stage.dat <<- as.matrix(read.delim(system.file(paste("extdata/stage_diag_", state, ".txt", sep=""), package='syphilis'), row.names=1)) #proportion of cases diagnosed as secondary or early latent, 2000-2016, excluding F 45+ due to small case numbers
+    p.early.dat <<- read.delim(system.file(paste("extdata/p_early_", state, ".txt", sep=""), package='syphilis')) #proportion of diagnosed syphilis that are early (of all cases, including late latent, 2011-2015 for all cases in given state from cdc)
+    diag.subpop <<- tibble::rownames_to_column(as.data.frame(read.delim(system.file(paste("extdata/subpop_diag_", state, ".txt", sep=""), package='syphilis'), row.names=1)), "year" )#diagnosis rates by subpop
 
-    load(system.file(paste("extdata/theta_", state, ".rda", sep=""),package='syphLAMA')) #load starting values of parameters
+    load(system.file(paste("extdata/theta_", state, ".rda", sep=""),package='syphilis')) #load starting values of parameters
     theta <<- theta
     
     #prep data used for calibration
