@@ -45,6 +45,7 @@ List syphSim(
   int dim = i*j*k*l; //total number of population subgroups in output matrix
   NumericVector b = as<NumericVector>(x["b"]); //transmission rate
   double delta = as<double>(x["delta"]); //1/dur incubation 
+  double return_rate_for_resusceptible = as<double>(x[['return_rate_for_resusceptible']]); // rate of return to first-time-susceptible from resusceptible
   NumericVector gamma = as<NumericVector>(x["gamma"]); //1/dur infectious
   NumericVector trt1 = as<NumericVector>(x["p.trt.1"]); //treatment rate, primary syph
   NumericVector trt2 = as<NumericVector>(x["p.trt.2"]); //treatment rate, secondary syph
@@ -406,7 +407,7 @@ List syphSim(
 				
 				// Initialize the equations and integration
 				for(int n=0; n<dim; n++) {   
-					Pop[n] += (-lambda[n]*S[n] + abx*E[n] + (1-rep_on)*(lambda1*T1[n] + lambda2*T2[n] + lambda3*T3[n]) + agingS[n] + agingSNSA[n] + birthsS[n]) * dt ;  // dS/dt
+					Pop[n] += (-lambda[n]*S[n] + return_rate_for_resusceptible*SR[n] + abx*E[n] + (1-rep_on)*(lambda1*T1[n] + lambda2*T2[n] + lambda3*T3[n]) + agingS[n] + agingSNSA[n] + birthsS[n]) * dt ;  // dS/dt
 					Pop[n+dim] += (lambda[n]*S[n] - delta*E[n] - abx*E[n]  + agingE[n]) * dt; // dE/dt
 					Pop[n+dim*2] += ( delta*E[n]  - gamma1*I1[n] - p_trt1[n]*I1[n] -alpha[n]*I1[n] - abx*I1[n] + agingI1[n] ) * dt; //dI1/dt
 					Pop[n+dim*3] += ( gamma1*I1[n] - gamma2*I2[n] - p_trt2[n]*I2[n] -alpha[n]*I2[n] - abx*I2[n] + agingI2[n]) * dt; //dI2/dt
@@ -423,7 +424,7 @@ List syphSim(
 
 					Pop[n+dim*7] += (p_trt3[n]*(L1[n] + LR1[n]) + alpha[n]*L1[n]+alpha_repeat[n]*LR1[n] + abx*(L1[n]+LR1[n]) - lambda2*T2[n] + agingT2[n])*dt; //dT2/dt
 					Pop[n+dim*8] += (p_trt4[n]*(L2[n] + LR2[n]) + alpha[n]*L2[n]+alpha_repeat[n]*LR2[n] + abx*(L2[n]+LR2[n]) - lambda3*T3[n] + agingT3[n])*dt ; //dT3/dt
-					Pop[n+dim*9] += (-lambda[n]*SR[n] + abx*ER[n] + rep_on*(lambda1*T1[n] + lambda2*T2[n] + lambda3*T3[n])  + agingSR[n])*dt;  // dSR/dt
+					Pop[n+dim*9] += (-lambda[n]*SR[n] - return_rate_for_resusceptible*SR[n] + abx*ER[n] + rep_on*(lambda1*T1[n] + lambda2*T2[n] + lambda3*T3[n])  + agingSR[n])*dt;  // dSR/dt
 					Pop[n+dim*10] += (lambda[n]*SR[n] - delta*ER[n] - abx*ER[n] + agingER[n])*dt; // dER/dt
 					Pop[n+dim*11] += (delta*ER[n] - gamma1*IR1[n] - p_trt1[n]*IR1[n] -alpha_repeat[n]*IR1[n] - abx*IR1[n]  + agingIR1[n])*dt; //dIR1/dt
 					Pop[n+dim*12] += (gamma1*IR1[n] - gamma2*IR2[n] - p_trt2[n]*IR2[n] -alpha_repeat[n]*IR2[n] - abx*IR2[n]  + agingIR2[n]) * dt; //dIR2/dt

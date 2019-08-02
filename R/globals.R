@@ -6,7 +6,7 @@
 
 load_globals <- function(model.end = 110) {
 
-	statenames <<- c(LA = 'Louisiana', MA = 'Massachusetts')
+  statenames <<- c(LA = 'Louisiana', MA = 'Massachusetts')
 
   ### set up different subpopulations, sexes, and activity classes ###
   i<<-5 #number of subpopulations, 1= Black, 2=White, 3=Hispanic, 4=MSM-HIVneg, 5=MSM-HIVpos
@@ -17,15 +17,15 @@ load_globals <- function(model.end = 110) {
 
   #### model time steps and calibration period ####
   tstep <<- 1/(52)  #weekly time step
-	cal.period <<- 5 #duration of calibration period (2012-2016 currently)
-	cal.start <<- 100 #time at which start calibration 
-	model.end <<- model.end # end of the simulation
+  cal.period <<- 5 #duration of calibration period (2012-2016 currently)
+  cal.start <<- 100 #time at which start calibration 
+  model.end <<- model.end # end of the simulation
   start.year <<- 2012 # data calibration start
   end.year <<- 2016 # data calibration end
-	intervention_years <<- 105:109
+  intervention_years <<- 105:109
 
-	# the term such that cal.start + model_to_gregorian_difference == start.year
-	model_to_gregorian_difference <<- start.year - cal.start 
+  # the term such that cal.start + model_to_gregorian_difference == start.year
+  model_to_gregorian_difference <<- start.year - cal.start 
 
   # background antibiotic treatment
   p.abx.init <- 0.15 #set this to 0 if want to turn off abx treatment -- this implements a period (pre-cal) with high rates of abx use, to represent the intro of penicillin in the pop, which decreases to abx.background 
@@ -38,6 +38,10 @@ load_globals <- function(model.end = 110) {
   # when to start moving people into the prior infected compartments 
   rep.start <- cal.start - 5 #years before calibration start when start tracking prior treated infections
   rep.count <<- c(rep(0,rep.start), rep(1, model.end+1-rep.start))
+
+  # Number of Years During which Subsequent Infections are Considered Reinfections, 
+  # After which people are returned to the first-time susceptible population.
+  reinfection_period <- 2 
   
   age.cat<<-c(25, 20) # age band widths, corresponding to 20-44 yo and 45-64 yo
   out_all <<- NULL
@@ -71,21 +75,21 @@ load_globals <- function(model.end = 110) {
   nsa.index <<- index*20+1:index           #not sexually active population
   d4.index <<- index*21+1:index            #diagnosed latent latent
   dr.index <<- index*22+1:index            #diagnosed primary, secondary, and early latent, previously treated
-	tested.index <<- index*23+1:index        #tested for syphilis
+  tested.index <<- index*23+1:index        #tested for syphilis
 
 
 
-	# index for all infected individuals
-	infected.index <<- c(e.index, prim.index, sec.index, early.index,
-	  latent.index, er.index, primr.index, secr.index, earlyr.index, latentr.index)
-	
-	# index for all sexually active individuals
-	allpop.index <<- c(infected.index, s.index, treated.inf.index, treated.early.index, treated.late.index, sr.index)
+  # index for all infected individuals
+  infected.index <<- c(e.index, prim.index, sec.index, early.index,
+    latent.index, er.index, primr.index, secr.index, earlyr.index, latentr.index)
+  
+  # index for all sexually active individuals
+  allpop.index <<- c(infected.index, s.index, treated.inf.index, treated.early.index, treated.late.index, sr.index)
 
-	infectious_index <<- c(prim.index, sec.index, primr.index, secr.index)
-	noninfectious_index <<- c(e.index, early.index, latent.index, er.index, earlyr.index, latentr.index)
+  infectious_index <<- c(prim.index, sec.index, primr.index, secr.index)
+  noninfectious_index <<- c(e.index, early.index, latent.index, er.index, earlyr.index, latentr.index)
 
-	# index for resusceptible (all)
+  # index for resusceptible (all)
   resusceptible.index <<- c(sr.index, primr.index, secr.index, earlyr.index, latentr.index)
   
   pop1 <<- c(1:4,21:24) #subpop1
@@ -101,7 +105,7 @@ load_globals <- function(model.end = 110) {
   m4<<-13:16 #M subpop4
   m5<<-17:20 #M subpop5
   msw <<-1:12 #M heterosexual
-	msm <<- c(m4,m5) # M men-who-have-sex-with-men
+  msm <<- c(m4,m5) # M men-who-have-sex-with-men
   f1<<-21:24 #F subpop1
   f2<<-25:28 #F subpop2
   f3<<-29:32 #F subpop3
@@ -130,79 +134,79 @@ load_globals <- function(model.end = 110) {
   y.f.3 <<- 29:30 # young age cat, subpop 3
   o.f.3 <<- 31:32 # old age cat, subpop 3
   y.f.23 <<- c(25:26,29:30) # youngest age cat, subpops 2&3
-	high_activity <<- seq(2, 40, 2) # high sexual activity
-	low_activity <<- seq(1, 39, 2) # low sexual activity
+  high_activity <<- seq(2, 40, 2) # high sexual activity
+  low_activity <<- seq(1, 39, 2) # low sexual activity
 
   # Make a 4 dimensional array with each of the model dimensions 
-	# corresponding to the index of the population in their serial 
-	# (1-dimensional) ordering.
+  # corresponding to the index of the population in their serial 
+  # (1-dimensional) ordering.
   pop_array <<- array(data = 1:40, dim = c(k, l, i, j),
-	             dimnames = list(
-								k = c('low', 'high'),
-								l = c('young', 'old'),
-								i = c('black', 'white', 'hispanic', 'msm-hivneg', 'msm-hivpos'),
-								j = c('male', 'female')
-						   ))
+               dimnames = list(
+                k = c('low', 'high'),
+                l = c('young', 'old'),
+                i = c('black', 'white', 'hispanic', 'msm-hivneg', 'msm-hivpos'),
+                j = c('male', 'female')
+               ))
 
   # Flatten the pop array into a lookup table (data frame)
-	# with columns j, k, l, i, index.
-	pop <<- as.data.frame.table(pop_array, responseName = 'index')
+  # with columns j, k, l, i, index.
+  pop <<- as.data.frame.table(pop_array, responseName = 'index')
 
-	# Define screening interventions
-	interventions <<- tibble::tribble(
-									~codename,                ~longname,      ~target,  ~freq,
-										'annual',                 'Annual',        'all',      1,
-							'twice_annual',           'Twice Annual',        'all',      2,
-								'msm_annual',             'MSM Annual',        'msm',      1,
-					'msm_twice_annual',       'MSM Twice Annual',        'msm',      2,
-				 'msm_hivpos_annual',        'HIV+ MSM Annual', 'msm-hivpos',      1,
-	 'msm_hivpos_twice_annual',  'HIV+ MSM Twice Annual', 'msm-hivpos',      2,
-				 'msm_hivneg_annual',        'HIV- MSM Annual', 'msm-hivneg',      1,
-	 'msm_hivneg_twice_annual',  'HIV- MSM Twice Annual', 'msm-hivneg',      2
-	)
-	
-	# Natural History Parameters used in Simultaneous Calibration
-	natural_history_parameters <<- 
-		c('logit.b.m', 'logit.b.f', 'logit.b.msm', 'log.dur.incub', 'log.dur.prim',
-			'log.dur.sec', 'log.dur.imm.inf', 'log.dur.imm.early', 'log.dur.immune')
+  # Define screening interventions
+  interventions <<- tibble::tribble(
+                  ~codename,                ~longname,      ~target,  ~freq,
+                    'annual',                 'Annual',        'all',      1,
+              'twice_annual',           'Twice Annual',        'all',      2,
+                'msm_annual',             'MSM Annual',        'msm',      1,
+          'msm_twice_annual',       'MSM Twice Annual',        'msm',      2,
+         'msm_hivpos_annual',        'HIV+ MSM Annual', 'msm-hivpos',      1,
+   'msm_hivpos_twice_annual',  'HIV+ MSM Twice Annual', 'msm-hivpos',      2,
+         'msm_hivneg_annual',        'HIV- MSM Annual', 'msm-hivneg',      1,
+   'msm_hivneg_twice_annual',  'HIV- MSM Twice Annual', 'msm-hivneg',      2
+  )
+  
+  # Natural History Parameters used in Simultaneous Calibration
+  natural_history_parameters <<- 
+    c('logit.b.m', 'logit.b.f', 'logit.b.msm', 'log.dur.incub', 'log.dur.prim',
+      'log.dur.sec', 'log.dur.imm.inf', 'log.dur.imm.early', 'log.dur.immune')
 
 
-	###  Population Indices for Outcomes (diagnosis, incidence, prevalence) by Sex (f, msw, msm), and Risk (high/low activity)
+  ###  Population Indices for Outcomes (diagnosis, incidence, prevalence) by Sex (f, msw, msm), and Risk (high/low activity)
 
   # Diagnosis by Sex 
-  diagnosed_females <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, females))
-	diagnosed_msm <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, msm))
-	diagnosed_msw <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, msw))
+  diagnosed_females <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, females))
+  diagnosed_msm <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, msm))
+  diagnosed_msw <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, msw))
 
   # Diagnosis by Activity
-  diagnosed_high_activity <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, high_activity))
-  diagnosed_low_activity <<- c(sapply(list(d1.index, d2.index, d3.index, d4.index), `[`, low_activity))
+  diagnosed_high_activity <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, high_activity))
+  diagnosed_low_activity <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, low_activity))
 
-	# Incidence by Sex
-	incidence_females <<- c(sapply(list(inc.index, incr.index), `[`, females))
-	incidence_msm <<- c(sapply(list(inc.index, incr.index), `[`, msm))
-	incidence_msw <<- c(sapply(list(inc.index, incr.index), `[`, msw))
+  # Incidence by Sex
+  incidence_females <<- c(sapply(list(inc.index, incr.index), `[`, females))
+  incidence_msm <<- c(sapply(list(inc.index, incr.index), `[`, msm))
+  incidence_msw <<- c(sapply(list(inc.index, incr.index), `[`, msw))
 
   # Incidence by Risk
-	incidence_high_activity <<- c(sapply(list(inc.index, incr.index), `[`, high_activity))
-	incidence_low_activity <<- c(sapply(list(inc.index, incr.index), `[`, low_activity))
+  incidence_high_activity <<- c(sapply(list(inc.index, incr.index), `[`, high_activity))
+  incidence_low_activity <<- c(sapply(list(inc.index, incr.index), `[`, low_activity))
 
   # Prevalence by Sex
-	prevalence_females <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
-	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, females))
-	prevalence_msw <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
-	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, msw))
-	prevalence_msm <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
-	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, msm))
+  prevalence_females <<- c(sapply(list(prim.index, sec.index, early.index, latent.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, females))
+  prevalence_msw <<- c(sapply(list( prim.index, sec.index, early.index, latent.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, msw))
+  prevalence_msm <<- c(sapply(list( prim.index, sec.index, early.index, latent.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, msm))
 
-	# Prevalence by Risk
-	prevalence_high_activity <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
-	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, high_activity))
-	prevalence_low_activity <<- c(sapply(list(e.index, prim.index, sec.index, early.index, latent.index, 
-	  er.index, primr.index, secr.index, earlyr.index, latentr.index), `[`, low_activity))
+  # Prevalence by Risk
+  prevalence_high_activity <<- c(sapply(list(prim.index, sec.index, early.index, latent.index, 
+    primr.index, secr.index, earlyr.index, latentr.index), `[`, high_activity))
+  prevalence_low_activity <<- c(sapply(list(prim.index, sec.index, early.index, latent.index, 
+    primr.index, secr.index, earlyr.index, latentr.index), `[`, low_activity))
 
 
-	return(invisible(NULL))
+  return(invisible(NULL))
 }
 
 load_globals()
