@@ -131,7 +131,7 @@ constructSimulationEnvironment <- function(theta) {
 									screen=screen, behav=behav,dur.imm=dur.imm,
 									p.s.1=p.s.1, p.s.2 = p.s.2, p.s.3 = p.s.3,
 									screen_ps = screen_ps, screen_el = screen_el, screen_repeat = screen_repeat,
-		              output_weekly = FALSE) #parameters used by transmission model
+		              output_weekly = FALSE, return_rate_for_resusceptible = 1/reinfection_period) #parameters used by transmission model
 	})
 	return(e)
 }
