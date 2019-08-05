@@ -19,7 +19,7 @@ model.epi.loglik <- function(theta) {
   ll.diag.f.o <- sum(dnorm(x=diag.age.sex.rate.f.o, mean=as.numeric(unlist(pred[["prev"]][["early.inf.rate.f.o"]])), sd=diag.age.sex.rate.f.o.sd, log=TRUE))/4  #log likelihood for reported old female early syphilis rates
   ll.diag.subpop.m  <- sum(dnorm(x=rr.diag.subpop[1:4], mean=as.numeric(unlist(pred[["prev"]][["diag.rr"]]))[1:4],sd=rr.diag.subpop.sd[1:4], log=TRUE))/5 #log likelihood for reported case RR (black, Hispanic) males
   ll.diag.subpop.f  <- sum(dnorm(x=rr.diag.subpop[5:8], mean=as.numeric(unlist(pred[["prev"]][["diag.rr"]]))[5:8],sd=rr.diag.subpop.sd[5:8], log=TRUE))/2 #log likelihood for reported case RR (black, Hispanic) females
-  ll.msm <- sum(dbeta(x=p.msm.cases,beta.params.msm$alpha, beta.params.msm$beta, log=TRUE))/2 #log likelihood for proportion of male cases in MSM
+  ll.msm <- sum(dbeta(x=p.msm.cases,beta.params.msm$alpha/10, beta.params.msm$beta/10, log=TRUE))/2 #log likelihood for proportion of male cases in MSM
   ll.hiv <- sum(dbeta(x=p.hiv.cases,beta.params.hiv$alpha, beta.params.hiv$beta, log=TRUE))/3 #log likelihood for proportion of MSM cases with HIV coinfection
   ll.sec <- sum(dbeta(x=p.sec,beta.params.sec$alpha, beta.params.sec$beta, log=TRUE))/50 #log likelihood for proportion of early syphilis cases with secondary infection
   ll.el <- sum(dbeta(x=p.el,beta.params.el$alpha, beta.params.el$beta, log=TRUE))/50 #log likelihood for proportion of early syphilis cases with early latent infection
