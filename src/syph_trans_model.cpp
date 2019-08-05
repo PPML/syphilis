@@ -45,7 +45,7 @@ List syphSim(
   int dim = i*j*k*l; //total number of population subgroups in output matrix
   NumericVector b = as<NumericVector>(x["b"]); //transmission rate
   double delta = as<double>(x["delta"]); //1/dur incubation 
-  double return_rate_for_resusceptible = as<double>(x[['return_rate_for_resusceptible']]); // rate of return to first-time-susceptible from resusceptible
+  double return_rate_for_resusceptible = as<double>(x["return_rate_for_resusceptible"]); // rate of return to first-time-susceptible from resusceptible
   NumericVector gamma = as<NumericVector>(x["gamma"]); //1/dur infectious
   NumericVector trt1 = as<NumericVector>(x["p.trt.1"]); //treatment rate, primary syph
   NumericVector trt2 = as<NumericVector>(x["p.trt.2"]); //treatment rate, secondary syph

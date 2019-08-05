@@ -41,7 +41,7 @@ load_globals <- function(model.end = 110) {
 
   # Number of Years During which Subsequent Infections are Considered Reinfections, 
   # After which people are returned to the first-time susceptible population.
-  reinfection_period <- 2 
+  reinfection_period <<- 2 
   
   age.cat<<-c(25, 20) # age band widths, corresponding to 20-44 yo and 45-64 yo
   out_all <<- NULL
