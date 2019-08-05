@@ -1,7 +1,7 @@
 library(here)
 devtools::load_all()
 
-output_directory <- here("inst/mcmc/8-1-19/")
+output_directory <- here("inst/mcmc/8-2-19/")
 for (state in c("LA", "MA")) {
   load.start()
   trace <- trace.burn.thin <- trace.burn <- readRDS(
