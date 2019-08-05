@@ -7,7 +7,7 @@ if (is.null(nth_sim)) nth_sim <- 1
 
 # script config
 N_loops <- 20
-output_directory <- here("inst/optims/7-19-19/")
+output_directory <- here("inst/optims/8-5-19/")
 
 source(here("analysis/optimize/construct_simultaneous_optimization_function.R"))
 
