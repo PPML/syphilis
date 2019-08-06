@@ -41,7 +41,7 @@ test_likelihood(theta_ma)
 
   out <- optim(
     par = theta_ma,
-    fn = test_likelihood,
+    fn = dLogPosterior,
     method = "Nelder-Mead",
     control = list(fnscale = -1, maxit=1000)
   )
