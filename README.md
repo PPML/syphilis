@@ -15,15 +15,15 @@ targets, and likelihood distributions.
 
 These are defined (mostly) in: 
 
-    - `src/syph_trans_model.cpp` (differential equations), 
+  - `src/syph_trans_model.cpp` (differential equations), 
 
-    - `inst/extdata/priors.txt` (prior distribution specifications),
+  - `inst/extdata/priors.txt` (prior distribution specifications),
 
-    - `R/model.priors.fun.R` (prior distribution density function), 
-      data target files in `inst/extdata/` (read in with `R/initial.files.R`), 
+  - `R/model.priors.fun.R` (prior distribution density function), 
+    data target files in `inst/extdata/` (read in with `R/initial.files.R`), 
 
-    - `R/model.likelihood.fun.R` (the likelihood distribution density constructed from model simulation 
-      which measures the likelihood of data targets given the hypothesized model). 
+  - `R/model.likelihood.fun.R` (the likelihood distribution density constructed from model simulation 
+    which measures the likelihood of data targets given the hypothesized model). 
 
 To load the model into R, run the following: 
 
