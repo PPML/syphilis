@@ -50,7 +50,7 @@ second_natural_history_idxs <- natural_param_idxs[(length(natural_param_idxs)/2 
 optim_pars[,first_natural_history_idxs] <- optim_pars[,second_natural_history_idxs]
 
 # Save the top25 simultaneous optimizers.
-saveRDS(optim_pars, here("inst/optims/7-19-19/top25_best_simultaneous_params.rds"))
+saveRDS(optim_pars, paste0(files_path, "top25_best_simultaneous_params.rds"))
 
 # Extract & Save the Top 25 Parameters for Each Location
 optim_pars_LA <- optim_pars[, 1:(ncol(optim_pars)/2)]
