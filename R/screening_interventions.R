@@ -31,6 +31,11 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
  msm_8x_annually = adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 8),
  hr_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1),
  hr_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1),
+ msm_annual_hr_and_prior_diagnosis_quarterly = {
+   adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 1)
+   adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 4)
+    e$params$screen_repeat[106:nrow(e$params$screen_repeat), ] <- 4
+	 },
  msm_annual_all_hr_annual = {
    adjust_screening_for_intervention(e, pop_indices = c(m4, m5), new_level = 1)
    adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1)
@@ -44,7 +49,8 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
 			4
 	 },
  high_activity_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1),
- high_activity_twice_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1)
+ high_activity_twice_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 2),
+ high_activity_quarterly = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 4)
 	)
 
   return(invisible(NULL))
@@ -115,20 +121,85 @@ intervention period.")
 #' modify_simulation_environment_for_an_intervention(e, intervention = intervention)
 #' runSimulation(e)
 #' df <- extractInterventionStatistics(e, intervention = intervention)
-extractInterventionStatistics <- function(e, intervention) {
+extractInterventionStatistics <- function(sol) {
 	intervention_start <- min(intervention_years)
 	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
 
 	data.frame(
-		intervention = intervention,
 		year = intervention_period/52 + model_to_gregorian_difference,
-		prevalent_infections = rowSums(e$sim$out[1+intervention_period, 1+infected.index]),
-		incidents_per_year = rowSums(e$sim$out[1+intervention_period, 1+c(inc.index, incr.index)]) - 
-			rowSums(e$sim$out[1 + intervention_period - 52, 1+c(inc.index, incr.index)]),
-		tests_per_year = rowSums(e$sim$out[1+intervention_period,1+tested.index]) - 
-			rowSums(e$sim$out[intervention_period,1+tested.index]),
-		popsize = rowSums(e$sim$out[1+intervention_period, 1+allpop.index])
+		prevalent_infections = rowSums(sol[1+intervention_period, 1+infected.index]),
+		incidents_per_year = rowSums(sol[1+intervention_period, 1+c(inc.index, incr.index)]) - 
+			rowSums(sol[1 + intervention_period - 52, 1+c(inc.index, incr.index)]),
+		tests_per_year = rowSums(sol[1+intervention_period,1+tested.index]) - 
+			rowSums(sol[intervention_period,1+tested.index]),
+		popsize = rowSums(sol[1+intervention_period, 1+allpop.index])
 		)
+}
+
+
+extract_diagnoses_by_sex <- function(sol) { 
+	intervention_start <- min(intervention_years)
+	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
+
+  decumulate <- function(idxs) { 
+    return(
+      rowSums(sol[intervention_period, idxs]) - 
+      rowSums(sol[intervention_period - 52, idxs])
+    )} 
+
+  data.frame(
+    year = intervention_period/52 + model_to_gregorian_difference,
+    diagnosed_females = decumulate(diagnosed_females),
+    diagnosed_msw = decumulate(diagnosed_msw),
+    diagnosed_msm = decumulate(diagnosed_msm),
+    popsize_females = rowSums(sol[intervention_period, females]),
+    popsize_msw = rowSums(sol[intervention_period, msw]),
+    popsize_msm = rowSums(sol[intervention_period, msm])
+  )
+}
+
+
+extract_incidence_by_sex <- function(sol) { 
+	intervention_start <- min(intervention_years)
+	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
+
+  decumulate <- function(idxs) { 
+    return(
+      rowSums(sol[intervention_period, idxs]) - 
+      rowSums(sol[intervention_period - 52, idxs])
+    )} 
+
+  data.frame(
+    year = intervention_period/52 + model_to_gregorian_difference,
+    incidence_females = decumulate(incidence_females),
+    incidence_msw = decumulate(incidence_msw),
+    incidence_msm = decumulate(incidence_msm),
+    popsize_females = rowSums(sol[intervention_period, females]),
+    popsize_msw = rowSums(sol[intervention_period, msw]),
+    popsize_msm = rowSums(sol[intervention_period, msm])
+  )
+}
+
+
+extract_prevalence_by_sex <- function(sol) { 
+	intervention_start <- min(intervention_years)
+	intervention_period <- seq((intervention_start-1)*52-1, model.end*52)
+
+  decumulate <- function(idxs) { 
+    return(
+      rowSums(sol[intervention_period, idxs]) - 
+      rowSums(sol[intervention_period - 52, idxs])
+    )} 
+
+  data.frame(
+    year = intervention_period/52 + model_to_gregorian_difference,
+    prevalence_females = rowSums(sol[intervention_period, prevalence_females]),
+    prevalence_msw = rowSums(sol[intervention_period, prevalence_msw]),
+    prevalence_msm = rowSums(sol[intervention_period, prevalence_msm]),
+    popsize_females = rowSums(sol[intervention_period, females]),
+    popsize_msw = rowSums(sol[intervention_period, msw]),
+    popsize_msm = rowSums(sol[intervention_period, msm])
+  )
 }
 
 
@@ -144,84 +215,308 @@ extractInterventionStatistics <- function(e, intervention) {
 #' load.start()
 #' theta <- get(paste0('theta_', tolower(state)))
 #' df <- simulate_interventions(theta)
-simulate_interventions <- function(theta) {
+simulate_interventions <- function(
+  theta, 
+  interventions_list = c('msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly', 'high_activity_quarterly', 'msm_annual_hr_and_prior_diagnosis_quarterly'),
+  info_extractor
+) {
 	intervention_outcomes <- list()
-	for (intervention in c('basecase', interventions$codename)) {
+	for (intervention in c('basecase', interventions_list)) {
 		e <- constructSimulationEnvironment(theta)
 		modify_simulation_environment_for_an_intervention(e, intervention)
+		e$params$output_weekly <- TRUE
 		runSimulation(e)
 		intervention_outcomes[[length(intervention_outcomes)+1]] <- 
-			extractInterventionStatistics(e, intervention)
+			cbind.data.frame(intervention = intervention, info_extractor(e$sim$out))
 	}
 	do.call(rbind.data.frame, intervention_outcomes)
 }
 
 
-#' Format the Intervention Statistics 
-#' 
-#' Take the output from simulate_interventions do the following operations: 
-#' - Calculate Additional Tests
-#' - Calculate Change In Prevalent Infections 
-#' - Calculate Change in 
-#' 
-#' @param df A dataframe resulting from simulate_interventions.
-#'
-#' @example 
-#' devtools::load_all()
-#' state <- c('LA', 'MA')[sample.int(2,1)]
-#' load.start()
-#' theta <- get(paste0('theta_', tolower(state)))
-#' df <- simulate_interventions(theta)
-#' df <- format_intervention_statistics(df)
-#' 
-#' # prevalent infections in each
-#' ggplot(df, aes(x = year, y = prevalent_infections, color = intervention)) + 
-#'   geom_line()
-#'
-#' # prevalent infections averted
-#' ggplot(df, aes(x = year, y = -1 * chg_prevalent_infs, color = intervention)) + 
-#'   geom_line() +
-#'   scale_y_continuous(trans = symlog_trans())
-#' 
-#' # prevalent infections averted in 2021
-#' ggplot(filter(df, year == 2021), aes(x=intervention, y = -chg_prevalent_infs, fill = intervention, color = intervention)) + 
-#'	 geom_bar(stat='identity', alpha = 0.6) + 
-#'	 geom_text(aes(x = intervention, label = intervention, y = -chg_prevalent_infs*.1 + .5), color = 'black', alpha = 0.5, size=4) + # , angle = 25) + 
-#'	 scale_y_continuous(trans = symlog_trans()) + 
-#'	 coord_flip() + 
-#'	 theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), legend.position = 'none')
-#'
-#' 
-#' # incident infections in each
-#' ggplot(df, aes(x = year, y = incidents, color = intervention)) + 
-#'   geom_line()
-#'
-#' # prevalent infections averted
-#' ggplot(df, aes(x = year, y = -1 * chg_prevalent_infs, color = intervention)) + 
-#'   geom_line() +
-#'   scale_y_continuous(trans = symlog_trans())
-#' 
-#' # prevalent infections averted in 2021
-#' ggplot(filter(df, year == 2021), aes(x=intervention, y = -chg_prevalent_infs, fill = intervention, color = intervention)) + 
-#'	 geom_bar(stat='identity', alpha = 0.6) + 
-#'	 geom_text(aes(x = intervention, label = intervention, y = -chg_prevalent_infs*.1 + .5), color = 'black', alpha = 0.5, size=4) + # , angle = 25) + 
-#'	 scale_y_continuous(trans = symlog_trans()) + 
-#'	 coord_flip() + 
-#'	 theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), legend.position = 'none')
-format_intervention_statistics <- function(df) {
-	basecase <- df %>% dplyr::filter(intervention == 'basecase') %>% dplyr::select(-intervention)
-	df <- merge(df, basecase, by=c('year'), suffixes = c('', '.basecase'))
-	df <- df %>% dplyr::mutate(
-	    chg_prevalent_infs = prevalent_infections - prevalent_infections.basecase,
-			chg_prevalent_infs_pct = chg_prevalent_infs / prevalent_infections.basecase,
-			chg_incident_infs = incidents - incidents.basecase,
-			chg_incident_infs_pct = chg_incident_infs / incidents.basecase,
-			chg_tests = tests_per_year - tests_per_year.basecase,
-			chg_tests_pct = chg_tests / tests_per_year.basecase,
-			nnt_prevalent = -chg_prevalent_infs / chg_tests,
-			nnt_incident = -chg_incident_infs / chg_tests
-	  )
-	df <- dplyr::select(df, -c('prevalent_infections.basecase', 'incidents.basecase', 'tests_per_year.basecase'))
-	df <- dplyr::arrange(df, intervention, year)
-	return(df)
+
+simulate_diagnoses_by_sex_by_state <- function(state) { 
+  
+  state <<- state
+  # load state model
+  load.start()
+
+  # get state parametrization
+  theta <- get(paste0('theta_', tolower(state)))
+
+  # simulate interventions, record diagnoses by sex
+  df <- simulate_interventions(theta, info_extractor = extract_diagnoses_by_sex)
+
+  # reshape data into diagnoses per 100k
+  df %<>% 
+  mutate(diagnosed_females_per_100k = diagnosed_females / popsize_females * 100000,
+         diagnosed_msw_per_100k = diagnosed_msw / popsize_msw * 100000,
+         diagnosed_msm_per_100k = diagnosed_msm / popsize_msm * 100000) %>% 
+  select(-c(diagnosed_females, diagnosed_msw, diagnosed_msm, popsize_females, popsize_msw, popsize_msm)) %>% 
+  reshape2::melt(id.vars = c('intervention', 'year'), value.name = 'diagnosis_rate') %>% 
+  tidyr::separate(col = variable, into = c('prefix', 'group'), extra='drop') %>% 
+  select(-prefix)
+
+  return(df)
 }
+
+
+simulate_incidence_by_sex_by_state <- function(state) { 
+  
+  state <<- state
+  # load state model
+  load.start()
+
+  # get state parametrization
+  theta <- get(paste0('theta_', tolower(state)))
+
+  # simulate interventions, record diagnoses by sex
+  df <- simulate_interventions(theta, info_extractor = extract_incidence_by_sex)
+
+  # reshape data into diagnoses per 100k
+  df %<>% 
+  mutate(incidence_females_per_100k = incidence_females / popsize_females * 100000,
+         incidence_msw_per_100k = incidence_msw / popsize_msw * 100000,
+         incidence_msm_per_100k = incidence_msm / popsize_msm * 100000) %>% 
+  select(-c(incidence_females, incidence_msw, incidence_msm, popsize_females, popsize_msw, popsize_msm)) %>% 
+  reshape2::melt(id.vars = c('intervention', 'year'), value.name = 'incidence_rate') %>% 
+  tidyr::separate(col = variable, into = c('prefix', 'group'), extra='drop') %>% 
+  select(-prefix)
+
+  return(df)
+}
+
+
+simulate_prevalence_by_sex_by_state <- function(state) { 
+  
+  state <<- state
+  # load state model
+  load.start()
+
+  # get state parametrization
+  theta <- get(paste0('theta_', tolower(state)))
+
+  # simulate interventions, record diagnoses by sex
+  df <- simulate_interventions(theta, info_extractor = extract_prevalence_by_sex)
+
+  # reshape data into diagnoses per 100k
+  df %<>% 
+  mutate(prevalence_females_per_100k = prevalence_females / popsize_females * 100000,
+         prevalence_msw_per_100k = prevalence_msw / popsize_msw * 100000,
+         prevalence_msm_per_100k = prevalence_msm / popsize_msm * 100000) %>% 
+  select(-c(prevalence_females, prevalence_msw, prevalence_msm, popsize_females, popsize_msw, popsize_msm)) %>% 
+  reshape2::melt(id.vars = c('intervention', 'year'), value.name = 'prevalence_rate') %>% 
+  tidyr::separate(col = variable, into = c('prefix', 'group'), extra='drop') %>% 
+  select(-prefix)
+
+  return(df)
+}
+
+
+#' @import tidyverse
+simulate_and_plot_diagnoses_by_sex_both_states <- function() { 
+	load_globals(model.end = 116)
+
+  la_df <- simulate_diagnoses_by_sex_by_state('LA')
+  ma_df <- simulate_diagnoses_by_sex_by_state('MA')
+
+  df <- rbind.data.frame(
+    cbind.data.frame(state = 'Louisiana', la_df),
+    cbind.data.frame(state = 'Massachusetts', ma_df))
+
+  df %<>% filter(year <= 2027, year >= 2017)
+
+  produce_plot <- function(state, sex) { 
+    state1 <- enquo(state)
+    sex1 <- enquo(sex)
+
+    sex_lookup <- c(females = 'F', msw = 'MSW', msm = 'MSM')
+
+    ggplot( data = filter(df, state == !! state, group == !! sex), 
+            mapping = aes(x = year, y = diagnosis_rate, color = intervention, linetype = intervention)) + 
+      geom_line(size = 1) + 
+      ylab('') + 
+      xlab('') + 
+      expand_limits(y=0) + 
+      scale_color_manual(values = c('red', 'forestgreen', 'skyblue', 'orange', 'coral')) + 
+      scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
+      theme_bw() + 
+      ggtitle(paste0(sex_lookup[[sex]], " - ", state)) 
+  }
+
+
+  p1 <- produce_plot('Louisiana', 'females') 
+  p2 <- produce_plot('Massachusetts', 'females')
+  p3 <- produce_plot('Louisiana', 'msw')
+  p4 <- produce_plot('Massachusetts', 'msw')
+  p5 <- produce_plot('Louisiana', 'msm')
+  p6 <- produce_plot('Massachusetts', 'msm')
+
+  legend <- cowplot::get_legend(p1)
+
+  p1 <- p1 + theme(legend.position = 'none')
+  p2 <- p2 + theme(legend.position = 'none')
+  p3 <- p3 + theme(legend.position = 'none')
+  p4 <- p4 + theme(legend.position = 'none')
+  p5 <- p5 + theme(legend.position = 'none')
+  p6 <- p6 + theme(legend.position = 'none')
+
+  plt <- cowplot::plot_grid(p1, p2, NULL, p3, p4, NULL, p5, p6, NULL, ncol = 3) + cowplot::draw_grob(legend, 2/3.3, 0, 1.5/3.3, 1)
+
+  y.grob <- textGrob("Diagnosed Cases Per 100,000", 
+                   gp=gpar(fontface="bold", fontsize=15), rot=90)
+
+  x.grob <- textGrob("Year", 
+                   gp=gpar(fontface="bold", fontsize=15))
+
+  plt <- grid.arrange(arrangeGrob(plt, left = y.grob, bottom = x.grob))
+
+  # ggsave(plot = plt, 
+  #   filename = file.path(system.file("figures/diagnoses_by_sex_in_interventions/", package = 'syphilis'), 'diagnoses_by_sex_in_interventions.png'),
+  #   width = 10)
+
+  return(plt)
+}
+
+
+#' @import tidyverse
+simulate_and_plot_incidence_by_sex_both_states <- function() { 
+	load_globals(model.end = 116)
+
+  la_df <- simulate_incidence_by_sex_by_state('LA')
+  ma_df <- simulate_incidence_by_sex_by_state('MA')
+
+  df <- rbind.data.frame(
+    cbind.data.frame(state = 'Louisiana', la_df),
+    cbind.data.frame(state = 'Massachusetts', ma_df))
+
+  df %<>% filter(year <= 2027, year >= 2017)
+
+  produce_plot <- function(state, sex) { 
+    state1 <- enquo(state)
+    sex1 <- enquo(sex)
+
+    sex_lookup <- c(females = 'F', msw = 'MSW', msm = 'MSM')
+
+    ggplot( data = filter(df, state == !! state, group == !! sex), 
+            mapping = aes(x = year, y = incidence_rate, color = intervention, linetype = intervention)) + 
+      geom_line(size = 1) + 
+      ylab('') + 
+      xlab('') + 
+      expand_limits(y=0) + 
+      scale_color_manual(
+        labels = c('Base Case', 'Guidelines in MSM', 'Prior Diagnosis Quarterly', 'High Activity Quarterly', 'Combination'), 
+        values = c('red', 'forestgreen', 'skyblue', 'orange', 'purple')) + 
+      scale_linetype_manual(
+        labels = c('Base Case', 'Guidelines in MSM', 'Prior Diagnosis Quarterly', 'High Activity Quarterly', 'Combination'),
+        values = c(1,5,2,3,4))  +
+      scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
+      theme_bw() + 
+      
+      ggtitle(paste0(sex_lookup[[sex]], " - ", state)) 
+  }
+
+
+  p1 <- produce_plot('Louisiana', 'females')
+  p2 <- produce_plot('Massachusetts', 'females')
+  p3 <- produce_plot('Louisiana', 'msw')
+  p4 <- produce_plot('Massachusetts', 'msw')
+  p5 <- produce_plot('Louisiana', 'msm')
+  p6 <- produce_plot('Massachusetts', 'msm')
+
+  legend <- cowplot::get_legend(p1)
+
+  p1 <- p1 + theme(legend.position = 'none')
+  p2 <- p2 + theme(legend.position = 'none')
+  p3 <- p3 + theme(legend.position = 'none')
+  p4 <- p4 + theme(legend.position = 'none')
+  p5 <- p5 + theme(legend.position = 'none')
+  p6 <- p6 + theme(legend.position = 'none')
+
+  plt <- cowplot::plot_grid(p1, p2, NULL, p3, p4, NULL, p5, p6, NULL, ncol = 3) + cowplot::draw_grob(legend, 2/3.3, 0, 1.5/3.3, 1)
+
+  y.grob <- textGrob("Incidence Per 100,000", 
+                   gp=gpar(fontface="bold", fontsize=15), rot=90)
+
+  x.grob <- textGrob("Year", 
+                   gp=gpar(fontface="bold", fontsize=15))
+
+  plt <- grid.arrange(arrangeGrob(plt, left = y.grob, bottom = x.grob))
+
+  ggsave(plot = plt, 
+    filename = file.path(system.file("figures/", package = 'syphilis'), 'incidence_by_sex_in_interventions.png'),
+    width = 10)
+
+  return(plt)
+}
+
+#' @import tidyverse
+simulate_and_plot_prevalence_by_sex_both_states <- function() { 
+	load_globals(model.end = 116)
+
+  la_df <- simulate_prevalence_by_sex_by_state('LA')
+  ma_df <- simulate_prevalence_by_sex_by_state('MA')
+
+  df <- rbind.data.frame(
+    cbind.data.frame(state = 'Louisiana', la_df),
+    cbind.data.frame(state = 'Massachusetts', ma_df))
+
+  df %<>% filter(year <= 2027, year >= 2017)
+
+  produce_plot <- function(state, sex) { 
+    state1 <- enquo(state)
+    sex1 <- enquo(sex)
+
+    sex_lookup <- c(females = 'F', msw = 'MSW', msm = 'MSM')
+
+    ggplot( data = filter(df, state == !! state, group == !! sex), 
+            mapping = aes(x = year, y = prevalence_rate, color = intervention, linetype = intervention)) + 
+      geom_line(size = 1) + 
+      ylab('') + 
+      xlab('') + 
+      expand_limits(y=0) + 
+      scale_color_manual(
+        labels = c('Base Case', 'Guidelines in MSM', 'Prior Diagnosis Quarterly', 'High Activity Quarterly', 'Combination'), 
+        values = c('red', 'forestgreen', 'skyblue', 'orange', 'purple')) + 
+      scale_linetype_manual(
+        labels = c('Base Case', 'Guidelines in MSM', 'Prior Diagnosis Quarterly', 'High Activity Quarterly', 'Combination'),
+        values = c(1,5,2,3,4))  +
+      scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
+      theme_bw() + 
+      
+      ggtitle(paste0(sex_lookup[[sex]], " - ", state)) 
+  }
+
+
+  p1 <- produce_plot('Louisiana', 'females')
+  p2 <- produce_plot('Massachusetts', 'females')
+  p3 <- produce_plot('Louisiana', 'msw')
+  p4 <- produce_plot('Massachusetts', 'msw')
+  p5 <- produce_plot('Louisiana', 'msm')
+  p6 <- produce_plot('Massachusetts', 'msm')
+
+  legend <- cowplot::get_legend(p1)
+
+  p1 <- p1 + theme(legend.position = 'none')
+  p2 <- p2 + theme(legend.position = 'none')
+  p3 <- p3 + theme(legend.position = 'none')
+  p4 <- p4 + theme(legend.position = 'none')
+  p5 <- p5 + theme(legend.position = 'none')
+  p6 <- p6 + theme(legend.position = 'none')
+
+  plt <- cowplot::plot_grid(p1, p2, NULL, p3, p4, NULL, p5, p6, NULL, ncol = 3) + cowplot::draw_grob(legend, 2/3.3, 0, 1.5/3.3, 1)
+
+  y.grob <- textGrob("Prevalence Per 100,000", 
+                   gp=gpar(fontface="bold", fontsize=15), rot=90)
+
+  x.grob <- textGrob("Year", 
+                   gp=gpar(fontface="bold", fontsize=15))
+
+  plt <- grid.arrange(arrangeGrob(plt, left = y.grob, bottom = x.grob))
+
+  ggsave(plot = plt, 
+    filename = file.path(system.file("figures/", package = 'syphilis'), 'prevalence_by_sex_in_interventions.png'),
+    width = 10)
+
+  return(plt)
+}
+
