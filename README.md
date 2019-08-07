@@ -1,10 +1,20 @@
 
 # Modeling Syphilis in Louisiana and Massachusetts 
 
+This is a deterministic compartmental model of syphilis implemented in R using Rcpp. 
+
+### Background
+
+#### Recorded Case Rates in Louisiana and Massachusetts
+
 ![observed case rates](inst/figures/background_figures/case_rates.png?raw=true)
+
+#### Modeled Natural History of Syphilis
+
 ![modeled natural history](inst/figures/background_figures/modeled%20natural%20history.png?raw=true)
 
-This is a deterministic compartmental model of syphilis implemented in R using Rcpp. 
+
+## Workflow 
 
 The project workflow is as follows: 
 
