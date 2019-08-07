@@ -1,7 +1,7 @@
 
 # Modeling Syphilis in Louisiana and Massachusetts 
 
-![modeled natural history](./inst/figures/background_figures/modeled natural history.png?raw=true)
+![modeled natural history](inst/figures/background_figures/modeled natural history.png?raw=true)
 
 This is a deterministic compartmental model of syphilis implemented in R using Rcpp. 
 
