@@ -4,8 +4,8 @@
 \alias{adjust_screening_for_intervention}
 \title{Modify Screening Matrix for A Targeted Screening Intervention}
 \usage{
-adjust_screening_for_intervention(e, intervention_years = 105:109,
-  pop_indices, new_level)
+adjust_screening_for_intervention(e, intervention_start = 106, pop_indices,
+  new_level, repeat_level = NA)
 }
 \description{
 Using the intervention_years as rows and the pop_indices as columns, 

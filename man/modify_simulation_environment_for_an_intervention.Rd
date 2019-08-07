@@ -4,7 +4,7 @@
 \alias{modify_simulation_environment_for_an_intervention}
 \title{Modify the Screening Matrix to Implement Targeted Testing and Treatment Interventions}
 \usage{
-modify_simulation_environment_for_an_intervention(e)
+modify_simulation_environment_for_an_intervention(e, intervention)
 }
 \description{
 Check that the intervention is defined appropriately (either not at all or

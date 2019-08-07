@@ -4,14 +4,14 @@
 \alias{load_globals}
 \title{Load Global Variables
 This function loads the global variables necessary 
-for the syphLAMA package that do not depend on the 
+for the syphilis package that do not depend on the 
 state (LA or MA) having been declared.}
 \usage{
-load_globals()
+load_globals(model.end = 110)
 }
 \description{
 Load Global Variables
 This function loads the global variables necessary 
-for the syphLAMA package that do not depend on the 
+for the syphilis package that do not depend on the 
 state (LA or MA) having been declared.
 }

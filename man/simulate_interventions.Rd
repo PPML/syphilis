@@ -4,7 +4,9 @@
 \alias{simulate_interventions}
 \title{Simulate Each Intervention with a Given Parametrization}
 \usage{
-simulate_interventions(theta)
+simulate_interventions(theta,
+  interventions_list = c("msm_annual_hr_msm_quarterly",
+  "prior_diagnosis_quarterly", "high_activity_quarterly"), info_extractor)
 }
 \description{
 Go through each of the interventions (including the basecase),

@@ -4,7 +4,7 @@
 \alias{extractInterventionStatistics}
 \title{Extract Data from Simulation Outcomes for Screening Intervention Analysis}
 \usage{
-extractInterventionStatistics(e, intervention)
+extractInterventionStatistics(sol)
 }
 \description{
 In our screening intervention analysis we will calculate the following 
