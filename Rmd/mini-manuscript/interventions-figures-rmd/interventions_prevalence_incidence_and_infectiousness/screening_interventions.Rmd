@@ -24,7 +24,7 @@ library(here)
 ```{r define helper fn, echo=FALSE}
 simulate_annual_and_basecase <- function(theta) {
 	intervention_outcomes <- list()
-	for (intervention in c('basecase', 'annual', 'msm_annual', 'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly')) {
+	for (intervention in c('basecase', 'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly')) {
 		e <- constructSimulationEnvironment(theta)
 		modify_simulation_environment_for_an_intervention(e, intervention)
 		e$params$output_weekly <- TRUE
