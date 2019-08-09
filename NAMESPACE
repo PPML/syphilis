@@ -1,4 +1,5 @@
 exportPattern("^[[:alpha:]]+")
 import("magrittr")
 import('dplyr')
+import('tidyr')
 useDynLib("syphilis")
