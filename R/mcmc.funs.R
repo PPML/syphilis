@@ -62,3 +62,29 @@ annual.rates <- function(x){
   annual <-rbind(rep(0,ncol(x)), apply(x,2,diff))
 }
 
+# untransform_theta
+untransform_theta <- function(theta) { 
+  for (iter in 1:length(theta)) { 
+    if (grepl("logit\\.", names(theta)[[iter]])) { 
+      # untransform logit 
+      theta[[iter]] <- ilogit(theta[[iter]])
+
+      # rename
+      temp_name <- strsplit(names(theta)[[iter]], "\\.")[[1]]
+      temp_name <- paste0(temp_name[2:length(temp_name)], collapse='.')
+      names(theta)[[iter]] <- temp_name
+
+    } else if (grepl("log\\.", names(theta)[[iter]])) { 
+      # untransform log 
+      theta[[iter]] <- exp(theta[[iter]])
+
+      # rename
+      temp_name <- strsplit(names(theta)[[iter]], "\\.")[[1]]
+      temp_name <- paste0(temp_name[2:length(temp_name)], collapse='.')
+      names(theta)[[iter]] <- temp_name
+
+    } else stop("theta contains a term which is not a logit or log transformation.")
+  }
+
+  return(theta)
+}
