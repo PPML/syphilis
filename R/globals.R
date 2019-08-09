@@ -82,6 +82,8 @@ load_globals <- function(model.end = 110) {
 	# index for all infected individuals
 	infected.index <<- c(prim.index, sec.index, early.index,
 	  latent.index, primr.index, secr.index, earlyr.index, latentr.index)
+
+  early_infected_index <<- c(prim.index, sec.index, early.index, primr.index, secr.index, earlyr.index, latentr.index)
 	
 	# index for all sexually active individuals
 	allpop.index <<- c(infected.index, s.index, treated.inf.index, treated.early.index, treated.late.index, sr.index, nsa.index)
@@ -198,6 +200,15 @@ load_globals <- function(model.end = 110) {
      primr.index, secr.index, earlyr.index, latentr.index), `[`, msw))
   prevalence_msm <<- c(sapply(list( prim.index, sec.index, early.index, latent.index, 
      primr.index, secr.index, earlyr.index, latentr.index), `[`, msm))
+
+
+  prevalence_early_females <<- c(sapply(list(prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, females))
+  prevalence_early_msw <<- c(sapply(list( prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, msw))
+  prevalence_early_msm <<- c(sapply(list( prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, msm))
+
 
   # Prevalence by Risk
   prevalence_high_activity <<- c(sapply(list(prim.index, sec.index, early.index, latent.index, 
