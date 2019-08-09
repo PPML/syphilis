@@ -69,6 +69,7 @@ screen.fun <-function(screen.param,rr.screen) {
 
 #calculate time-varying tranmission relative risk for MSM
 behav.fun<- function(behav.m){
-  t<-seq(0,cal.period+9, by=1) #let time trend start 10 years before model calibration start
-  return(behav.m*t+1)
+  # t<-seq(0,cal.period+9, by=1) #let time trend start 10 years before model calibration start
+  t <- seq(0,1,length.out = cal.period+9)
+  return(behav.m*t)
 }
