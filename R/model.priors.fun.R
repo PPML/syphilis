@@ -96,7 +96,7 @@ old_prior <- function(theta) {
   dunif(ilogit(theta["logit.rand.rep.c"]),prior.param1["rand.rep.c"],prior.param2["rand.rep.c"])*
   dbeta(ilogit(theta["logit.rr.rep.symp.m"]),prior.param1["rr.rep.symp.m"],prior.param2["rr.rep.symp.m"])*
   dbeta(ilogit(theta["logit.rr.rep.symp.f"]),prior.param1["rr.rep.symp.f"],prior.param2["rr.rep.symp.f"])*
-  dunif(ilogit(theta["logit.behav.lin"]),prior.param1["behav.lin"],prior.param2["behav.lin"])*
+  dbeta(ilogit(theta["logit.behav.lin"]),prior.param1["behav.lin"],prior.param2["behav.lin"])*
   dbeta(ilogit(theta["logit.screen.m1.a"]),prior.param1["screen.m1.a"],prior.param2["screen.m1.a"]) * 
   dbeta(ilogit(theta["logit.screen.m1.d"]),prior.param1["screen.m1.d"],prior.param2["screen.m1.d"])*
   dunif(ilogit(theta["logit.rand.screen.m1.b"]),prior.param1["rand.screen.m1.b"],prior.param2["rand.screen.m1.b"]) * 
@@ -204,7 +204,7 @@ return(c(
   dunif(ilogit(theta["logit.rand.rep.c"]),prior.param1["rand.rep.c"],prior.param2["rand.rep.c"], log=T),
   dbeta(ilogit(theta["logit.rr.rep.symp.m"]),prior.param1["rr.rep.symp.m"],prior.param2["rr.rep.symp.m"], log=T),
   dbeta(ilogit(theta["logit.rr.rep.symp.f"]),prior.param1["rr.rep.symp.f"],prior.param2["rr.rep.symp.f"], log=T),
-  dunif(ilogit(theta["logit.behav.lin"]),prior.param1["behav.lin"],prior.param2["behav.lin"], log=T),
+  dbeta(ilogit(theta["logit.behav.lin"]),prior.param1["behav.lin"],prior.param2["behav.lin"], log=T),
   dbeta(ilogit(theta["logit.screen.m1.a"]),prior.param1["screen.m1.a"],prior.param2["screen.m1.a"], log=T),
   dbeta(ilogit(theta["logit.screen.m1.d"]),prior.param1["screen.m1.d"],prior.param2["screen.m1.d"], log=T),
   dunif(ilogit(theta["logit.rand.screen.m1.b"]),prior.param1["rand.screen.m1.b"],prior.param2["rand.screen.m1.b"], log=T),

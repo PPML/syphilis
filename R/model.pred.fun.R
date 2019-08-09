@@ -48,7 +48,7 @@ constructSimulationEnvironment <- function(theta) {
 		rr.screen.o <- unname(exp(c(rep(c(log(1), theta["log.rr.screen.o.m"]),times=3), rep(c(log(1), theta["log.rr.screen.o.msm"]),times=2), rep(c(log(1), theta["log.rr.screen.o.f"]), times=5)))) #screening rr by older age/sex
 		rr.screen.s<- unname(exp(rep(c(theta["log.rr.screen.m1"], log(1), theta["log.rr.screen.m3"],log(1), theta["log.rr.screen.msmhiv"], theta["log.rr.screen.f1"], log(1), theta["log.rr.screen.f3"],log(1),log(1)), each=2 ))) #screening rr by race/ethnicity/hiv status
 		rr.screen.s <-rr.screen.s * rr.screen.o #screening rr by age and race/ethnicity
-		rr.screen <- unname(exp(theta["log.rr.screen.ac"])) #screening rr in higher sexual activity group
+		rr.screen <- 1 + unname(exp(theta["log.rr.screen.ac"])) #screening rr in higher sexual activity group
 		screen <- unname(t(apply(t(apply(screen.trend, 1, function(x) x*rr.screen.s)), 1, FUN=screen.fun, rr.screen=rr.screen))) #calculate actual screening rates for each group by multiplying base rates by rr
 		screen[screen<0.0001]<-0  # make sure that screening rate isn't <0
 		# screen <-rbind(screen[rep(1, times=(cal.start-11)),], screen, screen[rep((nrow(screen)), times=10),]) ##generate screening rates for the entire model period (assume screening rates pre-calibration start=rate at start of calibration); time trend starts 10 years before cal start
