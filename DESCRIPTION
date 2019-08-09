@@ -30,7 +30,8 @@ Imports:
     bezier,
     plyr,
     reshape,
-		tibble
+		tibble,
+    magrittr
 Suggests:
     here,
     testthat
