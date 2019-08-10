@@ -98,6 +98,13 @@ constructSimulationEnvironment <- function(theta) {
 			behav.trend,
 			behav.trend[rep(length(behav.trend), times=model.end - (cal.start - 11 + length(behav.trend)))])
 
+		behav.trend.hetero<-behav.fun(ilogit(theta["logit.behav.hetero"])) # behav time trend representing changing condom use/behavior in heterosexuals
+		# behav <-c(rep(1, times=(cal.start-11)), behav.trend, behav.trend[rep(length(behav.trend), times=10)]) #expand to cover entire model run time, assume behav pre-calibration period = value at start of calibration; trend starts 10 years prior to cal start
+		behav.hetero <- 
+			c(rep(1, times=(cal.start-11)),
+			behav.trend.hetero,
+			behav.trend.hetero[rep(length(behav.trend.hetero), times=model.end - (cal.start - 11 + length(behav.trend.hetero)))])
+
 		rp.all <- exp(c(theta["log.rp.1.1.1.1"],theta["log.rp.1.1.2.1"],theta["log.rp.1.2.1.1"],theta["log.rp.1.2.2.1"], #relative rates of partner change in different population groups
 										theta["log.rp.1.1.1.2"],theta["log.rp.1.1.2.2"],theta["log.rp.1.2.1.2"], theta["log.rp.1.2.2.2"],
 										theta["log.rp.2.1.1.1"],theta["log.rp.2.1.2.1"],theta["log.rp.2.2.1.1"],theta["log.rp.2.2.2.1"],
@@ -128,7 +135,7 @@ constructSimulationEnvironment <- function(theta) {
 		# screen[102:105,] <- replacement
 		params <-list(b=b,delta=delta, gamma=gamma,p.trt.1=p.trt.1, p.trt.2=p.trt.2,
 									p.trt.3=p.trt.3,p.trt.4=p.trt.4, rep=rep.trend,rep.symp=rep.symp,
-									screen=screen, behav=behav,dur.imm=dur.imm,
+									screen=screen, behav=behav, behav.hetero = behav.hetero, dur.imm=dur.imm,
 									p.s.1=p.s.1, p.s.2 = p.s.2, p.s.3 = p.s.3,
 									screen_ps = screen_ps, screen_el = screen_el, screen_repeat = screen_repeat,
 		              output_weekly = FALSE, return_rate_for_resusceptible = 1/reinfection_period) #parameters used by transmission model

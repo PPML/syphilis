@@ -34,7 +34,7 @@ for (state in c('LA', 'MA')) {
 	assign(x = paste0('theta_', tolower(state)), value = unlist(optim_trace[max_idx, ]))
 
 	# remove all of the parametrizing variables except as they're stored in the state_env
-	rm(list=setdiff(ls(), c(globals, 'orig_theta_names', 'globals', 'la_env', 'ma_env', 'theta_la', 'theta_ma')))
+	rm(list=setdiff(ls(), c(globals, 'orig_theta_names', 'globals', 'la_env', 'ma_env')))
 }
 
 # Define dLogPosterior with respect to a particular state

@@ -1732,21 +1732,35 @@ plot.posteriors <- function(post.sample, output_dir) {
     labs(x="Year", y="Reporting probability\n(identified by screening)") 
   
   #transmission RR in MSM - change in condom use/behaviour in MSM leading to changes in transmission over time
-  bez.behav <- data.frame(X1=as.numeric(ilogit(post.sample$theta[,"logit.behav.lin"])))
-  behav.post <-reshape::melt(apply(bez.behav, 1, behav.fun))
-  behav.post$X1 <- behav.post$X1+start.year-11
-  behav.prior.bez<- as.data.frame(runif(1000,prior.param1["behav.lin"],prior.param2["behav.lin"]))
-  behav.prior <-reshape::melt(apply(behav.prior.bez, 1, behav.fun))
-  x<-data.frame(c(aggregate(value~X1, behav.prior, mean),aggregate(value~X1,behav.prior, min),  aggregate(value~X1, behav.prior, max)))
-  x<-x[,c(1,2,4,6)]
-  names(x)<-c("time", "mean", "min", "max")
+  # bez.behav <- data.frame(X1=as.numeric(ilogit(post.sample$theta[,"logit.behav.lin"])))
+  # behav.post <-reshape::melt(apply(bez.behav, 1, behav.fun))
+  # behav.post$X1 <- behav.post$X1+start.year-11
+  # behav.prior.bez<- as.data.frame(runif(1000,prior.param1["behav.lin"],prior.param2["behav.lin"]))
+  # behav.prior <-reshape::melt(apply(behav.prior.bez, 1, behav.fun))
+  # x<-data.frame(c(aggregate(value~X1, behav.prior, mean),aggregate(value~X1,behav.prior, min),  aggregate(value~X1, behav.prior, max)))
+  # x<-x[,c(1,2,4,6)]
+  # names(x)<-c("time", "mean", "min", "max")
   
-  plot.behav <- ggplot(data=behav.post) +
-    geom_line(aes(x=X1, y=value, group=X2, color=X2))+
-    geom_ribbon(data=x, aes(x=(start.year-10):end.year,ymin=min, ymax=max), alpha=0.2)+
-    theme_classic()+
-    theme(legend.position="none", axis.text.x=element_text(size=8),axis.text.y=element_text(size=8), title=element_text(size=8)) + 
-    labs(x="Year", y="Transmission\nRR in MSM")
+  # plot.behav <- ggplot(data=behav.post) +
+  #   geom_line(aes(x=X1, y=value, group=X2, color=X2))+
+  #   geom_ribbon(data=x, aes(x=(start.year-10):end.year,ymin=min, ymax=max), alpha=0.2)+
+  #   theme_classic()+
+  #   theme(legend.position="none", axis.text.x=element_text(size=8),axis.text.y=element_text(size=8), title=element_text(size=8)) + 
+  #   labs(x="Year", y="Transmission\nRR in MSM")
+
+
+  behav.post <- data.frame(x = as.numeric(ilogit(post.sample$theta[,'logit.behav.lin'])))
+  behav.prior <- data.frame() 
+  behav.prior_x <- seq(0,min(max(behav.post$x)*2, 1),length.out=100)
+  behav.prior_y <- dbeta(behav.prior_x, prior.param1['behav.lin'], prior.param2['behav.lin'])
+  behav.prior <- data.frame(x = behav.prior_x, y=behav.prior_y)
+
+  plot.behav <- ggplot(data = behav.post) + 
+    geom_histogram(aes(x=x, y = ..density..), color = 'purple', fill = 'purple', alpha = 0.3, bins = 100) + 
+    geom_area(data = behav.prior, mapping = aes(x = x, y = y), alpha=0.3) + 
+    xlab("Increase in Transmission Pr.") + 
+    theme_bw()
+
   
   #screen.m1 - screening rate in youngest males (other)
   bez.screen.m1 <- as.data.frame(cbind(bezA=ilogit(post.sample$theta[,"logit.screen.m1.a"]), bezD=ilogit(post.sample$theta[,"logit.screen.m1.d"]),bezB= post.scr.m1.b, bezC=post.scr.m1.c))
