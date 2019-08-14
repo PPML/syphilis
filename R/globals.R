@@ -4,7 +4,7 @@
 #' for the syphilis package that do not depend on the 
 #' state (LA or MA) having been declared. 
 
-load_globals <- function(model.end = 110) {
+load_globals <- function(model.end = 115) {
 
   statenames <<- c(LA = 'Louisiana', MA = 'Massachusetts')
 
@@ -22,7 +22,7 @@ load_globals <- function(model.end = 110) {
   model.end <<- model.end # end of the simulation
   start.year <<- 2012 # data calibration start
   end.year <<- 2016 # data calibration end
-  intervention_years <<- 105:109
+  intervention_years <<- 105:115 # 2017 to 202
 
   # the term such that cal.start + model_to_gregorian_difference == start.year
   model_to_gregorian_difference <<- start.year - cal.start 
@@ -83,16 +83,22 @@ load_globals <- function(model.end = 110) {
 	infected.index <<- c(prim.index, sec.index, early.index,
 	  latent.index, primr.index, secr.index, earlyr.index, latentr.index)
 
-  early_infected_index <<- c(prim.index, sec.index, early.index, primr.index, secr.index, earlyr.index, latentr.index)
+  early_infected_index <<- c(prim.index, sec.index, early.index, primr.index, secr.index, earlyr.index)
 	
 	# index for all sexually active individuals
-	allpop.index <<- c(infected.index, s.index, treated.inf.index, treated.early.index, treated.late.index, sr.index, nsa.index)
+	allpop.index <<- c(infected.index, e.index, er.index, s.index, treated.inf.index, treated.early.index, treated.late.index, sr.index, nsa.index)
 
   infectious_index <<- c(prim.index, sec.index, primr.index, secr.index)
   noninfectious_index <<- c(e.index, early.index, latent.index, er.index, earlyr.index, latentr.index)
 
   # index for resusceptible (all)
   resusceptible.index <<- c(sr.index, primr.index, secr.index, earlyr.index, latentr.index)
+
+  # reinfected index 
+  reinfected.index <<- c(primr.index, secr.index, earlyr.index, latentr.index)
+
+  # reinfected index 
+  newly_infected.index <<- c(prim.index, sec.index, early.index, latent.index)
   
   pop1 <<- c(1:4,21:24) #subpop1
   pop2 <<- c(5:8,25:28) # subpop2
@@ -194,11 +200,11 @@ load_globals <- function(model.end = 110) {
   incidence_low_activity <<- c(sapply(list(inc.index, incr.index), `[`, low_activity))
 
   # Prevalence by Sex
-  prevalence_females <<- c(sapply(list(prim.index, sec.index, early.index, latent.index, 
+  prevalence_females <<- c(sapply(list(prim.index, sec.index, early.index, 
      primr.index, secr.index, earlyr.index, latentr.index), `[`, females))
-  prevalence_msw <<- c(sapply(list( prim.index, sec.index, early.index, latent.index, 
+  prevalence_msw <<- c(sapply(list( prim.index, sec.index, early.index, 
      primr.index, secr.index, earlyr.index, latentr.index), `[`, msw))
-  prevalence_msm <<- c(sapply(list( prim.index, sec.index, early.index, latent.index, 
+  prevalence_msm <<- c(sapply(list( prim.index, sec.index, early.index, 
      primr.index, secr.index, earlyr.index, latentr.index), `[`, msm))
 
 
@@ -211,10 +217,10 @@ load_globals <- function(model.end = 110) {
 
 
   # Prevalence by Risk
-  prevalence_high_activity <<- c(sapply(list(prim.index, sec.index, early.index, latent.index, 
-    primr.index, secr.index, earlyr.index, latentr.index), `[`, high_activity))
-  prevalence_low_activity <<- c(sapply(list(prim.index, sec.index, early.index, latent.index, 
-    primr.index, secr.index, earlyr.index, latentr.index), `[`, low_activity))
+  prevalence_high_activity <<- c(sapply(list(prim.index, sec.index, early.index, 
+    primr.index, secr.index, earlyr.index), `[`, high_activity))
+  prevalence_low_activity <<- c(sapply(list(prim.index, sec.index, early.index, 
+    primr.index, secr.index, earlyr.index), `[`, low_activity))
 
 
   return(invisible(NULL))

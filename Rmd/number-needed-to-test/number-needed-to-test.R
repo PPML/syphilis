@@ -72,9 +72,13 @@ breakdown_simulation <- function(sol) {
 
 simulate_interventions <- function(theta, info_extractor) {
 	intervention_outcomes <- list()
-	for (intervention in c('basecase', 'annual', 'msm_annual',
-	'msm_annual_hr_msm_quarterly', 'prior_diagnosis_quarterly',
-	'msm_annual_all_hr_annual', 'msm_annual_all_hr_half_annual')) {
+  for (intervention in c('basecase', 
+  'msm_annual_hr_msm_quarterly',
+  'prior_diagnosis_annual', 
+  'prior_diagnosis_quarterly', 
+  'high_activity_annual',
+  'high_activity_quarterly'
+    )) {
 		e <- constructSimulationEnvironment(theta)
 		e$params$output_weekly <- TRUE
 		modify_simulation_environment_for_an_intervention(e, intervention)
@@ -135,16 +139,28 @@ df %<>% mutate(nnt_prevalent = additional_tests / prevalent_cases_averted, nnt_i
 
 df2 <- df %>% gather("variable", "value", -state, -intervention)
 
-df2 %<>% mutate(variable = recode(variable, nnt_prevalent = 'prevalent', nnt_incident = 'incident'))
+df2 %<>% mutate(variable = recode(variable, nnt_prevalent = 'Prevalent', nnt_incident = 'Incident'))
+
+         
+df2 %<>% mutate(intervention = recode(intervention, 
+  msm_annual_hr_msm_quarterly = 'Guidelines in MSM', 
+  prior_diagnosis_annual = 'Prior Diagnosis Annual', 
+  prior_diagnosis_quarterly = 'Prior Diagnosis Quarterly', 
+  high_activity_quarterly = 'High Activity Quarterly', 
+  high_activity_annual = 'High Activity Annual'
+  ))
+
+df2$intervention <- droplevels(as.factor(df2$intervention))
 
 ggplot(df2, aes(x = intervention, y = value, fill = intervention)) + 
   geom_bar(stat = 'identity', alpha = 0.7) + 
 	scale_y_log10() + 
 	coord_flip() + 
-	facet_grid(state~variable) + 
+  scale_x_discrete(limits = rev(levels(df2$intervention))) + 
+	facet_grid(variable~state) + 
 	scale_fill_manual(values = ghibli_palette("MononokeMedium")) + 
 	ylab("Number of Tests Needed to Avert One Infection") + 
-	xlab("Intervention Scenario") + 
+	xlab("") + 
 	ggtitle("Number Needed to Test To Avert One Incident/Prevalent Infection", "As Compared to the Base Case in 2027")
 
-ggsave("NumberNeededToTest_Syphilis.png")
+ggsave("NumberNeededToTest_Syphilis.png", width=10)

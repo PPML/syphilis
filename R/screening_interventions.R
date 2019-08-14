@@ -56,6 +56,10 @@ modify_simulation_environment_for_an_intervention <- function(e, intervention) {
       e$params$screen_repeat[106:nrow(e$params$screen_repeat), ] <- 
         4
      },
+   prior_diagnosis_annual = {
+      e$params$screen_repeat[106:nrow(e$params$screen_repeat), ] <- 
+        1
+     },
    high_activity_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 1),
    high_activity_twice_annual = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 2),
    high_activity_quarterly = adjust_screening_for_intervention(e, pop_indices = high_activity, new_level = 4),
@@ -156,12 +160,12 @@ extract_outcomes_by_sex <- function(sol) {
 
   decumulate <- function(idxs) { 
     return(
-      rowSums(sol[intervention_period, idxs]) - 
-      rowSums(sol[intervention_period - 52, idxs])
+      rowSums(sol[intervention_period, 1 + idxs]) - 
+      rowSums(sol[intervention_period - 52, 1 + idxs])
     )} 
 
   retrieve <- function(idxs) { 
-    rowSums(sol[intervention_period, idxs])
+    rowSums(sol[intervention_period, 1 + idxs])
   }
 
   data.frame(
@@ -177,18 +181,32 @@ extract_outcomes_by_sex <- function(sol) {
     diagnosed_females = decumulate(diagnosed_females),
     diagnosed_msw = decumulate(diagnosed_msw),
     diagnosed_msm = decumulate(diagnosed_msm),
+    diagnosed_reinfected = decumulate(dr.index),
+    
 
     # incidence
     incidence_all = decumulate(c(inc.index, incr.index)),
     incidence_females = decumulate(incidence_females),
     incidence_msw = decumulate(incidence_msw),
     incidence_msm = decumulate(incidence_msm),
+    incidence_reinfected = decumulate(incr.index),
+    incidence_new = decumulate(inc.index),
+    incidence_high_activity = decumulate(incidence_high_activity),
+    incidence_low_activity = decumulate(incidence_low_activity),
+
+
 
     # prevalence
     prevalence_all = retrieve(early_infected_index),
     prevalence_females = retrieve(prevalence_early_females),
     prevalence_msw = retrieve(prevalence_early_msw),
     prevalence_msm = retrieve(prevalence_early_msm),
+    prevalence_reinfected = retrieve(reinfected.index),
+    prevalence_new = retrieve(newly_infected.index),
+    prevalence_high_activity = retrieve(prevalence_high_activity),
+    prevalence_low_activity = retrieve(prevalence_low_activity),
+    prevalence_noninfectious = retrieve(noninfectious_index),
+    prevalence_infectious = retrieve(infectious_index),
 
     # tests
     tests_all = decumulate(tested.index)
@@ -277,17 +295,12 @@ extract_prevalence_by_sex <- function(sol) {
 #' df <- simulate_interventions(theta)
 simulate_interventions <- function(
   theta, 
-  interventions_list = c('msm_annual_hr_msm_quarterly',
-  'prior_diagnosis_quarterly', 'high_activity_quarterly',
-  'msm_annual_hr_and_prior_diagnosis_quarterly',
-  'annual',
-  'half_annual',
-  'msm_hr_and_prior_diagnosis_quarterly',
-  'msm_annual_all_hr_half_annual',
-  'msm_annual_all_hr_annual',
-  'twelve_times_annual',
-  'sixteen_times_annual',
-  'twenty_four_times_annual'
+  interventions_list = c(
+  'msm_annual_hr_msm_quarterly'# ,
+  # 'prior_diagnosis_annual', 
+  # 'prior_diagnosis_quarterly', 
+  # 'high_activity_annual',
+  # 'high_activity_quarterly'
   ),
   info_extractor
 ) {
@@ -325,12 +338,20 @@ simulate_outcomes_by_sex_by_state <- function(state) {
     prevalence_females = prevalence_females / popsize_females * 1e5,
     prevalence_msw = prevalence_msw / popsize_msw * 1e5,
     prevalence_msm = prevalence_msm / popsize_msm * 1e5,
+    prevalence_new = prevalence_new / popsize_all * 1e5,
+    prevalence_reinfected = prevalence_reinfected / popsize_all * 1e5,
+    prevalence_high_activity = prevalence_high_activity / popsize_all * 1e5,
+    prevalence_low_activity = prevalence_low_activity / popsize_all * 1e5,
 
     # incidence 
     incidence_all = incidence_all / popsize_all * 1e5,
     incidence_females = incidence_females / popsize_females * 1e5,
     incidence_msw = incidence_msw / popsize_msw * 1e5,
     incidence_msm = incidence_msm / popsize_msm * 1e5,
+    incidence_reinfected = incidence_reinfected / popsize_all * 1e5,
+    incidence_new = incidence_new / popsize_all * 1e5,
+    incidence_high_activity = incidence_high_activity / popsize_all * 1e5,
+    incidence_low_activity = incidence_low_activity / popsize_all * 1e5,
 
     # diagnoses
     diagnosed_all = diagnosed_all / popsize_all * 1e5,
@@ -349,7 +370,7 @@ simulate_outcomes_by_sex_by_state <- function(state) {
   reshape2::melt(id.vars = c('intervention', 'year'), value.name = 'rate') %>% 
 
   # separate the variable column into variable and sex
-  tidyr::separate(col = variable, into = c('variable', 'sex'), extra='drop')
+  tidyr::separate(col = variable, into = c('variable', 'group'), extra='drop')
 
   return(df)
 }
@@ -411,7 +432,7 @@ simulate_prevalence_by_sex_by_state <- function(state) {
   
   state <<- state
   # load state model
-  load.start()
+  load.start(model.end = 115)
 
   # get state parametrization
   theta <- get(paste0('theta_', tolower(state)))
@@ -440,66 +461,77 @@ simulate_outcomes_by_sex_both_states <- function() {
 
 #' @example 
 #' df <- simulate_outcomes_by_sex_both_states()
-#' plot_list <- plot_outcomes_by_sex(df, save=F)
-plot_outcomes_by_sex <- function(df) { 
-  plot_list <- list()
-
-  df %<>% filter(year <= 2027, year >= 2017)
-
-  produce_plot <- function(state, sex, outcome, include_title = T) { 
-    state1 <- enquo(state)
-    sex1 <- enquo(sex)
-    outcome1 <- enquo(outcome)
-
-    sex_lookup <- c(females = 'F', msw = 'MSW', msm = 'MSM', all = 'All')
-
-    ggplot( data = filter(df, state == !! state1, sex == !! sex1, variable == !! outcome1), 
-            mapping = aes(x = year, y = rate, color = intervention, linetype = intervention)) + 
-      geom_line(size = 1) + 
-      ylab('') + 
-      xlab('') + 
-      expand_limits(y=0) + 
-      # scale_color_manual(values = c('red', 'forestgreen', 'skyblue', 'orange', 'coral', 'purple', 'pink', 'grey', 'grey1', 'grey2', 'grey3', 'grey4')) + 
-      scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
-      theme_bw() + 
-      if (include_title) { 
-        ggtitle(paste0(tools::toTitleCase(outcome), ' Rate per 100,000'), subtitle = paste0(sex_lookup[[sex]], " - ", state)) 
-      } else { NULL } 
-  }
-}
-
-
-
-plot_state_outcomes_by_sex <- function(state, sex, outcome, include_title = T) { 
+plot_state_outcomes_by_sex <- function(state, group, outcome, include_title = T) { 
 
   if (! exists('df') || 
-  colnames(df) != c("state", "intervention", "year", "variable", "sex", "rate")) { 
+  colnames(df) != c("state", "intervention", "year", "variable", "group", "rate")) { 
     stop("df should be produced using simulate_outcomes_by_sex_both_states()")
   }
 
-  state1 <- enquo(state)
-  sex1 <- enquo(sex)
-  outcome1 <- enquo(outcome)
+  df %<>% filter(year <= 2027, year >= 2017)
 
-  sex_lookup <- c(females = 'F', msw = 'MSW', msm = 'MSM', all = 'All')
+  # produce_plot <- function(state, group, outcome, include_title = T) { 
+    state1 <- enquo(state)
+    group1 <- enquo(group)
+    outcome1 <- enquo(outcome)
 
-  ggplot( data = filter(df, state == !! state1, sex == !! sex1, variable == !! outcome1), 
-          mapping = aes(x = year, y = rate, color = intervention, linetype = intervention)) + 
-    geom_line(size = 1) + 
-    ylab('') + 
-    xlab('') + 
-    expand_limits(y=0) + 
-    # scale_color_manual(values = c('red', 'forestgreen', 'skyblue', 'orange', 'coral', 'purple', 'pink', 'grey', 'grey1', 'grey2', 'grey3', 'grey4')) + 
-    scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
-    theme_bw() + 
-    if (include_title) { 
-      ggtitle(paste0(tools::toTitleCase(outcome), ' Rate per 100,000'), subtitle = paste0(sex_lookup[[sex]], " - ", state)) 
-    } else { NULL } 
+    group_lookup <- c(females = 'F', msw = 'MSW', msm = 'MSM', all = 'All', new = 'New Infections', reinfected = 'Reinfected')
+
+
+
+    ggplot( data = filter(df, state == !! state1, group == !! group1, variable == !! outcome1), 
+            mapping = aes(x = year, y = rate, color = intervention, linetype = intervention)) + 
+      geom_line(size = 1.25, alpha=0.8) + 
+      ylab('') + 
+      xlab('') + 
+      expand_limits(y=0) + 
+
+  # intervention list: 
+  # 'msm_annual_hr_msm_quarterly',
+  # 'prior_diagnosis_quarterly', 
+  # 'high_activity_quarterly',
+  # 'high_activity_annual',
+  # 'msm_annual_all_hr_annual',
+  # 'msm_hr_and_prior_diagnosis_quarterly'
+
+      scale_color_manual(
+        labels = c('Base Case', 
+          'Guidelines in MSM', 
+          'Prior Diagnosis Annual', 
+          'Prior Diagnosis Quarterly', 
+          'High Activity Annual',
+          'High Activity Quarterly'), 
+
+        # values = c("#05141E", "#762B19", "#3D507A", "#657062", "#D14E3E",
+        # "#E78A40", "#EBD799")
+        # values = c("#7BA46C", "#602D31", "#008D91", "#0A789F", "#C6A28A", "#61B8D3", "#EACF9E")
+        # values = c("#7FC97F", "#BEAED4", "#FDC086", "#AAAA99", "#386CB0", "#F0027F", "#BF5B17")
+        values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#AAAA33")
+        ) + 
+
+      scale_linetype_manual(
+        labels = c('Base Case', 
+          'Guidelines in MSM', 
+          'Prior Diagnosis Annual', 
+          'Prior Diagnosis Quarterly', 
+          'High Activity Annual',
+          'High Activity Quarterly'), 
+        values = c(1,5,2,3,4,6))  +
+      scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
+      theme_bw() + 
+      if (include_title) { 
+        ggtitle(paste0(tools::toTitleCase(outcome), ' Rate per 100,000'), subtitle = paste0(group_lookup[[group]], " - ", state)) 
+      } else { NULL } 
+  # }
 }
+
+
+
+
 
 #' @import tidyverse
 simulate_and_plot_diagnoses_by_sex_both_states <- function() { 
-	load_globals(model.end = 116)
+	load_globals(model.end = 110)
 
   la_df <- simulate_diagnoses_by_sex_by_state('LA')
   ma_df <- simulate_diagnoses_by_sex_by_state('MA')
@@ -508,7 +540,7 @@ simulate_and_plot_diagnoses_by_sex_both_states <- function() {
     cbind.data.frame(state = 'Louisiana', la_df),
     cbind.data.frame(state = 'Massachusetts', ma_df))
 
-  df %<>% filter(year <= 2027, year >= 2017)
+  df %<>% filter(year <= 2020, year >= 2012)
 
   produce_plot <- function(state, sex) { 
     state1 <- enquo(state)
@@ -523,7 +555,7 @@ simulate_and_plot_diagnoses_by_sex_both_states <- function() {
       xlab('') + 
       expand_limits(y=0) + 
       scale_color_manual(values = c('red', 'forestgreen', 'skyblue', 'orange', 'coral')) + 
-      scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
+      scale_x_continuous(breaks = seq(2012, 2020, by=2)) + 
       theme_bw() + 
       ggtitle(paste0(sex_lookup[[sex]], " - ", state)) 
   }
@@ -574,7 +606,7 @@ simulate_and_plot_incidence_by_sex_both_states <- function() {
     cbind.data.frame(state = 'Louisiana', la_df),
     cbind.data.frame(state = 'Massachusetts', ma_df))
 
-  df %<>% filter(year <= 2027, year >= 2017)
+  df %<>% filter(year <= 2020, year >= 2012)
 
   produce_plot <- function(state, sex) { 
     state1 <- enquo(state)
@@ -594,7 +626,7 @@ simulate_and_plot_incidence_by_sex_both_states <- function() {
       scale_linetype_manual(
         labels = c('Base Case', 'Guidelines in MSM', 'Prior Diagnosis Quarterly', 'High Activity Quarterly', 'Combination'),
         values = c(1,5,2,3,4))  +
-      scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
+      scale_x_continuous(breaks = seq(2012, 2020, by=2)) + 
       theme_bw() + 
       
       ggtitle(paste0(sex_lookup[[sex]], " - ", state)) 
@@ -636,7 +668,7 @@ simulate_and_plot_incidence_by_sex_both_states <- function() {
 
 #' @import tidyverse
 simulate_and_plot_prevalence_by_sex_both_states <- function() { 
-	load_globals(model.end = 116)
+	load_globals(model.end = 110)
 
   la_df <- simulate_prevalence_by_sex_by_state('LA')
   ma_df <- simulate_prevalence_by_sex_by_state('MA')
@@ -645,7 +677,7 @@ simulate_and_plot_prevalence_by_sex_both_states <- function() {
     cbind.data.frame(state = 'Louisiana', la_df),
     cbind.data.frame(state = 'Massachusetts', ma_df))
 
-  df %<>% filter(year <= 2027, year >= 2017)
+  df %<>% filter(year <= 2020, year >= 2012)
 
   produce_plot <- function(state, sex) { 
     state1 <- enquo(state)
@@ -665,7 +697,7 @@ simulate_and_plot_prevalence_by_sex_both_states <- function() {
       scale_linetype_manual(
         labels = c('Base Case', 'Guidelines in MSM', 'Prior Diagnosis Quarterly', 'High Activity Quarterly', 'Combination'),
         values = c(1,5,2,3,4))  +
-      scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
+      scale_x_continuous(breaks = seq(2012, 2020, by=2)) + 
       theme_bw() + 
       
       ggtitle(paste0(sex_lookup[[sex]], " - ", state)) 
@@ -705,3 +737,197 @@ simulate_and_plot_prevalence_by_sex_both_states <- function() {
   return(plt)
 }
 
+
+
+
+
+breakdown_basecase <- function() { 
+  
+  for (state in c('LA', 'MA')) { 
+    theta <- get(paste0('theta_', tolower(state)))
+    state <<- state
+    load.start()
+
+		e <- constructSimulationEnvironment(theta)
+		e$params$output_weekly <- TRUE
+		runSimulation(e)
+		assign(paste0(tolower(state), '_df'), extract_outcomes_by_sex(e$sim$out))
+  }
+
+  df <- rbind.data.frame(
+    cbind.data.frame(state = 'Louisiana', la_df),
+    cbind.data.frame(state = 'Massachusetts', ma_df))
+
+  df %<>% 
+    mutate(
+    # prevalence 
+    prevalence_all = prevalence_all / popsize_all * 1e5,
+    prevalence_females = prevalence_females / popsize_all * 1e5,
+    prevalence_msw = prevalence_msw / popsize_all * 1e5,
+    prevalence_msm = prevalence_msm / popsize_all * 1e5,
+    prevalence_new = prevalence_new / popsize_all * 1e5,
+    prevalence_reinfected = prevalence_reinfected / popsize_all * 1e5,
+    prevalence_high_activity = prevalence_high_activity / popsize_all * 1e5,
+    prevalence_low_activity = prevalence_low_activity / popsize_all * 1e5,
+    prevalence_noninfectious = prevalence_noninfectious / popsize_all * 1e5,
+    prevalence_infectious = prevalence_infectious / popsize_all * 1e5,
+
+    # incidence 
+    incidence_all = incidence_all / popsize_all * 1e5,
+    incidence_females = incidence_females / popsize_all * 1e5,
+    incidence_msw = incidence_msw / popsize_all * 1e5,
+    incidence_msm = incidence_msm / popsize_all * 1e5,
+    incidence_reinfected = incidence_reinfected / popsize_all * 1e5,
+    incidence_new = incidence_new / popsize_all * 1e5,
+    incidence_high_activity = incidence_high_activity / popsize_all * 1e5,
+    incidence_low_activity = incidence_low_activity / popsize_all * 1e5,
+
+    # diagnoses
+    diagnosed_all = diagnosed_all / popsize_all * 1e5,
+    diagnosed_females = diagnosed_females / popsize_all * 1e5,
+    diagnosed_msw = diagnosed_msw / popsize_all * 1e5,
+    diagnosed_msm = diagnosed_msm / popsize_all * 1e5) %>% 
+
+  # remove population sizes
+  select(
+    -c(popsize_females, 
+       popsize_msw, 
+       popsize_msm,
+       tests_all)) %>% 
+
+  # reshape the columns into rows with column-variables
+  reshape2::melt(id.vars = c('state', 'year'), value.name = 'rate') %>% 
+
+  # separate the variable column into variable and sex
+  tidyr::separate(col = variable, into = c('variable', 'group'), extra='drop')
+
+  return(df)
+
+}
+
+
+make_plots_for_NEEMA_Aug12 <- function() { 
+  df <- simulate_outcomes_by_sex_both_states()
+
+  # df %<>% filter((intervention == 'basecase' & year %% 1 == 0 | year < 2012) | intervention != 'basecase')
+
+  la_prevalence <- plot_state_outcomes_by_sex('Louisiana', 'all', 'prevalence')
+
+  ma_prevalence <- plot_state_outcomes_by_sex('Massachusetts', 'all', 'prevalence')
+
+  ggsave(plot=la_prevalence, 
+    file.path(system.file('figures/intervention_figures/', package='syphilis'), 'la_prevalence1.png'),
+    width = 10, height = 6)
+
+
+  ggsave(plot=ma_prevalence, 
+    file.path(system.file('figures/intervention_figures/', package='syphilis'), 'ma_prevalence1.png'),
+    width = 10, height = 6)
+
+
+  la_incidence <- plot_state_outcomes_by_sex('Louisiana', 'all', 'incidence')
+
+  ma_incidence <- plot_state_outcomes_by_sex('Massachusetts', 'all', 'incidence')
+
+  ggsave(plot=la_incidence, 
+    file.path(system.file('figures/intervention_figures/', package='syphilis'), 'la_incidence1.png'),
+    width = 10, height = 6)
+
+
+  ggsave(plot=ma_incidence, 
+    file.path(system.file('figures/intervention_figures/', package='syphilis'), 'ma_incidence1.png'),
+    width = 10, height = 6)
+
+  df <- breakdown_basecase()
+
+  plot_breakdown_by_state_outcome_grouping <- function(state, outcome, grouping) { 
+    state1 <- enquo(state)
+    outcome1 <- enquo(outcome)
+    grouping1 <- enquo(grouping)
+
+    grouping_lookup <- list('risk' = c('high', 'low'), sex = c('msm', 'msw', 'females'), reinfection = c('new', 'reinfected'), infectiousness = c('noninfectious', 'infectious'))
+    
+
+    grouping_color_lookup <- c(risk = 'Reds', reinfection = 'Purples', sex = 'Blues', infectiousness = 'Oranges')
+
+    ggplot(
+        data = filter(df, year >= 2017, year <= 2027, state == !! state1, variable == !! outcome1, group %in% grouping_lookup[[grouping]]),
+        mapping = aes(x = year, y = rate, group = group,  fill = group)) + 
+        geom_area(alpha=0.8) + 
+        scale_fill_brewer(palette = grouping_color_lookup[[grouping]]) + 
+        theme_bw() + 
+        scale_x_continuous(breaks = seq(2017, 2027, by=2)) + 
+        ggtitle(paste0(tools::toTitleCase(outcome), " per 100,000 in ", state), subtitle = paste0("Broken down by ", tools::toTitleCase(grouping)))
+  }
+
+  la_prevalence_breakdown_risk <- ggplot(
+    data = filter(df, state == 'Louisiana', variable == 'prevalence', group %in% c('high', 'low')),
+    mapping = aes(x = year, y = rate, group = group,  fill = group)) + 
+    geom_area(alpha=0.5) + 
+    scale_fill_brewer(palette = 'Reds') + 
+    theme_bw()
+
+  la_prevalence_breakdown_infectiousness <- plot_breakdown_by_state_outcome_grouping('Louisiana', 'prevalence', 'infectiousness')
+  ggsave(plot = la_prevalence_breakdown_infectiousness, filename = file.path(system.file('figures/intervention_figures/', package='syphilis'), 'la_prevalence_breakdown_infectiousness.png'))
+
+  ma_prevalence_breakdown_infectiousness <- plot_breakdown_by_state_outcome_grouping('Massachusetts', 'prevalence', 'infectiousness')
+  ggsave(plot = ma_prevalence_breakdown_infectiousness, filename = file.path(system.file('figures/intervention_figures/', package='syphilis'), 'ma_prevalence_breakdown_infectiousness.png'))
+
+  la_incidence_breakdown_risk <- plot_breakdown_by_state_outcome_grouping('Louisiana', 'incidence', 'risk')
+  ggsave(plot = la_incidence_breakdown_risk, filename = file.path(system.file('figures/intervention_figures/', package='syphilis'), 'la_incidence_breakdown_risk.png'))
+
+  ma_incidence_breakdown_risk <- plot_breakdown_by_state_outcome_grouping('Massachusetts', 'incidence', 'risk')
+  ggsave(plot = ma_incidence_breakdown_risk, filename = file.path(system.file('figures/intervention_figures/', package='syphilis'), 'ma_incidence_breakdown_risk.png'))
+
+  la_incidence_breakdown_sex <- plot_breakdown_by_state_outcome_grouping('Louisiana', 'incidence', 'sex')
+  ggsave(plot = la_incidence_breakdown_sex, filename = file.path(system.file('figures/intervention_figures/', package='syphilis'), 'la_incidence_breakdown_sex.png'))
+
+  ma_incidence_breakdown_sex <- plot_breakdown_by_state_outcome_grouping('Massachusetts', 'incidence', 'sex')
+  ggsave(plot = ma_incidence_breakdown_sex, filename = file.path(system.file('figures/intervention_figures/', package='syphilis'), 'ma_incidence_breakdown_sex.png'))
+
+
+  la_incidence_breakdown_reinfection <- plot_breakdown_by_state_outcome_grouping('Louisiana', 'incidence', 'reinfection')
+  ggsave(plot = la_incidence_breakdown_reinfection, filename = file.path(system.file('figures/intervention_figures/', package='syphilis'), 'la_incidence_breakdown_reinfection.png'))
+
+  ma_incidence_breakdown_reinfection <- plot_breakdown_by_state_outcome_grouping('Massachusetts', 'incidence', 'reinfection')
+  ggsave(plot = ma_incidence_breakdown_reinfection, filename = file.path(system.file('figures/intervention_figures/', package='syphilis'), 'ma_incidence_breakdown_reinfection.png'))
+  # la_prevalence_breakdown_sex <- ggplot(
+  #   data = filter(df, state == 'Louisiana', variable == 'prevalence', group %in% c('msm', 'msw', 'females')),
+  #   mapping = aes(x = year, y = rate, group = group,  fill = group)) + 
+  #   geom_area(alpha=0.5) + 
+  #   scale_fill_brewer(palette = 'Reds') + 
+  #   theme_bw()
+
+  # la_prevalence_breakdown_reinfection <- ggplot(
+  #   data = filter(df, state == 'Louisiana', variable == 'prevalence', group %in% c('new', 'reinfected')),
+  #   mapping = aes(x = year, y = rate, group = group,  fill = group)) + 
+  #   geom_area(alpha=0.5) + 
+  #   scale_fill_brewer(palette = 'Purples') + 
+  #   theme_bw()
+
+  # ma_prevalence_breakdown_risk <- ggplot(
+  #   data = filter(df, state == 'Massachusetts', variable == 'prevalence', group %in% c('high', 'low')),
+  #   mapping = aes(x = year, y = rate, group = group,  fill = group)) + 
+  #   geom_area(alpha=0.5) + 
+  #   scale_fill_brewer(palette = 'Reds') + 
+  #   theme_bw()
+
+  # ma_prevalence_breakdown_sex <- ggplot(
+  #   data = filter(df, state == 'Massachusetts', variable == 'prevalence', group %in% c('msm', 'msw', 'females')),
+  #   mapping = aes(x = year, y = rate, group = group,  fill = group)) + 
+  #   geom_area(alpha=0.5) + 
+  #   scale_fill_brewer(palette = 'Reds') + 
+  #   theme_bw()
+
+  # ma_prevalence_breakdown_reinfection <- ggplot(
+  #   data = filter(df, state == 'Massachusetts', variable == 'prevalence', group %in% c('new', 'reinfected')),
+  #   mapping = aes(x = year, y = rate, group = group,  fill = group)) + 
+  #   geom_area(alpha=0.5) + 
+  #   scale_fill_brewer(palette = 'Purples') + 
+  #   theme_bw()
+
+
+  ggsave(plot = la_prevalence_breakdown_risk, filename = file.path(system.file('figures/intervention_figures/', package='syphilis'), 'la_prevalence_breakdown_risk.png'))
+
+
+}
