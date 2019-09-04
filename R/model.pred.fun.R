@@ -53,9 +53,9 @@ constructSimulationEnvironment <- function(theta) {
 		screen[screen<0.0001]<-0  # make sure that screening rate isn't <0
 		# screen <-rbind(screen[rep(1, times=(cal.start-11)),], screen, screen[rep((nrow(screen)), times=10),]) ##generate screening rates for the entire model period (assume screening rates pre-calibration start=rate at start of calibration); time trend starts 10 years before cal start
 		screen <- rbind(
-		  screen[rep(1, times = (cal.start - 11)),],
+		  screen[rep(1, times = (cal.start - 11)*52),],
 			screen,
-			screen[rep(nrow(screen), times = model.end - (cal.start - 11 + nrow(screen))),])
+			screen[rep(nrow(screen), times = model.end*52 - (cal.start - 11 + nrow(screen)/52) * 52),])
 
 		# Set up duplicate screening rates to be used for different screening interventions
 		# these are un-modified in the basecase, but to simulate a counterfactual where 
@@ -85,9 +85,9 @@ constructSimulationEnvironment <- function(theta) {
 		rep.trend[rep.trend>1]<-1  # make sure that reporting rate isn't >1
 		# rep <-rbind(rep.trend[rep(1, times=(cal.start-11)),], rep.trend, rep.trend[rep((nrow(rep.trend)), times=10),])  #expand reporting prob to cover entire model run time, assume reporting pre-calibration period = reporting at start of cal; time trend starts 10 years prior to cal start
 		rep.trend <- rbind(
-		  rep.trend[rep(1, times=(cal.start-11)),],
+		  rep.trend[rep(1, times=(cal.start-11)*52),],
 			rep.trend,
-			rep.trend[rep(nrow(rep.trend), times=model.end - (cal.start - 11 + nrow(rep.trend))),])
+			rep.trend[rep(nrow(rep.trend), times=model.end*52 - (cal.start - 11 + nrow(rep.trend)/52)*52),])
 
 		rep.symp<-matrix(c(rep.trend[,males]*rr.rep.symp.m, rep.trend[,females]*rr.rep.symp.f), ncol=40) #reporting rate if male or female case who actively seeks treatment
 		# rep<-rep[,1] #reporting rate if case identified by screening

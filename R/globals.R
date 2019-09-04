@@ -22,10 +22,17 @@ load_globals <- function(model.end = 115) {
   model.end <<- model.end # end of the simulation
   start.year <<- 2012 # data calibration start
   end.year <<- 2016 # data calibration end
-  intervention_years <<- 105:115 # 2017 to 202
+  intervention_years <<- 100:115 # 2012 to 2021
+  intervention_start <<- min(intervention_years)
+  intervention_stop <<- max(intervention_years)
 
   # the term such that cal.start + model_to_gregorian_difference == start.year
   model_to_gregorian_difference <<- start.year - cal.start 
+
+  # intervention start and stop in Gregorian years
+  intervention_start_gregorian <<- intervention_start + model_to_gregorian_difference
+  intervention_stop_gregorian <<- intervention_stop + model_to_gregorian_difference
+
 
   # background antibiotic treatment
   p.abx.init <- 0.15 #set this to 0 if want to turn off abx treatment -- this implements a period (pre-cal) with high rates of abx use, to represent the intro of penicillin in the pop, which decreases to abx.background 
@@ -78,6 +85,23 @@ load_globals <- function(model.end = 115) {
   tested.index <<- index*23+1:index        #tested for syphilis
 
 
+  mutually_exclusive_stages_list <<- list(
+    s.index,
+    e.index,
+    prim.index,
+    sec.index,
+    early.index,
+    latent.index,
+    treated.inf.index,
+    treated.early.index,
+    treated.late.index,
+    sr.index,
+    er.index,
+    primr.index,
+    secr.index,
+    earlyr.index,
+    latentr.index,
+    nsa.index)
 
 	# index for all infected individuals
 	infected.index <<- c(prim.index, sec.index, early.index,
@@ -180,6 +204,11 @@ load_globals <- function(model.end = 115) {
 
 
   ###  Population Indices for Outcomes (diagnosis, incidence, prevalence) by Sex (f, msw, msm), and Risk (high/low activity)
+
+  # total populations 
+  all_females <<- c(sapply(mutually_exclusive_stages_list, `[`, females))
+  all_msw <<- c(sapply(mutually_exclusive_stages_list, `[`, msw))
+  all_msm <<- c(sapply(mutually_exclusive_stages_list, `[`, msm))
 
   # Diagnosis by Sex 
   diagnosed_females <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, females))

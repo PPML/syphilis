@@ -54,10 +54,10 @@ List syphSim(
   NumericVector report = as<NumericVector>(x["rep"]); //reporting probability, screened case
   NumericMatrix report_symp = as<NumericMatrix>(x["rep.symp"]); //reporting probability matrix, case seeking care
   NumericMatrix screen = as<NumericMatrix>(x["screen"]); //screening rate matrix
-  NumericVector alpha(dim); //screening rate (updated annually)
+  NumericVector alpha(dim); //screening rate (updated weekly)
 	NumericMatrix screen_repeat = as<NumericMatrix>(x["screen_repeat"]); // screening rates for individuals with diagnosis history
-	NumericVector alpha_repeat(dim); // screening rate (updated annually) for individuals with diagnosis history 
-  NumericVector rep_s(dim); //reporting probabilities (updataed annually)
+	NumericVector alpha_repeat(dim); // screening rate (updated weekly) for individuals with diagnosis history 
+  NumericVector rep_s(dim); //reporting probabilities (updataed weekly)
   NumericVector c_msm = as<NumericVector>(x["behav"]); //transmission rr in MSM 
   NumericVector dur_imm = as<NumericVector>(x["dur.imm"]); //duration immunity after treatment
   NumericVector cmlow1 = as<NumericVector>(cm["cm.low1"]); //contact matrix low activity, black 
@@ -191,9 +191,9 @@ List syphSim(
 					NSA[n] = Pop[n+20*dim];
 					D4[n] =  Pop[n+21*dim];
 					DR[n] =  Pop[n+22*dim];
-					alpha[n] = screen(y,n);  //update screening and reporting
-					alpha_repeat[n] = screen_repeat(y,n);
-					rep_s[n] = report_symp(y,n);
+					alpha[n] = screen(y*52+w,n);  //update screening and reporting
+					alpha_repeat[n] = screen_repeat(y*52+w,n);
+					rep_s[n] = report_symp(y*52+w,n);
 				}
 				
 				//calculate force of infection for each sex and subpopulation
@@ -524,7 +524,7 @@ List syphSimCTCounterfactual(
   NumericVector alpha(dim); //screening rate (updated annually)
 	NumericVector alpha_ps(dim); //screening rate for primary/secondary
 	NumericVector alpha_el(dim); //screening rate for early/late latent 
-  NumericVector rep_s(dim); //reporting probabilities (updataed annually)
+  NumericVector rep_s(dim); //reporting probabilities (updated weekly)
   NumericVector c_msm = as<NumericVector>(x["behav"]); //transmission rr in MSM 
   NumericVector dur_imm = as<NumericVector>(x["dur.imm"]); //duration immunity after treatment
   NumericVector cmlow1 = as<NumericVector>(cm["cm.low1"]); //contact matrix low activity, black 
@@ -658,10 +658,10 @@ List syphSimCTCounterfactual(
 					NSA[n] = Pop[n+20*dim];
 					D4[n] =  Pop[n+21*dim];
 					DR[n] =  Pop[n+22*dim];
-					alpha[n] = screen(y,n);  //update screening and reporting
-					alpha_ps[n] = screen_ps(y,n);
-					alpha_el[n] = screen_el(y,n);
-					rep_s[n] = report_symp(y,n);
+					alpha[n] = screen(y*52+w,n);  //update screening and reporting
+					alpha_ps[n] = screen_ps(y*52+w,n);
+					alpha_el[n] = screen_el(y*52+w,n);
+					rep_s[n] = report_symp(y*52+w,n);
 				}
 				
 				//calculate force of infection for each sex and subpopulation
