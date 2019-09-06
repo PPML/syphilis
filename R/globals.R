@@ -145,9 +145,11 @@ load_globals <- function(model.end = 115) {
   f5<<-37:40 #F subpop5 (empty)
   y.m<<-c(1:2,5:6,9:10,13:14,17:18) #youngest age cat M
   y.m.msw<<- c(1:2, 5:6, 9:10) #yougest age cat MSW only
+  y.m.msm <<- setdiff(y.m, y.m.msw) # youngest age cat MSM only
   y.f<<-c(21:22,25:26,29:30) #youngest age cat F
   o.m<<-c(3:4,7:8, 11:12,15:16,19:20) #oldest age cat M
   o.m.msw <<- c(3:4, 7:8, 11:12) #oldest age cat MSW only
+  o.m.msm <<- setdiff(o.m, o.m.msw) # oldest age cat MSM only
   o.f<<-c(23:24,27:28,31:32) #oldest age cat F
   y.m.1 <<- 1:2 #youngest age cat, subpop1
   o.m.1 <<- 3:4 #old age cat, subpop1
@@ -168,6 +170,8 @@ load_globals <- function(model.end = 115) {
   y.f.23 <<- c(25:26,29:30) # youngest age cat, subpops 2&3
   high_activity <<- seq(2, 40, 2) # high sexual activity
   low_activity <<- seq(1, 39, 2) # low sexual activity
+  young <<- c(y.m, y.f)
+  old <<- c(o.m, o.f)
 
   # Make a 4 dimensional array with each of the model dimensions 
   # corresponding to the index of the population in their serial 
@@ -206,43 +210,143 @@ load_globals <- function(model.end = 115) {
   ###  Population Indices for Outcomes (diagnosis, incidence, prevalence) by Sex (f, msw, msm), and Risk (high/low activity)
 
   # total populations 
+
+  all_young <<-  c(sapply(mutually_exclusive_stages_list, `[`, young))
+  all_old <<-  c(sapply(mutually_exclusive_stages_list, `[`, old))
+
   all_females <<- c(sapply(mutually_exclusive_stages_list, `[`, females))
+  all_young_females <<- c(sapply(mutually_exclusive_stages_list, `[`, y.f))
+  all_old_females <<- c(sapply(mutually_exclusive_stages_list, `[`, o.f))
+
+  all_males <<- c(sapply(mutually_exclusive_stages_list, `[`, males))
+  all_young_males <<- c(sapply(mutually_exclusive_stages_list, `[`, y.m))
+  all_old_males <<- c(sapply(mutually_exclusive_stages_list, `[`, o.m))
+
   all_msw <<- c(sapply(mutually_exclusive_stages_list, `[`, msw))
+  all_young_msw <<- c(sapply(mutually_exclusive_stages_list, `[`, y.m.msw))
+  all_old_msw <<- c(sapply(mutually_exclusive_stages_list, `[`, o.m.msw))
+
   all_msm <<- c(sapply(mutually_exclusive_stages_list, `[`, msm))
+  all_young_msm <<- c(sapply(mutually_exclusive_stages_list, `[`, setdiff(y.m, y.m.msm)))
+  all_old_msm <<- c(sapply(mutually_exclusive_stages_list, `[`, setdiff(o.m, o.m.msm)))
+
 
   # Diagnosis by Sex 
+  diagnosed_young <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, young))
+  diagnosed_old <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, old))
+
   diagnosed_females <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, females))
-  diagnosed_msm <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, msm))
+  diagnosed_young_females <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, y.f))
+  diagnosed_old_females <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, o.f))
+
+  diagnosed_males <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, males))
+  diagnosed_young_males <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, y.m))
+  diagnosed_old_males <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, o.m))
+
   diagnosed_msw <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, msw))
+  diagnosed_young_msw <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, y.m.msw))
+  diagnosed_old_msw <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, o.m.msw))
+
+  diagnosed_msm <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, msm))
+  diagnosed_young_msm <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, y.m.msm))
+  diagnosed_old_msm <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, o.m.msm))
 
   # Diagnosis by Activity
   diagnosed_high_activity <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, high_activity))
   diagnosed_low_activity <<- c(sapply(list(d1.index, d2.index, d3.index), `[`, low_activity))
 
   # Incidence by Sex
+  incidence_young <<- c(sapply(list(inc.index, incr.index), `[`, young))
+  incidence_old <<- c(sapply(list(inc.index, incr.index), `[`, old))
+
   incidence_females <<- c(sapply(list(inc.index, incr.index), `[`, females))
+  incidence_young_females <<- c(sapply(list(inc.index, incr.index), `[`, y.f))
+  incidence_old_females <<- c(sapply(list(inc.index, incr.index), `[`, o.f))
+
+  incidence_males <<- c(sapply(list(inc.index, incr.index), `[`, males))
+  incidence_young_males <<- c(sapply(list(inc.index, incr.index), `[`, y.m))
+  incidence_old_males <<- c(sapply(list(inc.index, incr.index), `[`, o.m))
+
   incidence_msm <<- c(sapply(list(inc.index, incr.index), `[`, msm))
+  incidence_young_msm <<- c(sapply(list(inc.index, incr.index), `[`, y.m.msm))
+  incidence_old_msm <<- c(sapply(list(inc.index, incr.index), `[`, o.m.msm))
+
   incidence_msw <<- c(sapply(list(inc.index, incr.index), `[`, msw))
+  incidence_young_msw <<- c(sapply(list(inc.index, incr.index), `[`, y.m.msw))
+  incidence_old_msw <<- c(sapply(list(inc.index, incr.index), `[`, o.m.msw))
 
   # Incidence by Risk
   incidence_high_activity <<- c(sapply(list(inc.index, incr.index), `[`, high_activity))
   incidence_low_activity <<- c(sapply(list(inc.index, incr.index), `[`, low_activity))
 
   # Prevalence by Sex
+  prevalence_young <<- c(sapply(list(prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, young))
+  prevalence_old <<- c(sapply(list(prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, old))
+
   prevalence_females <<- c(sapply(list(prim.index, sec.index, early.index, 
      primr.index, secr.index, earlyr.index, latentr.index), `[`, females))
+  prevalence_young_females <<- c(sapply(list(prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, y.f))
+  prevalence_old_females <<- c(sapply(list(prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, o.f))
+
   prevalence_msw <<- c(sapply(list( prim.index, sec.index, early.index, 
      primr.index, secr.index, earlyr.index, latentr.index), `[`, msw))
+  prevalence_young_msw <<- c(sapply(list( prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, y.m.msw))
+  prevalence_old_msm <<- c(sapply(list( prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, o.m.msw))
+
   prevalence_msm <<- c(sapply(list( prim.index, sec.index, early.index, 
      primr.index, secr.index, earlyr.index, latentr.index), `[`, msm))
+  prevalence_young_msm <<- c(sapply(list( prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, y.m.msm))
+  prevalence_old_msm <<- c(sapply(list( prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, o.m.msm))
 
+  prevalence_males <<- c(sapply(list( prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, males))
+  prevalence_young_males <<- c(sapply(list( prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, y.m))
+  prevalence_old_males <<- c(sapply(list( prim.index, sec.index, early.index, 
+     primr.index, secr.index, earlyr.index, latentr.index), `[`, o.m))
+
+
+  # Prevalence of Early Syphilis by Sex, Age
+  prevalence_early_young<<- c(sapply(list(prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, young))
+  prevalence_early_old <<- c(sapply(list(prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, old))
 
   prevalence_early_females <<- c(sapply(list(prim.index, sec.index, early.index,  
      primr.index, secr.index, earlyr.index), `[`, females))
+  prevalence_early_young_females <<- c(sapply(list(prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, y.f))
+  prevalence_early_old_females <<- c(sapply(list(prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, o.f))
+
   prevalence_early_msw <<- c(sapply(list( prim.index, sec.index, early.index,  
      primr.index, secr.index, earlyr.index), `[`, msw))
+  prevalence_early_young_msw <<- c(sapply(list( prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, y.m.msw))
+  prevalence_early_old_msw <<- c(sapply(list( prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, o.m.msw))
+
   prevalence_early_msm <<- c(sapply(list( prim.index, sec.index, early.index,  
      primr.index, secr.index, earlyr.index), `[`, msm))
+  prevalence_early_young_msm <<- c(sapply(list( prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, y.m.msm))
+  prevalence_early_old_msm <<- c(sapply(list( prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, o.m.msm))
+
+  prevalence_early_males <<- c(sapply(list( prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, males))
+  prevalence_early_young_males <<- c(sapply(list( prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, y.m))
+  prevalence_early_old_males <<- c(sapply(list( prim.index, sec.index, early.index,  
+     primr.index, secr.index, earlyr.index), `[`, o.m))
 
 
   # Prevalence by Risk
