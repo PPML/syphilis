@@ -421,6 +421,209 @@ simulate_interventions_trace <- function(
 }
 
 
+compute_confidence_intervals_for_trace_interventions <- function() { 
+  # read in raw data
+  la_df <- readRDS(system.file('interventions/la_interventions_df.rds', package='syphilis'))
+  ma_df <- readRDS(system.file('interventions/ma_interventions_df.rds', package='syphilis'))
+
+  # > colnames(la_df)
+  #  [1] "sim"                      "intervention"
+  #  [3] "year"                     "popsize_young_females"
+  #  [5] "popsize_old_females"      "popsize_young_males"
+  #  [7] "popsize_old_males"        "diagnosed_young_females"
+  #  [9] "diagnosed_old_females"    "diagnosed_young_males"
+  # [11] "diagnosed_old_males"      "incidence_young_females"
+  # [13] "incidence_old_females"    "incidence_young_males"
+  # [15] "incidence_old_males"      "prevalence_young_females"
+  # [17] "prevalence_old_females"   "prevalence_young_males"
+  # [19] "prevalence_old_males"
+
+  # combine the data frames
+  la_df <- cbind.data.frame(state = 'Louisiana', la_df)
+  ma_df <- cbind.data.frame(state = 'Massachusetts', ma_df)
+  df <- rbind.data.frame(la_df, ma_df)
+
+  # group by state, year, intervention, and produce confidence intervals
+  df %>% group_by(state, year, intervention) %>% 
+    summarize(
+      # preserve population sizes
+      popsize_young_females = mean(popsize_young_females, na.rm=T),
+      popsize_old_females = mean(popsize_old_females, na.rm=T),
+      popsize_young_males = mean(popsize_young_males, na.rm=T),
+      popsize_old_males = mean(popsize_old_males, na.rm=T),
+      
+      # yearly diagnosed counts -- mean, ci_high, and ci_low (95% confidence intervals)
+      diagnosed_young_females.mean = mean(diagnosed_young_females, na.rm=T),
+      diagnosed_young_females.ci_high = quantile(diagnosed_young_females, .975, na.rm=T),
+      diagnosed_young_females.ci_low = quantile(diagnosed_young_females, .025, na.rm=T),
+
+      diagnosed_old_females.mean = mean(diagnosed_old_females, na.rm=T),
+      diagnosed_old_females.ci_high = quantile(diagnosed_old_females, .975, na.rm=T),
+      diagnosed_old_females.ci_low = quantile(diagnosed_old_females, .025, na.rm=T),
+
+      diagnosed_young_males.mean = mean(diagnosed_young_males, na.rm=T),
+      diagnosed_young_males.ci_high = quantile(diagnosed_young_males, .975, na.rm=T),
+      diagnosed_young_males.ci_low = quantile(diagnosed_young_males, .025, na.rm=T),
+
+      diagnosed_old_males.mean = mean(diagnosed_old_males, na.rm=T),
+      diagnosed_old_males.ci_high = quantile(diagnosed_old_males, .975, na.rm=T),
+      diagnosed_old_males.ci_low = quantile(diagnosed_old_males, .025, na.rm=T),
+
+      # yearly incidence counts -- mean, ci_high, and ci_low (95% confidence intervals)
+      incidence_young_females.mean = mean(incidence_young_females, na.rm=T),
+      incidence_young_females.ci_high = quantile(incidence_young_females, .975, na.rm=T),
+      incidence_young_females.ci_low = quantile(incidence_young_females, .025, na.rm=T),
+
+      incidence_old_females.mean = mean(incidence_old_females, na.rm=T),
+      incidence_old_females.ci_high = quantile(incidence_old_females, .975, na.rm=T),
+      incidence_old_females.ci_low = quantile(incidence_old_females, .025, na.rm=T),
+
+      incidence_young_males.mean = mean(incidence_young_males, na.rm=T),
+      incidence_young_males.ci_high = quantile(incidence_young_males, .975, na.rm=T),
+      incidence_young_males.ci_low = quantile(incidence_young_males, .025, na.rm=T),
+
+      incidence_old_males.mean = mean(incidence_old_males, na.rm=T),
+      incidence_old_males.ci_high = quantile(incidence_old_males, .975, na.rm=T),
+      incidence_old_males.ci_low = quantile(incidence_old_males, .025, na.rm=T),
+
+      # prevalence counts -- mean, ci_high, and ci_low (95% confidence intervals)
+      prevalence_young_females.mean = mean(prevalence_young_females, na.rm=T),
+      prevalence_young_females.ci_high = quantile(prevalence_young_females, .975, na.rm=T),
+      prevalence_young_females.ci_low = quantile(prevalence_young_females, .025, na.rm=T),
+
+      prevalence_old_females.mean = mean(prevalence_old_females, na.rm=T),
+      prevalence_old_females.ci_high = quantile(prevalence_old_females, .975, na.rm=T),
+      prevalence_old_females.ci_low = quantile(prevalence_old_females, .025, na.rm=T),
+
+      prevalence_young_males.mean = mean(prevalence_young_males, na.rm=T),
+      prevalence_young_males.ci_high = quantile(prevalence_young_males, .975, na.rm=T),
+      prevalence_young_males.ci_low = quantile(prevalence_young_males, .025, na.rm=T),
+
+      prevalence_old_males.mean = mean(prevalence_old_males, na.rm=T),
+      prevalence_old_males.ci_high = quantile(prevalence_old_males, .975, na.rm=T),
+      prevalence_old_males.ci_low = quantile(prevalence_old_males, .025, na.rm=T)
+    ) -> df2
+
+    saveRDS(df2, file.path(system.file('interventions/', package='syphilis'), 'intvs_summarized.rds'))
+
+  df2 %>% 
+  # reshape data into rates per 100k
+  dplyr::mutate(
+    # prevalence 
+    prevalence_youngfemales.ci_high = prevalence_young_females.ci_high / popsize_young_females * 1e5,
+    prevalence_oldfemales.ci_high = prevalence_old_females.ci_high / popsize_old_females * 1e5,
+    prevalence_youngmales.ci_high = prevalence_young_males.ci_high / popsize_young_males * 1e5,
+    prevalence_oldmales.ci_high = prevalence_old_males.ci_high / popsize_old_males * 1e5,
+
+    prevalence_youngfemales.ci_low = prevalence_young_females.ci_low / popsize_young_females * 1e5,
+    prevalence_oldfemales.ci_low = prevalence_old_females.ci_low / popsize_old_females * 1e5,
+    prevalence_youngmales.ci_low = prevalence_young_males.ci_low / popsize_young_males * 1e5,
+    prevalence_oldmales.ci_low = prevalence_old_males.ci_low / popsize_old_males * 1e5,
+
+    prevalence_youngfemales.mean = prevalence_young_females.mean / popsize_young_females * 1e5,
+    prevalence_oldfemales.mean = prevalence_old_females.mean / popsize_old_females * 1e5,
+    prevalence_youngmales.mean = prevalence_young_males.mean / popsize_young_males * 1e5,
+    prevalence_oldmales.mean = prevalence_old_males.mean / popsize_old_males * 1e5,
+
+    # incidence
+    incidence_youngfemales.ci_high = incidence_young_females.ci_high / popsize_young_females * 1e5,
+    incidence_oldfemales.ci_high = incidence_old_females.ci_high / popsize_old_females * 1e5,
+    incidence_youngmales.ci_high = incidence_young_males.ci_high / popsize_young_males * 1e5,
+    incidence_oldmales.ci_high = incidence_old_males.ci_high / popsize_old_males * 1e5,
+
+    incidence_youngfemales.ci_low = incidence_young_females.ci_low / popsize_young_females * 1e5,
+    incidence_oldfemales.ci_low = incidence_old_females.ci_low / popsize_old_females * 1e5,
+    incidence_youngmales.ci_low = incidence_young_males.ci_low / popsize_young_males * 1e5,
+    incidence_oldmales.ci_low = incidence_old_males.ci_low / popsize_old_males * 1e5,
+
+    incidence_youngfemales.mean = incidence_young_females.mean / popsize_young_females * 1e5,
+    incidence_oldfemales.mean = incidence_old_females.mean / popsize_old_females * 1e5,
+    incidence_youngmales.mean = incidence_young_males.mean / popsize_young_males * 1e5,
+    incidence_oldmales.mean = incidence_old_males.mean / popsize_old_males * 1e5,
+
+    # diagnoses
+    diagnosed_youngfemales.ci_high = diagnosed_young_females.ci_high / popsize_young_females * 1e5,
+    diagnosed_oldfemales.ci_high = diagnosed_old_females.ci_high / popsize_old_females * 1e5,
+    diagnosed_youngmales.ci_high = diagnosed_young_males.ci_high / popsize_young_males * 1e5,
+    diagnosed_oldmales.ci_high = diagnosed_old_males.ci_high / popsize_old_males * 1e5,
+
+    diagnosed_youngfemales.ci_low = diagnosed_young_females.ci_low / popsize_young_females * 1e5,
+    diagnosed_oldfemales.ci_low = diagnosed_old_females.ci_low / popsize_old_females * 1e5,
+    diagnosed_youngmales.ci_low = diagnosed_young_males.ci_low / popsize_young_males * 1e5,
+    diagnosed_oldmales.ci_low = diagnosed_old_males.ci_low / popsize_old_males * 1e5,
+
+    diagnosed_youngfemales.mean = diagnosed_young_females.mean / popsize_young_females * 1e5,
+    diagnosed_oldfemales.mean = diagnosed_old_females.mean / popsize_old_females * 1e5,
+    diagnosed_youngmales.mean = diagnosed_young_males.mean / popsize_young_males * 1e5,
+    diagnosed_oldmales.mean = diagnosed_old_males.mean / popsize_old_males * 1e5) %>% 
+
+  # remove population sizes
+  select(
+    -c(popsize_young_females, 
+       popsize_young_males,
+       popsize_old_females, 
+       popsize_old_males,
+       diagnosed_young_females.mean,
+       diagnosed_old_females.mean,
+       diagnosed_young_males.mean,
+       diagnosed_old_males.mean,
+       incidence_young_females.mean,
+       incidence_old_females.mean,
+       incidence_young_males.mean,
+       incidence_old_males.mean,
+       prevalence_young_females.mean,
+       prevalence_old_females.mean,
+       prevalence_young_males.mean,
+       prevalence_old_males.mean,
+       diagnosed_young_females.ci_high,
+       diagnosed_old_females.ci_high,
+       diagnosed_young_males.ci_high,
+       diagnosed_old_males.ci_high,
+       incidence_young_females.ci_high,
+       incidence_old_females.ci_high,
+       incidence_young_males.ci_high,
+       incidence_old_males.ci_high,
+       prevalence_young_females.ci_high,
+       prevalence_old_females.ci_high,
+       prevalence_young_males.ci_high,
+       prevalence_old_males.ci_high,
+       diagnosed_young_females.ci_low,
+       diagnosed_old_females.ci_low,
+       diagnosed_young_males.ci_low,
+       diagnosed_old_males.ci_low,
+       incidence_young_females.ci_low,
+       incidence_old_females.ci_low,
+       incidence_young_males.ci_low,
+       incidence_old_males.ci_low,
+       prevalence_young_females.ci_low,
+       prevalence_old_females.ci_low,
+       prevalence_young_males.ci_low,
+       prevalence_old_males.ci_low
+       )) %>% 
+
+  # reshape the columns into rows with column-variables
+  reshape2::melt(id.vars = c('state', 'intervention', 'year'), value.name = 'rate') -> df2_reshaped
+
+  # separate the variable column into variable and sex
+  df2_reshaped %>% tidyr::separate(col = 'variable', into = c('group', 'statistic'), sep = '\\.', fill = 'left') -> df2_reshaped_1
+
+  df2_reshaped_1 %>% tidyr::separate(col = 'group', into = c('variable', 'group'), extra='drop',
+    sep='_') -> df3
+
+  df3 %>% tidyr::spread(statistic, rate) -> df3_spread
+
+  saveRDS(df3_spread, file.path(system.file('interventions/', package='syphilis'), 'intvs_formatted.rds'))
+
+  
+  # ggplot(filter(df3_spread, state == 'Louisiana', variable == 'prevalence', group == 'oldmales'),
+  #   aes(x = year, y = mean, ymax = ci_high, ymin = ci_low, fill = intervention, color = intervention)) + 
+  #   geom_ribbon(size = 0, alpha = 0.8) + geom_line() + 
+  #   theme_minimal() + 
+  #   facet_wrap(~intervention)
+
+
+}
+
 
 
 simulate_outcomes_by_sex_by_state <- function(state) { 
@@ -629,10 +832,10 @@ plot_state_outcomes_by_sex_and_age <- function(state, outcome, years, include_le
   state1 <- enquo(state)
   outcome1 <- enquo(outcome)
 
-  group_lookup <- c(females = 'F', msw = 'MSW', msm = 'MSM', males = 'M', all = 'All', 
-    new = 'New Infections', reinfected = 'Reinfected', young = 'Young', youngfemales = 'Young F', 
-    youngmales = 'Young M', youngmsw = 'Young MSW', youngmsm = 'Young MSM',
-    old = 'Old', oldmales = 'Old M', oldfemales = 'Old F', oldmsm = 'Old MSM', oldmsw = 'Old MSW')
+  # group_lookup <- c(females = 'F', msw = 'MSW', msm = 'MSM', males = 'M', all = 'All', 
+  #   new = 'New Infections', reinfected = 'Reinfected', young = 'Young', youngfemales = 'Young F', 
+  #   youngmales = 'Young M', youngmsw = 'Young MSW', youngmsm = 'Young MSM',
+  #   old = 'Old', oldmales = 'Old M', oldfemales = 'Old F', oldmsm = 'Old MSM', oldmsw = 'Old MSW')
 
   outcome_lookup <- c(prevalence = "Prevalent early syphilis infections\nper 100,000 population\n", 
     incidence = "Incident syphilis cases\nper 100,000 population\n",
@@ -684,6 +887,92 @@ plot_state_outcomes_by_sex_and_age <- function(state, outcome, years, include_le
       # } else { NULL } 
 }
 
+
+plot_state_outcomes_by_sex_and_age_conf_ints <- function(state, outcome, years, group, include_legend = FALSE) { 
+
+  if (missing(years)) {
+    min_year <- intervention_start_gregorian
+    max_year <- 2016 # intervention_stop_gregorian
+  }
+
+  if (! exists('df') || 
+  colnames(df) != c(
+  "state","intervention","year","variable","group","ci_high","ci_low","mean")) { 
+    stop("df should be read in from inst/interventions/intvs_formatted.rds")
+  }
+
+  df %<>% filter(year <= max_year, year >= min_year)
+
+  state1 <- enquo(state)
+  outcome1 <- enquo(outcome)
+  group1 <- enquo(group)
+
+  # group_lookup <- c(females = 'F', msw = 'MSW', msm = 'MSM', males = 'M', all = 'All', 
+  #   new = 'New Infections', reinfected = 'Reinfected', young = 'Young', youngfemales = 'Young F', 
+  #   youngmales = 'Young M', youngmsw = 'Young MSW', youngmsm = 'Young MSM',
+  #   old = 'Old', oldmales = 'Old M', oldfemales = 'Old F', oldmsm = 'Old MSM', oldmsw = 'Old MSW')
+
+  outcome_lookup <- c(prevalence = "Prevalent early syphilis infections\nper 100,000 population\n", 
+    incidence = "Incident syphilis cases\nper 100,000 population\n",
+    diagnosed = "Reported early syphilis cases\nper 100,000 population\n")
+
+  df %<>% mutate(group = recode(group, youngmales = "M: 25-44 y", youngfemales = "F: 25-44 y", oldmales = "M: 45-64 y", oldfemales = "F: 45-64 y"))
+
+  df %<>% mutate(intervention = recode(intervention, 
+    basecase = 'Base Case', msm_annual_hr_msm_quarterly = 'Guidelines in MSM',
+    msm_quarterly = 'MSM every 3 months', prior_diagnosis_quarterly = 'Prior Diagnosis every 3 months',
+    high_activity_quarterly = 'High Activity every 3 months'))
+
+  groupnames <- c("M: 25-44 y", "F: 25-44 y", "M: 45-64 y", "F: 45-64 y")
+  group_lookup <- c(youngfemales = 'F: 25-44 y', youngmales = 'M: 25-44 y', oldfemales = 'F: 45-64 y', oldmales = 'M: 45-64 y')
+
+  ggplot(
+    data = filter(df, state == !! state1, group == group_lookup[[!! group1]], variable == !! outcome1), 
+    mapping = aes(x = year, y = mean, ymax = ci_high, ymin = ci_low, fill =
+      intervention, color = intervention, linetype = intervention)) + 
+
+    geom_line(size = 1, alpha=0.8) + 
+    geom_ribbon(size = 0, alpha=0.2) + 
+
+    ylab('') + 
+    xlab('') + 
+    expand_limits(y=0) + 
+    # facet_wrap(intervention~.) + 
+    theme_minimal() + 
+    scale_color_manual(
+      labels = c('Base Case', 
+        'Guidelines in MSM', 
+        'MSM every 3 months',
+        'Prior Diagnosis every 3 months', 
+        'High Activity every 3 months'), 
+        values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) + 
+                   
+    scale_fill_manual(
+      labels = c('Base Case', 
+        'Guidelines in MSM', 
+        'MSM every 3 months',
+        'Prior Diagnosis every 3 months', 
+        'High Activity every 3 months'), 
+        values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) + 
+
+    scale_linetype_manual(
+      labels = c('Base Case', 
+        'Guidelines in MSM', 
+        'MSM every 3 months', 
+        'Prior Diagnosis every 3 months', 
+        'High Activity every 3 months'), 
+      values = c(1,5,2,3,4))  +
+
+    labs( x="Year", y=outcome_lookup[[outcome]], title=state, subtitle = group_lookup[[group]], 
+      color = 'Intervention', linetype = 'Intervention') +
+
+    theme(legend.position= if(include_legend) "right" else "none",
+      axis.text.x=element_text(angle=45,hjust=0.5,size=8),
+      axis.text.y=element_text(size=10),  
+      axis.title.x = element_text(size = 10),
+      plot.title=element_text(size=12, hjust=0.5),
+      text=element_text(size=12))
+}
 
 
 
@@ -1256,4 +1545,195 @@ make_incidence_diagnoses_intervention_plots <- function() {
 	ggsave(plot=fig4_new, filename = file.path(system.file('figures/intervention_figures/outcomes_by_age_and_sex/', package = 'syphilis'), 'diagnoses_and_incidence.png'), units="in", width=12, height=8)
 
 }
+
+
+save_outcome_plots_with_confidence_intervals <- function() { 
+  df <- readRDS(system.file('interventions/intvs_formatted.rds', package='syphilis'))
+
+  options_grid <- expand.grid(
+    c('Louisiana', 'Massachusetts'),
+    c('prevalence', 'diagnosed', 'incidence'),
+    c('youngfemales', 'youngmales', 'oldfemales', 'oldmales'))
+
+  for (iter in 1:nrow(options_grid)) { 
+    plt <- plot_state_outcomes_by_sex_and_age_conf_ints(options_grid[iter,1], options_grid[iter,2], group = options_grid[iter,3])
+    ggsave(plot = plt, filename =
+      file.path(system.file('figures/intervention_figures/with_confidence_intervals/',
+      package='syphilis'),
+      paste0(paste0(sapply(options_grid[iter,], as.character), collapse = '_'), '.png')),
+      units = 'in',
+      width = 12, height = 8)
+  }
+
+
+  la_prev <- cowplot::plot_grid(
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'prevalence', group = 'youngfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'prevalence', group = 'oldfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'prevalence', group = 'youngmales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'prevalence', group = 'oldmales'),
+    nrow = 2, 
+    labels = c("A", "B", "C", "D"))
+
+  ma_prev <- cowplot::plot_grid(
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'prevalence', group = 'youngfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'prevalence', group = 'oldfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'prevalence', group = 'youngmales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'prevalence', group = 'oldmales'),
+    nrow = 2, 
+    labels = c("A", "B", "C", "D"))
+
+  ggsave(plot = la_prev, filename =
+    file.path(system.file('figures/intervention_figures/with_confidence_intervals/',
+    package='syphilis'), 'la_prev.png'),
+    units = 'in',
+    width = 12, height = 8)
+
+  ggsave(plot = ma_prev, filename =
+    file.path(system.file('figures/intervention_figures/with_confidence_intervals/',
+    package='syphilis'), 'ma_prev.png'),
+    units = 'in',
+    width = 12, height = 8)
+
+
+
+  la_diag <- cowplot::plot_grid(
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'diagnosed', group = 'youngfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'diagnosed', group = 'oldfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'diagnosed', group = 'youngmales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'diagnosed', group = 'oldmales'),
+    nrow = 2, 
+    labels = c("A", "B", "C", "D"))
+
+  ma_diag <- cowplot::plot_grid(
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'diagnosed', group = 'youngfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'diagnosed', group = 'oldfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'diagnosed', group = 'youngmales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'diagnosed', group = 'oldmales'),
+    nrow = 2, 
+    labels = c("A", "B", "C", "D"))
+
+  ggsave(plot = la_diag, filename =
+    file.path(system.file('figures/intervention_figures/with_confidence_intervals/',
+    package='syphilis'), 'la_diag.png'),
+    units = 'in',
+    width = 12, height = 8)
+
+  ggsave(plot = ma_diag, filename =
+    file.path(system.file('figures/intervention_figures/with_confidence_intervals/',
+    package='syphilis'), 'ma_diag.png'),
+    units = 'in',
+    width = 12, height = 8)
+
+
+  la_inc <- cowplot::plot_grid(
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'incidence', group = 'youngfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'incidence', group = 'oldfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'incidence', group = 'youngmales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Louisiana', 'incidence', group = 'oldmales'),
+    nrow = 2, 
+    labels = c("A", "B", "C", "D"))
+
+  ma_inc <- cowplot::plot_grid(
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'incidence', group = 'youngfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'incidence', group = 'oldfemales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'incidence', group = 'youngmales'),
+    plot_state_outcomes_by_sex_and_age_conf_ints('Massachusetts', 'incidence', group = 'oldmales'),
+    nrow = 2, 
+    labels = c("A", "B", "C", "D"))
+
+  ggsave(plot = la_inc, filename =
+    file.path(system.file('figures/intervention_figures/with_confidence_intervals/',
+    package='syphilis'), 'la_inc.png'),
+    units = 'in',
+    width = 12, height = 8)
+
+  ggsave(plot = ma_inc, filename =
+    file.path(system.file('figures/intervention_figures/with_confidence_intervals/',
+    package='syphilis'), 'ma_inc.png'),
+    units = 'in',
+    width = 12, height = 8)
+
+    
+}
+
+
+plot_point_estimates_of_interventions <- function(state, outcome) { 
+
+  if (! exists('df') || 
+  colnames(df) != c(
+  "state","intervention","year","variable","group","ci_high","ci_low","mean")) { 
+    stop("df should be read in from inst/interventions/intvs_formatted.rds")
+  }
+
+  
+  df %<>% filter(year == max(year))
+
+  df %<>% mutate(group = recode(group, youngmales = "M: 25-44 y", youngfemales = "F: 25-44 y", oldmales = "M: 45-64 y", oldfemales = "F: 45-64 y"))
+
+  df %<>% mutate(intervention = recode(intervention, 
+    basecase = 'Base Case', msm_annual_hr_msm_quarterly = 'Guidelines in MSM',
+    msm_quarterly = 'MSM every 3 months', prior_diagnosis_quarterly = 'Prior Diagnosis every 3 months',
+    high_activity_quarterly = 'High Activity every 3 months'))
+
+
+  outcome1 <- enquo(outcome)
+  state1 <- enquo(state)
+
+  outcome_lookup <- c(prevalence = "\nPrevalent early syphilis infections per 100,000 population\n", 
+    incidence = "\nIncident syphilis cases per 100,000 population\n",
+    diagnosed = "\nReported early syphilis cases per 100,000 population\n")
+
+  ggplot(data = filter(df, variable == !! outcome1, state == !! state1), 
+    mapping = aes(x = intervention, y = mean, ymax = ci_high, ymin = ci_low, 
+    color = intervention, shape = intervention, fill = intervention)) + 
+    geom_pointrange() + 
+    facet_wrap(~ group) +
+    theme_minimal() + 
+    coord_flip() + 
+    scale_x_discrete(limits = rev(levels(df$intervention))) + 
+    xlab("") + 
+    ylab(outcome_lookup[[outcome]]) + 
+    ggtitle(state) + 
+    theme(legend.position = 'none', plot.title = element_text(hjust = .5)) + 
+    scale_color_manual(
+      labels = c('Base Case', 
+        'Guidelines in MSM', 
+        'MSM every 3 months',
+        'Prior Diagnosis every 3 months', 
+        'High Activity every 3 months'), 
+        values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) + 
+    scale_fill_manual(
+      labels = c('Base Case', 
+        'Guidelines in MSM', 
+        'MSM every 3 months',
+        'Prior Diagnosis every 3 months', 
+        'High Activity every 3 months'), 
+        values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) + 
+    scale_shape_manual(
+      values = c(16,15,17,23,25))
+
+
+}
+
+plot_point_estimates_panel <- function() { 
+  la_diag <- plot_point_estimates_of_interventions('Louisiana', 'diagnosed')
+  ma_diag <- plot_point_estimates_of_interventions('Massachusetts', 'diagnosed')
+  la_inc <- plot_point_estimates_of_interventions('Louisiana', 'incidence')
+  ma_inc <- plot_point_estimates_of_interventions('Massachusetts', 'incidence')
+
+  cowplot::plot_grid(
+    la_diag, ma_diag, la_inc, ma_inc, nrow = 2, labels = c("A", "B", "C", "D")) -> 
+  diagnosis_and_incidence_2016
+
+	ggsave(plot = diagnosis_and_incidence_2016, filename =
+	file.path(system.file("figures/intervention_figures/with_confidence_intervals/",
+		package='syphilis'),
+		'diagnosis_and_incidence_2016.png'),
+    units = 'in',
+    width = 12, 
+    height = 8)
+
+}
+
+
 
