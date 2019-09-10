@@ -167,7 +167,7 @@ adjust_screening_for_intervention <- function(e, intervention_start, pop_indices
 
 extract_outcomes <- function(sol) { 
 	intervention_start <- min(intervention_years)
-	intervention_period <- seq((intervention_start-1)*52-1, (intervention_start + cal.period - 1)*52)
+	intervention_period <- seq((intervention_start-1)*52-1, (intervention_start + cal.period)*52)
 
   decumulate <- function(idxs) { 
     return(
