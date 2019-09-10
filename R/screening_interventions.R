@@ -183,7 +183,7 @@ extract_outcomes <- function(sol) {
     year = intervention_period/52 + model_to_gregorian_difference,
 
     # popsizes
-    # popsize_all = retrieve(allpop.index),
+    popsize_all = retrieve(allpop.index),
     # popsize_young = retrieve(all_young),
     # popsize_old = retrieve(all_old),
 
@@ -204,7 +204,7 @@ extract_outcomes <- function(sol) {
     popsize_old_males = retrieve(all_old_males),
 
     # diagnoses 
-    # diagnosed_all = decumulate(c(d1.index, d2.index, d3.index)), # diagnosed early syphilis
+    diagnosed_all = decumulate(c(d1.index, d2.index, d3.index)), # diagnosed early syphilis
     # diagnosed_young = decumulate(diagnosed_young), 
     # diagnosed_old = decumulate(diagnosed_old), 
 
@@ -227,7 +227,7 @@ extract_outcomes <- function(sol) {
     # diagnosed_reinfected = decumulate(dr.index),
 
     # incidence
-    # incidence_all = decumulate(c(inc.index, incr.index)),
+    incidence_all = decumulate(c(inc.index, incr.index)),
     # incidence_young = decumulate(incidence_young),
     # incidence_old = decumulate(incidence_old),
 
@@ -255,7 +255,7 @@ extract_outcomes <- function(sol) {
 
 
     # prevalence
-    # prevalence_all = retrieve(early_infected_index),
+    prevalence_all = retrieve(early_infected_index),
     # prevalence_young = retrieve(prevalence_early_young),
     # prevalence_old = retrieve(prevalence_early_old),
 
