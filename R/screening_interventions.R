@@ -625,6 +625,109 @@ compute_confidence_intervals_for_trace_interventions <- function() {
 }
 
 
+compute_interventions_change_in_outcomes <- function() { 
+
+  # read in raw data
+  la_df <- readRDS(system.file('interventions/la_interventions_df.rds', package='syphilis'))
+  ma_df <- readRDS(system.file('interventions/ma_interventions_df.rds', package='syphilis'))
+
+  # > colnames(la_df)
+  #  [1] "sim"                      "intervention"
+  #  [3] "year"                     "popsize_young_females"
+  #  [5] "popsize_old_females"      "popsize_young_males"
+  #  [7] "popsize_old_males"        "diagnosed_young_females"
+  #  [9] "diagnosed_old_females"    "diagnosed_young_males"
+  # [11] "diagnosed_old_males"      "incidence_young_females"
+  # [13] "incidence_old_females"    "incidence_young_males"
+  # [15] "incidence_old_males"      "prevalence_young_females"
+  # [17] "prevalence_old_females"   "prevalence_young_males"
+  # [19] "prevalence_old_males"
+
+  # combine the data frames
+  la_df <- cbind.data.frame(state = 'Louisiana', la_df)
+  ma_df <- cbind.data.frame(state = 'Massachusetts', ma_df)
+  df <- rbind.data.frame(la_df, ma_df)
+
+  # we're only going to compute change from basecase in the last intervention year
+  df %<>% filter(year == max(year))
+
+  # get just basecase
+  basecase_df <- filter(df, intervention == 'basecase')
+
+  # filter out basecase
+  df <- filter(df, intervention != 'basecase')
+
+  # put intervention data and basecase data next to each other for the same sim, year, state
+  df2 <- merge(df, basecase_df, by = c('state', 'sim', 'year'), suffixes = c('', '.basecase'))
+
+  # intervention.basecase doesn't contain any information, just 'basecase'
+  df2 %<>% select(-intervention.basecase)
+
+  # popsize is constant, so it cancels out of the change compared to basecase equation
+  df2 %<>% select(-starts_with('popsize'))
+
+  # list of variables to compare
+  varlist <- c("incidence_young_females", "incidence_old_females", "incidence_young_males",
+    "incidence_old_males", "prevalence_young_females", "prevalence_old_females",
+    "prevalence_young_males", "prevalence_old_males", "diagnosed_young_females",
+    "diagnosed_old_females", "diagnosed_young_males", "diagnosed_old_males")
+
+  for (var in varlist) {  # compute change from basecase
+    df2[[var]] <- (df2[[var]] - df2[[paste0(var, '.basecase')]]) / df2[[paste0(var, '.basecase')]]
+  }
+
+  df2 %<>% select(-ends_with('.basecase')) # drop basecase values
+
+  df2[,varlist] <- df2[,varlist]*100 # format as a percent change
+
+  # save raw data
+  saveRDS(df2, file.path(system.file("interventions/", package='syphilis'), 'intvs_change_from_basecase.rds'))
+
+  # function to compute sixnums (mean, median, interquartile, confidence intervals) for a list of columns
+  summarize_sixnum <- function(df, cols) { 
+    df %>% 
+      group_by(state, year, intervention) %>% 
+      summarize_at(
+        vars(cols), list(
+          mean = ~mean(., na.rm=T),
+          median = ~quantile(., .5, na.rm=T),
+          ci_high = ~quantile(., .975, na.rm=T),
+          ci_low = ~quantile(., .025, na.rm=T),
+          iq_high = ~quantile(., .75, na.rm=T),
+          iq_low = ~quantile(., .25, na.rm=T)
+          ))
+  }
+
+  # compute sixnums
+  df3 <- summarize_sixnum(df2, varlist)
+
+  # replace _ with . for easier splitting later
+  colnames(df3) %<>%
+    gsub(pattern = "_mean", replacement = ".mean", .) %>% 
+    gsub(pattern = "_median", replacement = ".median", .) %>% 
+    gsub(pattern = "_ci_high", replacement = ".ci_high", .) %>% 
+    gsub(pattern = "_ci_low", replacement = ".ci_low", .) %>% 
+    gsub(pattern = "_iq_high", replacement = ".iq_high", .) %>% 
+    gsub(pattern = "_iq_low", replacement = ".iq_low", .)
+
+  df4 <- df3 %>% tidyr::gather(key = "outcome", value = "change", -state, -year, -intervention)
+
+  df4$outcome %<>% 
+    gsub(pattern = "_young_females", replacement = ".young_females", .) %>% 
+    gsub(pattern = "_young_males", replacement = ".young_males", .) %>% 
+    gsub(pattern = "_old_females", replacement = ".old_females", .) %>% 
+    gsub(pattern = "_old_males", replacement = ".old_males", .)
+
+  df4 %<>% tidyr::separate(col = 'outcome', into = c('outcome', 'group', 'statistic'), sep = '\\.')
+
+  df4 %<>% tidyr::spread('statistic', 'change')
+
+  saveRDS(df4, file.path(system.file("interventions/", package='syphilis'), 
+    'intvs_change_from_basecase_summarized.rds'))
+    
+}
+
+
 
 simulate_outcomes_by_sex_by_state <- function(state) { 
   
@@ -1736,4 +1839,88 @@ plot_point_estimates_panel <- function() {
 }
 
 
+
+plot_point_estimates_of_change_in_interventions <- function(state, outcome) { 
+
+  if (! exists('df') || 
+  colnames(df) !=
+    c("state", "year", "intervention", "outcome", "group", "ci_high",
+    "ci_low", "iq_high", "iq_low", "mean", "median")
+  ) { 
+    stop("df should be read in from inst/interventions/intvs_change_from_basecase_summarized.rds")
+  }
+
+
+  df %<>% mutate(group = recode(group, young_males = "M: 25-44 y", young_females = "F: 25-44 y", 
+    old_males = "M: 45-64 y", old_females = "F: 45-64 y"))
+
+  df %<>% mutate(intervention = recode(intervention, 
+    basecase = 'Base Case', msm_annual_hr_msm_quarterly = 'Guidelines in MSM',
+    msm_quarterly = 'MSM every 3 months', prior_diagnosis_quarterly = 'Prior Diagnosis every 3 months',
+    high_activity_quarterly = 'High Activity every 3 months'))
+
+  df$intervention %<>% droplevels
+
+  outcome1 <- enquo(outcome)
+  state1 <- enquo(state)
+
+  outcome_lookup <- c(prevalence = "\nPercent change in prevalent early syphilis infections\nrelative to the base case\n", 
+    incidence = "\nPercent change in incident syphilis cases\nrelative to the base case\n",
+    diagnosed = "\nPercent change in reported early syphilis cases\nrelative to the base case\n")
+
+  ggplot(data = filter(df, outcome == !! outcome1, state == !! state1), 
+    mapping = aes(x = intervention, middle = median, ymax = ci_high, ymin = ci_low, 
+    upper = iq_high, lower = iq_low, 
+    color = intervention )) + 
+    geom_hline(yintercept = 0, size = .5, color = 'red', alpha = 0.4) +
+    # geom_pointrange() + 
+    geom_boxplot(stat = 'identity', width = 0.5, alpha = 0.7) + 
+    # geom_vline(aes(xintercept = mean)) + 
+    facet_wrap(~ group) +
+    theme_minimal() + 
+    coord_flip() + 
+    scale_x_discrete(limits = rev(levels(df$intervention))) + 
+    xlab("") + 
+    ylab(outcome_lookup[[outcome]]) + 
+    ggtitle(state) + 
+    theme(legend.position = 'none', plot.title = element_text(hjust = .5)) + 
+    scale_color_manual(
+      labels = c(
+        'Guidelines in MSM', 
+        'MSM every 3 months',
+        'Prior Diagnosis every 3 months', 
+        'High Activity every 3 months'), 
+        values = c( "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) + 
+    scale_fill_manual(
+      labels = c( 
+        'Guidelines in MSM', 
+        'MSM every 3 months',
+        'Prior Diagnosis every 3 months', 
+        'High Activity every 3 months'), 
+        values = c( "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) + 
+    scale_shape_manual(
+      values = c(15,17,23,25))
+
+}
+
+
+plot_point_estimates_of_relative_change_panel <- function() { 
+  la_diag <- plot_point_estimates_of_change_in_interventions('Louisiana', 'diagnosed')
+  ma_diag <- plot_point_estimates_of_change_in_interventions('Massachusetts', 'diagnosed')
+  la_inc <- plot_point_estimates_of_change_in_interventions('Louisiana', 'incidence')
+  ma_inc <- plot_point_estimates_of_change_in_interventions('Massachusetts', 'incidence')
+
+  cowplot::plot_grid(
+    la_diag, ma_diag, la_inc, ma_inc, nrow = 2, labels = c("A", "B", "C", "D")) -> 
+  diagnosis_and_incidence_2016
+
+	ggsave(plot = diagnosis_and_incidence_2016, filename =
+	file.path(system.file("figures/intervention_figures/with_confidence_intervals/",
+		package='syphilis'),
+		'change_in_diagnosis_and_incidence_2016.png'),
+    units = 'in',
+    width = 12, 
+    height = 8)
+
+}
 
