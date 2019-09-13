@@ -5,5 +5,5 @@
 TODO.md
 .dropbox*
 .here
-inst/interventions/la_interventions_df.rds# too large for git, synced via dropbox for now
-inst/interventions/ma_interventions_df.rds# too large for git, synced via dropbox for now
+*la_interventions_df.rds # too large for git, synced via dropbox for now
+*ma_interventions_df.rds # too large for git, synced via dropbox for now
