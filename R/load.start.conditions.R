@@ -17,7 +17,7 @@ load.start <- function(){
   p.s.3 <<- if(state=="MA") 0.11 else 0.05 #proportion of population in i=3 (hispanic) in 2015
   p.s.2<<-1-p.s.1-p.s.3
   p.low <<- 0.90 #proportion of population in low activity group
-  p.low.msm <<-0.90 # proportion of MSM in low activity group
+  p.low.msm <<-0.80 # proportion of MSM in low activity group
   p.hiv <<- if(state=="MA") c(0.05,0.12) else c(0.22, 0.28) # proportion of MSM who are HIV positive (young and old) -- 2015 estimates 
   p.sa.m.y <<- c(0.98, 0.94, 0.95, 0.94,1) #proportion of young M that are sexually active, by subpop (based on NSFG) - assuming mean for MSM and all HIV+ MSM are sexually active
   p.sa.m.o <<-c(rep(0.99,i-1),1) #proportion of M old that are sexually active (assumption, based on males aged 40-44 in NSFG reporting ever sexually active)
