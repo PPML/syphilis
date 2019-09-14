@@ -1743,7 +1743,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   plot.behav <- ggplot(data=behav.post) +
     geom_line(aes(x=X1, y=value, group=X2, color=X2))+
-    geom_ribbon(data=x, aes(x=(start.year-10):end.year,ymin=min, ymax=max), alpha=0.2)+
+    geom_ribbon(data=x, aes(x=(start.year-10):(end.year-1),ymin=min, ymax=max), alpha=0.2)+
     theme_classic()+
     theme(legend.position="none", axis.text.x=element_text(size=8),axis.text.y=element_text(size=8), title=element_text(size=8)) + 
     labs(x="Year", y="Transmission\nRR in MSM")
