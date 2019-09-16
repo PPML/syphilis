@@ -1039,7 +1039,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #dur.sec
   dur.sec.post<-data.frame(X1=as.numeric(exp(trace.burn.thin[,"log.dur.sec"])))
-  dur.sec.prior <- as.data.frame(cbind(x=seq(0,150,0.1),y=dunif(seq(0,150,0.1),prior.param1["dur.sec"],prior.param2["dur.sec"])))
+  dur.sec.prior <- as.data.frame(cbind(x=seq(0,150,0.1),y=dnorm(seq(0,150,0.1),prior.param1["dur.sec"],prior.param2["dur.sec"])))
   plot.dur.sec <- ggplot() +
     geom_histogram(data=dur.sec.post, aes(x=X1, y=..density..), fill="turquoise",size=0.5, colour="turquoise", alpha=0.6, binwidth=2)+
     geom_area(data=dur.sec.prior,aes(x=x, y=y), fill="dimgrey", alpha=0.3)+
