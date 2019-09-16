@@ -19,7 +19,7 @@ bezier.fun<- function(screen.bezier){
   p2 = (  2*y0 -  9*y1 + 18*y2 - 5*y3) / 6
   p3 = y3
   p<-c(p0,p1,p2,p3)
-  t<-seq(0,1, length.out=(cal.period+10)) #let time trend start 10 years before calibration start
+  t<-seq(0,1, length.out=(cal.period+10)*52) #let time trend start 10 years before calibration start, compute weekly
   #browser()
   bezier::bezier(t,p)  #this is the function from the bezier package - Hmisc also has a bezier function that is NOT the one to use
 }
@@ -69,7 +69,7 @@ screen.fun <-function(screen.param,rr.screen) {
 
 #calculate time-varying tranmission relative risk for MSM
 behav.fun<- function(behav.m){
-  # t<-seq(0,cal.period+9, by=1) #let time trend start 10 years before model calibration start
-  t <- seq(0,1,length.out = cal.period+9)
-  return(behav.m*t)
+  t<-seq(0,cal.period+9, by=1) #let time trend start 10 years before model calibration start
+  return(behav.m*t+1)
 }
+
