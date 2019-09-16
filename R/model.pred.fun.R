@@ -142,4 +142,29 @@ runSimulation <- function(e) {
 		sim <- syphSim(params,
 						tstep,
 						cm.list,
-	
+						p.abx,
+						rep.count, 
+						model.end + 1,
+						yinit, 
+						n.sa,
+						births,
+						births.sa, 
+						births.nsa,
+						aging,
+						aging.nsa)
+		return(sim)
+	})
+	return(invisible(NULL))
+}
+
+summarizeSimulation <- function(e) {
+  with(e, {
+		sol<-sim$out
+		ct <- sim$ct
+		prev<-model.prev(sol)  #calculate desired outputs for calibration, function stored in model.out.fun.R
+		list(subpop.assort=pred.s.dist, age.assort=age.dist.all, prev=prev)
+	})
+}
+
+
+
