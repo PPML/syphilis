@@ -933,9 +933,9 @@ plot_state_outcomes_by_sex_and_age <- function(state, outcome, years, include_le
     incidence = "Incident syphilis cases\nper 100,000 population\n",
     diagnosed = "Reported early syphilis cases\nper 100,000 population\n")
 
-  df %<>% mutate(group = recode(group, youngmales = "M: 25-44 y", youngfemales = "F: 25-44 y", oldmales = "M: 45-64 y", oldfemales = "F: 45-64 y"))
+  df %<>% mutate(group = recode(group, youngmales = "M: 20-44 y", youngfemales = "F: 20-44 y", oldmales = "M: 45-64 y", oldfemales = "F: 45-64 y"))
 
-  groupnames <- c("M: 25-44 y", "F: 25-44 y", "M: 45-64 y", "F: 45-64 y")
+  groupnames <- c("M: 20-44 y", "F: 20-44 y", "M: 45-64 y", "F: 45-64 y")
 
   ggplot(
     data = filter(df, state == !! state1, group %in% groupnames, variable == !! outcome1), 
@@ -1022,15 +1022,15 @@ plot_state_outcomes_by_sex_and_age_conf_ints <- function(state, outcome, years, 
     incidence = "Incident syphilis cases\nper 100,000 population\n",
     diagnosed = "Reported early syphilis cases\nper 100,000 population\n")
 
-  df %<>% mutate(group = recode(group, youngmales = "M: 25-44 y", youngfemales = "F: 25-44 y", oldmales = "M: 45-64 y", oldfemales = "F: 45-64 y"))
+  df %<>% mutate(group = recode(group, youngmales = "M: 20-44 y", youngfemales = "F: 20-44 y", oldmales = "M: 45-64 y", oldfemales = "F: 45-64 y"))
 
   df %<>% mutate(intervention = recode(intervention, 
     basecase = 'Base Case', msm_annual_hr_msm_quarterly = 'Guidelines in MSM',
     msm_quarterly = 'MSM every 3 months', prior_diagnosis_quarterly = 'Prior Diagnosis every 3 months',
     high_activity_quarterly = 'High Activity every 3 months'))
 
-  groupnames <- c("M: 25-44 y", "F: 25-44 y", "M: 45-64 y", "F: 45-64 y")
-  group_lookup <- c(youngfemales = 'F: 25-44 y', youngmales = 'M: 25-44 y', oldfemales = 'F: 45-64 y', oldmales = 'M: 45-64 y')
+  groupnames <- c("M: 20-44 y", "F: 20-44 y", "M: 45-64 y", "F: 45-64 y")
+  group_lookup <- c(youngfemales = 'F: 20-44 y', youngmales = 'M: 20-44 y', oldfemales = 'F: 45-64 y', oldmales = 'M: 45-64 y')
 
   ggplot(
     data = filter(df, state == !! state1, group == group_lookup[[!! group1]], variable == !! outcome1), 
@@ -1825,7 +1825,7 @@ plot_point_estimates_of_interventions <- function(state, outcome) {
   
   df %<>% filter(year == max(year))
 
-  df %<>% mutate(group = recode(group, youngmales = "M: 25-44 y", youngfemales = "F: 25-44 y", oldmales = "M: 45-64 y", oldfemales = "F: 45-64 y"))
+  df %<>% mutate(group = recode(group, youngmales = "M: 20-44 y", youngfemales = "F: 20-44 y", oldmales = "M: 45-64 y", oldfemales = "F: 45-64 y"))
 
   df %<>% mutate(intervention = recode(intervention, 
     basecase = 'Base Case', msm_annual_hr_msm_quarterly = 'Guidelines in MSM',
@@ -1955,7 +1955,8 @@ plot_point_estimates_of_change_in_interventions <- function(state, outcome) {
         'High Activity every 3 months'), 
         values = c( "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) + 
     scale_shape_manual(
-      values = c(15,17,23,25))
+      values = c(15,17,23,25)) + 
+    ylim(c(-100, max(df$ci_high)))
 
 }
 
