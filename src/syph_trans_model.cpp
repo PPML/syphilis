@@ -54,10 +54,10 @@ List syphSim(
   NumericVector report = as<NumericVector>(x["rep"]); //reporting probability, screened case
   NumericMatrix report_symp = as<NumericMatrix>(x["rep.symp"]); //reporting probability matrix, case seeking care
   NumericMatrix screen = as<NumericMatrix>(x["screen"]); //screening rate matrix
-  NumericVector alpha(dim); //screening rate (updated annually)
+  NumericVector alpha(dim); //screening rate (updated weekly)
 	NumericMatrix screen_repeat = as<NumericMatrix>(x["screen_repeat"]); // screening rates for individuals with diagnosis history
-	NumericVector alpha_repeat(dim); // screening rate (updated annually) for individuals with diagnosis history 
-  NumericVector rep_s(dim); //reporting probabilities (updataed annually)
+	NumericVector alpha_repeat(dim); // screening rate (updated weekly) for individuals with diagnosis history 
+  NumericVector rep_s(dim); //reporting probabilities (updataed weekly)
   NumericVector c_msm = as<NumericVector>(x["behav"]); //transmission rr in MSM 
   NumericVector dur_imm = as<NumericVector>(x["dur.imm"]); //duration immunity after treatment
   NumericVector cmlow1 = as<NumericVector>(cm["cm.low1"]); //contact matrix low activity, black 
@@ -191,15 +191,15 @@ List syphSim(
 					NSA[n] = Pop[n+20*dim];
 					D4[n] =  Pop[n+21*dim];
 					DR[n] =  Pop[n+22*dim];
-					alpha[n] = screen(y,n);  //update screening and reporting
-					alpha_repeat[n] = screen_repeat(y,n);
-					rep_s[n] = report_symp(y,n);
+					alpha[n] = screen(y*52+w,n);  //update screening and reporting
+					alpha_repeat[n] = screen_repeat(y*52+w,n);
+					rep_s[n] = report_symp(y*52+w,n);
 				}
 				
 				//calculate force of infection for each sex and subpopulation
 				for(int n=0; n<4; n++) { //males subpop 1
 					int m = n;
-					lambda[n] =  ((b[0]) * (cmlow1[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
+					lambda[n] =  (b[0] * (cmlow1[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
 																cmlow1[m+4]   * (I1[22] + I2[22] + IR1[22] + IR2[22]) / (n_sa[22]) + //F, low AC, age=2, subpop1
 																cmlow1[m+8]   * (I1[24] + I2[24] + IR1[24] + IR2[24]) / (n_sa[24]) + //F, low AC, age=1, subpop2
 																cmlow1[m+12]  * (I1[26] + I2[26] + IR1[26] + IR2[26]) / (n_sa[26]) + //F, low AC, age=2, subpop2
@@ -215,7 +215,7 @@ List syphSim(
 				
 				for(int n=4; n<8; n++) {   //males subpop 2
 					int m = n-4;
-					lambda[n] =  ((b[0]) * (cmlow2[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
+					lambda[n] =  (b[0] * (cmlow2[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
 																cmlow2[m+4]   * (I1[22] + I2[22] + IR1[22] + IR2[22]) / (n_sa[22]) + //F, low AC, age=2, subpop1
 																cmlow2[m+8]   * (I1[24] + I2[24] + IR1[24] + IR2[24]) / (n_sa[24]) + //F, low AC, age=1, subpop2
 																cmlow2[m+12]  * (I1[26] + I2[26] + IR1[26] + IR2[26]) / (n_sa[26]) + //F, low AC, age=2, subpop2
@@ -231,7 +231,7 @@ List syphSim(
 				
 				for(int n=8; n<12; n++) {   //males subpop 3
 					int m = n-8;
-					lambda[n] =  ((b[0]) * (cmlow3[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
+					lambda[n] =  (b[0] * (cmlow3[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
 																cmlow3[m+4]   * (I1[22] + I2[22] + IR1[22] + IR2[22]) / (n_sa[22]) + //F, low AC, age=2, subpop1
 																cmlow3[m+8]   * (I1[24] + I2[24] + IR1[24] + IR2[24]) / (n_sa[24]) + //F, low AC, age=1, subpop2
 																cmlow3[m+12]  * (I1[26] + I2[26] + IR1[26] + IR2[26]) / (n_sa[26]) + //F, low AC, age=2, subpop2
@@ -247,7 +247,7 @@ List syphSim(
 				
 				for(int n=12; n<16; n++) {   //males subpop 4
 					int m = n-12;
-					lambda[n] =  (((b[0]) *  (cmlow4[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
+					lambda[n] =  ((b[0] *  (cmlow4[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
 																	cmlow4[m+4]   * (I1[22] + I2[22] + IR1[22] + IR2[22]) / (n_sa[22]) + //F, low AC, age=2, subpop1
 																	cmlow4[m+8]   * (I1[24] + I2[24] + IR1[24] + IR2[24]) / (n_sa[24]) + //F, low AC, age=1, subpop2
 																	cmlow4[m+12]  * (I1[26] + I2[26] + IR1[26] + IR2[26]) / (n_sa[26]) + //F, low AC, age=2, subpop2
@@ -260,7 +260,7 @@ List syphSim(
 																	cmhigh4[m+16] * (I1[29] + I2[29] + IR1[29] + IR2[29]) / (n_sa[29]) + //F, high AC, age=1, subpop3
 																	cmhigh4[m+20] * (I1[31] + I2[31] + IR1[31] + IR2[31]) / (n_sa[31]))) +//F, high AC, age=2, subpop3
 								
-											((b[2] + (1-b[2])*c_rr)*
+											((b[2]*c_rr)*
 																 (cmlow4[m+24]  * (I1[12] + I2[12] + IR1[12] + IR2[12]) / (n_sa[12]) + //M, low AC, age=1, subpop4
 																	cmlow4[m+28]  * (I1[14] + I2[14] + IR1[14] + IR2[14]) / (n_sa[14]) + //M, low AC, age=2, subpop4
 																	cmlow4[m+32]  * (I1[16] + I2[16] + IR1[16] + IR2[16]) / (n_sa[16]) + //M, low AC, age=1, subpop5
@@ -274,7 +274,7 @@ List syphSim(
 				
 				for(int n=16; n<20; n++) {   //males subpop 5
 					int m = n-16;
-					lambda[n] =  (((b[0]) *(cmlow5[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
+					lambda[n] =  ((b[0] *(cmlow5[m]     * (I1[20] + I2[20] + IR1[20] + IR2[20]) / (n_sa[20]) + //F, low AC, age=1, subpop1
 																cmlow5[m+4]   * (I1[22] + I2[22] + IR1[22] + IR2[22]) / (n_sa[22]) + //F, low AC, age=2, subpop1
 																cmlow5[m+8]   * (I1[24] + I2[24] + IR1[24] + IR2[24]) / (n_sa[24]) + //F, low AC, age=1, subpop2
 																cmlow5[m+12]  * (I1[26] + I2[26] + IR1[26] + IR2[26]) / (n_sa[26]) + //F, low AC, age=2, subpop2
@@ -287,7 +287,7 @@ List syphSim(
 																cmhigh5[m+16] * (I1[29] + I2[29] + IR1[29] + IR2[29]) / (n_sa[29]) + //F, high AC, age=1, subpop3
 																cmhigh5[m+20] * (I1[31] + I2[31] + IR1[31] + IR2[31]) / (n_sa[31]))) + //F, high AC, age=2, subpop3
 																
-													(((b[2] + (1-b[2])*c_rr))*
+													((b[2]*c_rr)*
 															 (cmlow5[m+24]  * (I1[12] + I2[12] + IR1[12] + IR2[12]) / (n_sa[12]) + //M, low AC, age=1, subpop4
 																cmlow5[m+28]  * (I1[14] + I2[14] + IR1[14] + IR2[14]) / (n_sa[14]) + //M, low AC, age=2, subpop4
 																cmlow5[m+32]  * (I1[16] + I2[16] + IR1[16] + IR2[16]) / (n_sa[16]) + //M, low AC, age=1, subpop5
@@ -301,7 +301,7 @@ List syphSim(
 				
 				for(int n=20; n<24; n++) {   //females subpop 1
 					int m = n;
-					lambda[n] =  ((b[1]) * (cmlow1[m+20]     * (I1[0]  + I2[0]  + IR1[0]  + IR2[0])  /(n_sa[0])  + //M, low AC, age=1, subpop1
+					lambda[n] =  (b[1] * (cmlow1[m+20]     * (I1[0]  + I2[0]  + IR1[0]  + IR2[0])  /(n_sa[0])  + //M, low AC, age=1, subpop1
 																cmlow1[m+4+20]   * (I1[2]  + I2[2]  + IR1[2]  + IR2[2])  /(n_sa[2])  + //M, low AC, age=2, subpop1
 																cmlow1[m+8+20]   * (I1[4]  + I2[4]  + IR1[4]  + IR2[4])  /(n_sa[4])  + //M, low AC, age=1, subpop2
 																cmlow1[m+12+20]  * (I1[6]  + I2[6]  + IR1[6]  + IR2[6])  /(n_sa[6])  + //M, low AC, age=2, subpop2
@@ -327,7 +327,7 @@ List syphSim(
 				
 				for(int n=24; n<28; n++) {   //females subpop 2
 					int m = n-4;
-					lambda[n] =  ((b[1]) * (cmlow2[m+20]     * (I1[0]  + I2[0]  + IR1[0]  + IR2[0])  / (n_sa[0])  + //M, low AC, age=1, subpop1
+					lambda[n] =  (b[1] * (cmlow2[m+20]     * (I1[0]  + I2[0]  + IR1[0]  + IR2[0])  / (n_sa[0])  + //M, low AC, age=1, subpop1
 																cmlow2[m+4+20]   * (I1[2]  + I2[2]  + IR1[2]  + IR2[2])  / (n_sa[2])  + //M, low AC, age=2, subpop1
 																cmlow2[m+8+20]   * (I1[4]  + I2[4]  + IR1[4]  + IR2[4])  / (n_sa[4])  + //M, low AC, age=1, subpop2
 																cmlow2[m+12+20]  * (I1[6]  + I2[6]  + IR1[6]  + IR2[6])  / (n_sa[6])  + //M, low AC, age=2, subpop2
@@ -353,7 +353,7 @@ List syphSim(
 				
 				for(int n=28; n<32; n++) {   //females subpop 3
 					int m = n-8;
-					lambda[n] =  ((b[1]) * (cmlow3[m+20]    * (I1[0]   + I2[0]  + IR1[0]  + IR2[0])  / (n_sa[0])  + //M, low AC, age=1, subpop1
+					lambda[n] =  (b[1] * (cmlow3[m+20]    * (I1[0]   + I2[0]  + IR1[0]  + IR2[0])  / (n_sa[0])  + //M, low AC, age=1, subpop1
 																cmlow3[m+4+20]  * (I1[2]   + I2[2]  + IR1[2]  + IR2[2])  / (n_sa[2])  + //M, low AC, age=2, subpop1
 																cmlow3[m+8+20]  * (I1[4]   + I2[4]  + IR1[4]  + IR2[4])  / (n_sa[4])  + //M, low AC, age=1, subpop2
 																cmlow3[m+12+20] * (I1[6]   + I2[6]  + IR1[6]  + IR2[6])  / (n_sa[6])  + //M, low AC, age=2, subpop2
@@ -524,7 +524,7 @@ List syphSimCTCounterfactual(
   NumericVector alpha(dim); //screening rate (updated annually)
 	NumericVector alpha_ps(dim); //screening rate for primary/secondary
 	NumericVector alpha_el(dim); //screening rate for early/late latent 
-  NumericVector rep_s(dim); //reporting probabilities (updataed annually)
+  NumericVector rep_s(dim); //reporting probabilities (updated weekly)
   NumericVector c_msm = as<NumericVector>(x["behav"]); //transmission rr in MSM 
   NumericVector dur_imm = as<NumericVector>(x["dur.imm"]); //duration immunity after treatment
   NumericVector cmlow1 = as<NumericVector>(cm["cm.low1"]); //contact matrix low activity, black 
@@ -658,10 +658,10 @@ List syphSimCTCounterfactual(
 					NSA[n] = Pop[n+20*dim];
 					D4[n] =  Pop[n+21*dim];
 					DR[n] =  Pop[n+22*dim];
-					alpha[n] = screen(y,n);  //update screening and reporting
-					alpha_ps[n] = screen_ps(y,n);
-					alpha_el[n] = screen_el(y,n);
-					rep_s[n] = report_symp(y,n);
+					alpha[n] = screen(y*52+w,n);  //update screening and reporting
+					alpha_ps[n] = screen_ps(y*52+w,n);
+					alpha_el[n] = screen_el(y*52+w,n);
+					rep_s[n] = report_symp(y*52+w,n);
 				}
 				
 				//calculate force of infection for each sex and subpopulation
@@ -958,3 +958,4 @@ List syphSimCTCounterfactual(
 //               aging,
 //               aging.nsa)
 // */
+
