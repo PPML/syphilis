@@ -906,7 +906,7 @@ simulate_outcomes_by_sex_both_states <- function() {
     cbind.data.frame(state = 'Massachusetts', simulate_outcomes_by_sex_by_state('MA')))
 }
 
-plot_state_outcomes_by_sex_and_age <- function(state, outcome, years, include_legend = FALSE, include_ci = FALSE) { 
+plot_state_outcomes_by_sex_and_age <- function(state, outcome, years, include_legend = FALSE, include_ci = FALSE, scales = 'fixed') { 
 
   if (missing(years)) {
     min_year <- intervention_start_gregorian
@@ -945,7 +945,7 @@ plot_state_outcomes_by_sex_and_age <- function(state, outcome, years, include_le
     ylab('') + 
     xlab('') + 
     expand_limits(y=0) + 
-    facet_wrap(group~.) + 
+    facet_wrap(group~., scales=scales) + 
     theme_minimal() + 
     scale_color_manual(
       labels = c('Base Case', 
@@ -1042,7 +1042,7 @@ plot_state_outcomes_by_sex_and_age_conf_ints <- function(state, outcome, years, 
 
     ylab('') + 
     xlab('') + 
-    expand_limits(y=0) + 
+    expand_limits(y=c(0, max(df$ci_high, na.rm=T))) + 
     facet_wrap(intervention~.) + 
     theme_minimal() + 
     scale_color_manual(
@@ -1655,6 +1655,25 @@ make_incidence_diagnoses_intervention_plots <- function() {
 	ggsave(plot=fig4_new, filename = file.path(system.file('figures/intervention_figures/outcomes_by_age_and_sex/', package = 'syphilis'), 'incidence_diagnosis_and_prevalence.png'), units="in", width=12, height=12)
 
   
+  la_inc <- plot_state_outcomes_by_sex_and_age('Louisiana', 'incidence', scales='free_y')
+  ma_inc <- plot_state_outcomes_by_sex_and_age('Massachusetts', 'incidence', scales='free_y')
+  la_diag <- plot_state_outcomes_by_sex_and_age('Louisiana', 'diagnosed', scales='free_y')
+  ma_diag <- plot_state_outcomes_by_sex_and_age('Massachusetts', 'diagnosed', scales='free_y')
+  la_prev <- plot_state_outcomes_by_sex_and_age('Louisiana', 'prevalence', scales='free_y')
+  ma_prev <- plot_state_outcomes_by_sex_and_age('Massachusetts', 'prevalence', scales='free_y')
+
+  la_inc_w_legend <- plot_state_outcomes_by_sex_and_age('Louisiana', 'incidence', include_legend=TRUE)
+  intervention_legend <- cowplot::get_legend(la_inc_w_legend)
+
+	cowplot::plot_grid(la_diag, ma_diag,  
+		la_inc, ma_inc, 
+    la_prev, ma_prev,
+		nrow=3,  
+		labels = c("A", "B", "C", "D", "E", "F")) -> fig4_wout_legend
+
+  cowplot::plot_grid(fig4_wout_legend, intervention_legend, nrow = 1, rel_widths = c(1,.3)) -> fig4_new
+
+	ggsave(plot=fig4_new, filename = file.path(system.file('figures/intervention_figures/outcomes_by_age_and_sex/', package = 'syphilis'), 'incidence_diagnosis_and_prevalence_free_scales.png'), units="in", width=12, height=12)
   # la_prev <- plot_state_outcomes_by_sex_and_age('Louisiana', 'prevalence')
   # ma_prev <- plot_state_outcomes_by_sex_and_age('Massachusetts', 'prevalence')
 
@@ -1688,6 +1707,28 @@ make_incidence_diagnoses_intervention_plots <- function() {
   cowplot::plot_grid(fig4_wout_legend, intervention_legend, nrow = 1, rel_widths = c(1,.3)) -> fig4_new
 
 	ggsave(plot=fig4_new, filename = file.path(system.file('figures/intervention_figures/outcomes_by_age_and_sex/', package = 'syphilis'), 'incidence_diagnosis_and_prevalence_guidelines.png'), units="in", width=12, height=12)
+
+  df %<>% filter(intervention %in% c('basecase', 'msm_annual_hr_msm_quarterly'))
+
+  la_inc <- plot_state_outcomes_by_sex_and_age('Louisiana', 'incidence', include_ci = T, scales='free_y')
+  ma_inc <- plot_state_outcomes_by_sex_and_age('Massachusetts', 'incidence', include_ci = T, scales='free_y')
+  la_diag <- plot_state_outcomes_by_sex_and_age('Louisiana', 'diagnosed', include_ci = T, scales='free_y')
+  ma_diag <- plot_state_outcomes_by_sex_and_age('Massachusetts', 'diagnosed', include_ci = T, scales='free_y')
+  la_prev <- plot_state_outcomes_by_sex_and_age('Louisiana', 'prevalence', include_ci = T, scales='free_y')
+  ma_prev <- plot_state_outcomes_by_sex_and_age('Massachusetts', 'prevalence', include_ci = T, scales='free_y')
+
+  la_inc_w_legend <- plot_state_outcomes_by_sex_and_age('Louisiana', 'incidence', include_legend=TRUE)
+  intervention_legend <- cowplot::get_legend(la_inc_w_legend)
+
+	cowplot::plot_grid(la_diag, ma_diag,  
+		la_inc, ma_inc, 
+    la_prev, ma_prev,
+		nrow=3,  
+		labels = c("A", "B", "C", "D", "E", "F")) -> fig4_wout_legend
+
+  cowplot::plot_grid(fig4_wout_legend, intervention_legend, nrow = 1, rel_widths = c(1,.3)) -> fig4_new
+
+	ggsave(plot=fig4_new, filename = file.path(system.file('figures/intervention_figures/outcomes_by_age_and_sex/', package = 'syphilis'), 'incidence_diagnosis_and_prevalence_guidelines_free_scales.png'), units="in", width=12, height=12)
 
   
   # la_prev <- plot_state_outcomes_by_sex_and_age('Louisiana', 'prevalence', include_ci = T)
@@ -1935,6 +1976,7 @@ plot_point_estimates_of_change_in_interventions <- function(state, outcome) {
     # facet_wrap(~ group) +
     theme_minimal() + 
     coord_flip() + 
+    expand_limits(y=c(-100, max(df$ci_high, na.rm=T))) + 
     scale_x_discrete(limits = rev(levels(df$intervention))) + 
     xlab("") + 
     ylab(outcome_lookup[[outcome]]) + 
