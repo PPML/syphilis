@@ -5,7 +5,8 @@
 # function takes 4 parameters: 1 = start point (value at t=0), 2=end point (value at t=end), 3&4=internal control points
 # produces annual estimates of screening/reporting rate for length specified (the calibration period)
 
-bezier.fun<- function(screen.bezier){
+bezier.fun<- function(screen.bezier, length.out){
+  if (missing(length.out)) length.out <- (cal.period+10)*52
   bez.a<-screen.bezier[1]
   bez.d<-screen.bezier[2]
   bez.b <- screen.bezier[3]
@@ -19,7 +20,7 @@ bezier.fun<- function(screen.bezier){
   p2 = (  2*y0 -  9*y1 + 18*y2 - 5*y3) / 6
   p3 = y3
   p<-c(p0,p1,p2,p3)
-  t<-seq(0,1, length.out=(cal.period+10)*52) #let time trend start 10 years before calibration start, compute weekly
+  t<-seq(0,1, length.out=length.out) #let time trend start 10 years before calibration start, compute weekly
   #browser()
   bezier::bezier(t,p)  #this is the function from the bezier package - Hmisc also has a bezier function that is NOT the one to use
 }

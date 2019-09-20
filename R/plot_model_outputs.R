@@ -1207,8 +1207,8 @@ plot.posteriors <- function(post.sample, output_dir) {
   rr.screen.ac.post<-data.frame(X1=as.numeric(exp(trace.burn.thin[,"log.rr.screen.ac"])))
   rr.screen.ac.prior <- as.data.frame(cbind(x=seq(0,5,0.01),y=dgamma(seq(0,5,0.01),prior.param1["rr.screen.ac"],prior.param2["rr.screen.ac"])))
   plot.rr.screen.ac <- ggplot() +
-    geom_histogram(data=rr.screen.ac.post, aes(x=X1, y=..density..), fill="deepskyblue",size=0.5, colour="deepskyblue", alpha=0.6, binwidth=0.1)+
-    geom_area(data=rr.screen.ac.prior,aes(x=x, y=y), fill="dimgrey", alpha=0.3)+
+    geom_histogram(data=rr.screen.ac.post, aes(x=1+X1, y=..density..), fill="deepskyblue",size=0.5, colour="deepskyblue", alpha=0.6, binwidth=0.1)+
+    geom_area(data=rr.screen.ac.prior,aes(x=1+x, y=y), fill="dimgrey", alpha=0.3)+
     theme_classic() +
     theme(legend.position="none", axis.text.x=element_text(size=8),axis.text.y=element_text(size=8), title=element_text(size=8), axis.title.x=element_text(margin=margin(t=10))) + 
     coord_cartesian(xlim=c(0,5))+
@@ -1735,7 +1735,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   bez.behav <- data.frame(X1=as.numeric(ilogit(post.sample$theta[,"logit.behav.lin"])))
   behav.post <-reshape::melt(apply(bez.behav, 1, behav.fun))
   behav.post$X1 <- behav.post$X1+start.year-11
-  behav.prior.bez<- as.data.frame(runif(1000,prior.param1["behav.lin"],prior.param2["behav.lin"]))
+  behav.prior.bez<- as.data.frame(rbeta(1000,prior.param1["behav.lin"],prior.param2["behav.lin"]))
   behav.prior <-reshape::melt(apply(behav.prior.bez, 1, behav.fun))
   x<-data.frame(c(aggregate(value~X1, behav.prior, mean),aggregate(value~X1,behav.prior, min),  aggregate(value~X1, behav.prior, max)))
   x<-x[,c(1,2,4,6)]
@@ -1743,18 +1743,18 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   plot.behav <- ggplot(data=behav.post) +
     geom_line(aes(x=X1, y=value, group=X2, color=X2))+
-    geom_ribbon(data=x, aes(x=(start.year-10):(end.year-1),ymin=min, ymax=max), alpha=0.2)+
+    geom_ribbon(data=x, aes(x=(start.year-10):(end.year),ymin=min, ymax=max), alpha=0.2)+
     theme_classic()+
     theme(legend.position="none", axis.text.x=element_text(size=8),axis.text.y=element_text(size=8), title=element_text(size=8)) + 
     labs(x="Year", y="Transmission\nRR in MSM")
   
   #screen.m1 - screening rate in youngest males (other)
   bez.screen.m1 <- as.data.frame(cbind(bezA=ilogit(post.sample$theta[,"logit.screen.m1.a"]), bezD=ilogit(post.sample$theta[,"logit.screen.m1.d"]),bezB= post.scr.m1.b, bezC=post.scr.m1.c))
-  screen.m1.post <-reshape::melt(apply(bez.screen.m1, 1, bezier.fun))
+  screen.m1.post <-reshape::melt(apply(bez.screen.m1, 1, bezier.fun, length.out = (cal.period+10)))
   screen.m1.post$X1 <- screen.m1.post$X1+start.year-11
   screen.m1.prior.bez<- as.data.frame(cbind(a=rbeta(1000,prior.param1["screen.m1.a"],prior.param2["screen.m1.a"]),d=rbeta(1000,prior.param1["screen.m1.d"],prior.param2["screen.m1.d"]),b=runif(1000,prior.param1["rand.screen.m1.b"],prior.param2["rand.screen.m1.b"]),c=runif(1000,prior.param1["rand.screen.m1.c"],prior.param2["rand.screen.m1.c"])))
   screen.m1.prior.bez <- matrix(apply(screen.m1.prior.bez,1, prior.ctrl),ncol=4, byrow=TRUE)
-  screen.m1.prior <-reshape::melt(apply(screen.m1.prior.bez, 1, bezier.fun))
+  screen.m1.prior <-reshape::melt(apply(screen.m1.prior.bez, 1, bezier.fun, length.out = (cal.period+10)))
   x<-data.frame(c(aggregate(value~X1, screen.m1.prior, mean),aggregate(value~X1,screen.m1.prior, min),  aggregate(value~X1, screen.m1.prior, max)))
   x<-x[,c(1,2,4,6)]
   names(x)<-c("time", "mean", "min", "max")
@@ -1769,11 +1769,11 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #screen.msm1 - screening rate in youngest MSM
   bez.screen.msm1 <- as.data.frame(cbind(bezA=ilogit(post.sample$theta[,"logit.screen.msm1.a"]), bezD=ilogit(post.sample$theta[,"logit.screen.msm1.d"]),bezB= post.scr.msm1.b, bezC=post.scr.msm1.c))
-  screen.msm1.post <-reshape::melt(apply(bez.screen.msm1, 1, bezier.fun))
+  screen.msm1.post <-reshape::melt(apply(bez.screen.msm1, 1, bezier.fun, length.out = (cal.period+10)))
   screen.msm1.post$X1 <- screen.msm1.post$X1+start.year-11
   screen.msm1.prior.bez<- as.data.frame(cbind(a=rbeta(1000,prior.param1["screen.msm1.a"],prior.param2["screen.msm1.a"]),d=rbeta(1000,prior.param1["screen.msm1.d"],prior.param2["screen.msm1.d"]),b=runif(1000,prior.param1["rand.screen.msm1.b"],prior.param2["rand.screen.msm1.b"]),c=runif(1000,prior.param1["rand.screen.msm1.c"],prior.param2["rand.screen.msm1.c"])))
   screen.msm1.prior.bez <- matrix(apply(screen.msm1.prior.bez,1, prior.ctrl),ncol=4, byrow=TRUE)
-  screen.msm1.prior <-reshape::melt(apply(screen.msm1.prior.bez, 1, bezier.fun))
+  screen.msm1.prior <-reshape::melt(apply(screen.msm1.prior.bez, 1, bezier.fun, length.out = (cal.period+10)))
   x<-data.frame(c(aggregate(value~X1, screen.msm1.prior, mean),aggregate(value~X1,screen.msm1.prior, min),  aggregate(value~X1, screen.msm1.prior, max)))
   x<-x[,c(1,2,4,6)]
   names(x)<-c("time", "mean", "min", "max")
@@ -1788,11 +1788,11 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #screen.f1 - screening rate in youngest females (other)
   bez.screen.f1 <- as.data.frame(cbind(bezA=ilogit(post.sample$theta[,"logit.screen.f1.a"]), bezD=ilogit(post.sample$theta[,"logit.screen.f1.d"]),bezB= post.scr.f1.b, bezC=post.scr.f1.c))
-  screen.f1.post <-reshape::melt(apply(bez.screen.f1, 1, bezier.fun))
+  screen.f1.post <-reshape::melt(apply(bez.screen.f1, 1, bezier.fun, length.out = (cal.period+10)))
   screen.f1.post$X1 <- screen.f1.post$X1+start.year-11
   screen.f1.prior.bez<- as.data.frame(cbind(a=rbeta(1000,prior.param1["screen.f1.a"],prior.param2["screen.f1.a"]),d=rbeta(1000,prior.param1["screen.f1.d"],prior.param2["screen.f1.d"]),b=runif(1000,prior.param1["rand.screen.f1.b"],prior.param2["rand.screen.f1.b"]),c=runif(1000,prior.param1["rand.screen.f1.c"],prior.param2["rand.screen.f1.c"])))
   screen.f1.prior.bez <- matrix(apply(screen.f1.prior.bez,1, prior.ctrl),ncol=4, byrow=TRUE)
-  screen.f1.prior <-reshape::melt(apply(screen.f1.prior.bez, 1, bezier.fun))
+  screen.f1.prior <-reshape::melt(apply(screen.f1.prior.bez, 1, bezier.fun, length.out = (cal.period+10)))
   x<-data.frame(c(aggregate(value~X1, screen.f1.prior, mean),aggregate(value~X1,screen.f1.prior, min),  aggregate(value~X1, screen.f1.prior, max)))
   x<-x[,c(1,2,4,6)]
   names(x)<-c("time", "mean", "min", "max")
