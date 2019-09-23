@@ -1735,7 +1735,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   bez.behav <- data.frame(X1=as.numeric(ilogit(post.sample$theta[,"logit.behav.lin"])))
   behav.post <-reshape::melt(apply(bez.behav, 1, behav.fun))
   behav.post$X1 <- behav.post$X1+start.year-11
-  behav.prior.bez<- as.data.frame(runif(1000,prior.param1["behav.lin"],prior.param2["behav.lin"]))
+  behav.prior.bez<- as.data.frame(rbeta(1000,prior.param1["behav.lin"],prior.param2["behav.lin"]))
   behav.prior <-reshape::melt(apply(behav.prior.bez, 1, behav.fun))
   x<-data.frame(c(aggregate(value~X1, behav.prior, mean),aggregate(value~X1,behav.prior, min),  aggregate(value~X1, behav.prior, max)))
   x<-x[,c(1,2,4,6)]
