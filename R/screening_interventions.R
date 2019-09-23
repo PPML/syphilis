@@ -2025,8 +2025,6 @@ plot_point_estimates_of_relative_change_panel <- function() {
     width = 12, 
     height = 12)
 
-  la_prev <- plot_point_estimates_of_change_in_interventions('Louisiana', 'prevalence')
-  ma_prev <- plot_point_estimates_of_change_in_interventions('Massachusetts', 'prevalence')
 
   # cowplot::plot_grid(
   #   la_prev, ma_prev, nrow = 1, labels = c("A", "B")) -> 
@@ -2043,3 +2041,105 @@ plot_point_estimates_of_relative_change_panel <- function() {
 }
 
 
+plot_violin_boxplot_for_change_in_intvs <- function(state, outcome) { 
+
+  if ( ! identical( colnames(df), 
+    c("state", "sim", "intervention", "variable", "value"))) { 
+      stop("df should be loaded in from prep_data_for_violin_boxplot()") } 
+
+  df %<>% mutate(intervention = recode(intervention, 
+    basecase = 'Base Case', msm_annual_hr_msm_quarterly = 'Guidelines in MSM',
+    msm_quarterly = 'MSM every 3 months', prior_diagnosis_quarterly = 'Prior Diagnosis every 3 months',
+    high_activity_quarterly = 'High Activity every 3 months'))
+
+
+  df$intervention %<>% droplevels
+
+  outcome1 <- enquo(outcome)
+  state1 <- enquo(state)
+
+  outcome_lookup <- c(prevalence = "\nPrevalent early syphilis infections per 100,000 population\n", 
+    incidence = "\nIncident syphilis cases per 100,000 population\n",
+    diagnosed = "\nReported early syphilis cases per 100,000 population\n")
+
+  ggplot(data = filter(df, variable == !! outcome1, state == !! state1), 
+    mapping = aes(x = intervention, y = value, fill = intervention)) + 
+    geom_violin(scale = 'width', alpha = 0.8) + 
+    geom_boxplot(width = 0.1, color = 'black', fill = 'white', outlier.color = NA) + 
+    stat_summary(fun.y=mean, geom='point') + 
+    geom_hline(yintercept = 0, size = .5, color = 'red', alpha = 0.4) +
+    theme_minimal() + 
+    coord_flip() + 
+    scale_x_discrete(limits = rev(levels(df$intervention))) + 
+    xlab("") + 
+    ylab(outcome_lookup[[outcome]]) + 
+    ggtitle(state) + 
+    theme(legend.position = 'none', plot.title = element_text(hjust = .5)) + 
+    scale_color_manual(
+      labels = c( 
+        'Guidelines in MSM', 
+        'MSM every 3 months',
+        'Prior Diagnosis every 3 months', 
+        'High Activity every 3 months'), 
+        values = c("#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) + 
+    scale_fill_manual(
+      labels = c(
+        'Guidelines in MSM', 
+        'MSM every 3 months',
+        'Prior Diagnosis every 3 months', 
+        'High Activity every 3 months'), 
+        values = c( "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00"))
+
+}
+
+
+
+
+
+
+plot_violin_boxplot_change_in_intvs_panels <- function() { 
+
+  df <- prep_data_for_violin_boxplot()
+
+  la_diag <- plot_violin_boxplot_for_change_in_intvs('Louisiana', 'diagnosed')
+  ma_diag <- plot_violin_boxplot_for_change_in_intvs('Massachusetts', 'diagnosed')
+  la_inc <- plot_violin_boxplot_for_change_in_intvs('Louisiana', 'incidence')
+  ma_inc <- plot_violin_boxplot_for_change_in_intvs('Massachusetts', 'incidence')
+  la_prev <- plot_violin_boxplot_for_change_in_intvs('Louisiana', 'prevalence')
+  ma_prev <- plot_violin_boxplot_for_change_in_intvs('Massachusetts', 'prevalence')
+
+  cowplot::plot_grid(
+    la_diag, ma_diag, la_inc, ma_inc, la_prev, ma_prev, nrow = 3, labels = c("A", "B", "C", "D", "E", "F")) -> 
+  inc_diag_and_prev_2017
+
+	ggsave(plot = inc_diag_and_prev_2017, filename =
+	file.path(system.file("figures/intervention_figures/with_confidence_intervals/",
+		package='syphilis'),
+		'change_in_inc_diag_prev_start_of_2017_violin_version.png'),
+    units = 'in',
+    width = 12, 
+    height = 12)
+
+
+  df <- prep_data_for_violin_boxplot(exclude_bad_sims = T)
+
+
+  la_diag <- plot_violin_boxplot_for_change_in_intvs('Louisiana', 'diagnosed')
+  ma_diag <- plot_violin_boxplot_for_change_in_intvs('Massachusetts', 'diagnosed')
+  la_inc <- plot_violin_boxplot_for_change_in_intvs('Louisiana', 'incidence')
+  ma_inc <- plot_violin_boxplot_for_change_in_intvs('Massachusetts', 'incidence')
+  la_prev <- plot_violin_boxplot_for_change_in_intvs('Louisiana', 'prevalence')
+  ma_prev <- plot_violin_boxplot_for_change_in_intvs('Massachusetts', 'prevalence')
+
+  cowplot::plot_grid(
+    la_diag, ma_diag, la_inc, ma_inc, la_prev, ma_prev, nrow = 3, labels = c("A", "B", "C", "D", "E", "F")) -> 
+  inc_diag_and_prev_2017
+
+	ggsave(plot = inc_diag_and_prev_2017, filename =
+	file.path(system.file("figures/intervention_figures/with_confidence_intervals/",
+		package='syphilis'),
+		'change_in_inc_diag_prev_start_of_2017_violin_version_exclude_bad_sims.png'),
+    units = 'in',
+    width = 12, 
+    height = 12)
+}
