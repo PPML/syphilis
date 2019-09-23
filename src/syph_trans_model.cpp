@@ -260,7 +260,7 @@ List syphSim(
 																	cmhigh4[m+16] * (I1[29] + I2[29] + IR1[29] + IR2[29]) / (n_sa[29]) + //F, high AC, age=1, subpop3
 																	cmhigh4[m+20] * (I1[31] + I2[31] + IR1[31] + IR2[31]) / (n_sa[31]))) +//F, high AC, age=2, subpop3
 								
-											((b[2]*c_rr)*
+											((b[2] + (1-b[2])*c_rr)*
 																 (cmlow4[m+24]  * (I1[12] + I2[12] + IR1[12] + IR2[12]) / (n_sa[12]) + //M, low AC, age=1, subpop4
 																	cmlow4[m+28]  * (I1[14] + I2[14] + IR1[14] + IR2[14]) / (n_sa[14]) + //M, low AC, age=2, subpop4
 																	cmlow4[m+32]  * (I1[16] + I2[16] + IR1[16] + IR2[16]) / (n_sa[16]) + //M, low AC, age=1, subpop5
@@ -287,7 +287,7 @@ List syphSim(
 																cmhigh5[m+16] * (I1[29] + I2[29] + IR1[29] + IR2[29]) / (n_sa[29]) + //F, high AC, age=1, subpop3
 																cmhigh5[m+20] * (I1[31] + I2[31] + IR1[31] + IR2[31]) / (n_sa[31]))) + //F, high AC, age=2, subpop3
 																
-													((b[2]*c_rr)*
+													((b[2] + (1-b[2])*c_rr)*
 															 (cmlow5[m+24]  * (I1[12] + I2[12] + IR1[12] + IR2[12]) / (n_sa[12]) + //M, low AC, age=1, subpop4
 																cmlow5[m+28]  * (I1[14] + I2[14] + IR1[14] + IR2[14]) / (n_sa[14]) + //M, low AC, age=2, subpop4
 																cmlow5[m+32]  * (I1[16] + I2[16] + IR1[16] + IR2[16]) / (n_sa[16]) + //M, low AC, age=1, subpop5
