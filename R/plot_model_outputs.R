@@ -1017,7 +1017,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #dur.incub
   dur.incub.post<-data.frame(X1=as.numeric(exp(trace.burn.thin[,"log.dur.incub"])))
-  dur.incub.prior <- as.data.frame(cbind(x=seq(0,50,0.1),y=dunif(seq(0,50,0.1),prior.param1["dur.incub"],prior.param2["dur.incub"])))
+  dur.incub.prior <- as.data.frame(cbind(x=seq(0,50,0.1),y=dnorm(seq(0,50,0.1),prior.param1["dur.incub"],prior.param2["dur.incub"])))
   plot.dur.incub <- ggplot() +
     geom_histogram(data=dur.incub.post, aes(x=X1, y=..density..), fill="turquoise",size=0.5, colour="turquoise", alpha=0.6, binwidth=1)+
     geom_area(data=dur.incub.prior,aes(x=x, y=y), fill="dimgrey", alpha=0.3)+
@@ -1713,13 +1713,13 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #rep.symp - reporting probability
   bez.rep <- as.data.frame(cbind(bezA=ilogit(post.sample$theta[,"logit.rep.a"]), bezD=ilogit(post.sample$theta[,"logit.rep.d"]),bezB= post.rep.b, bezC=post.rep.c))
-  rep.post <-reshape::melt(apply(bez.rep, 1, bezier.fun))
+  rep.post <-reshape::melt(apply(bez.rep, 1, bezier.fun, length.out = (cal.period + 10)))
   #browser()
   rep.post$X1 <- rep.post$X1+start.year-11
   #rep.post$X1 <- rep.post$X1+start.year-11
   rep.prior.bez<- as.data.frame(cbind(a=rbeta(1000,prior.param1["rep.a"],prior.param2["rep.a"]),d=rbeta(1000,prior.param1["rep.d"],prior.param2["rep.d"]),b=runif(1000,prior.param1["rand.rep.b"],prior.param2["rand.rep.b"]),c=runif(1000,prior.param1["rand.rep.c"],prior.param2["rand.rep.c"])))
   rep.prior.bez<-matrix(apply(rep.prior.bez,1, prior.ctrl),ncol=4, byrow=TRUE)
-  rep.prior <-reshape::melt(apply(rep.prior.bez, 1, bezier.fun))
+  rep.prior <-reshape::melt(apply(rep.prior.bez, 1, bezier.fun, length.out = (cal.period + 10)))
   x<-data.frame(c(aggregate(value~X1, rep.prior, mean),aggregate(value~X1,rep.prior, min),  aggregate(value~X1, rep.prior, max)))
   x<-x[,c(1,2,4,6)]
   names(x)<-c("time", "mean", "min", "max")
@@ -1735,7 +1735,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   bez.behav <- data.frame(X1=as.numeric(ilogit(post.sample$theta[,"logit.behav.lin"])))
   behav.post <-reshape::melt(apply(bez.behav, 1, behav.fun))
   behav.post$X1 <- behav.post$X1+start.year-11
-  behav.prior.bez<- as.data.frame(rbeta(1000,prior.param1["behav.lin"],prior.param2["behav.lin"]))
+  behav.prior.bez<- as.data.frame(runif(1000,prior.param1["behav.lin"],prior.param2["behav.lin"]))
   behav.prior <-reshape::melt(apply(behav.prior.bez, 1, behav.fun))
   x<-data.frame(c(aggregate(value~X1, behav.prior, mean),aggregate(value~X1,behav.prior, min),  aggregate(value~X1, behav.prior, max)))
   x<-x[,c(1,2,4,6)]
