@@ -1028,7 +1028,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   #dur.prim
   dur.prim.post<-data.frame(X1=as.numeric(exp(trace.burn.thin[,"log.dur.prim"])))
-  dur.prim.prior <- as.data.frame(cbind(x=seq(0,75,0.1),y=dunif(seq(0,75,0.1),prior.param1["dur.prim"],prior.param2["dur.prim"])))
+  dur.prim.prior <- as.data.frame(cbind(x=seq(0,75,0.1),y=dnorm(seq(0,75,0.1),prior.param1["dur.prim"],prior.param2["dur.prim"])))
   plot.dur.prim <- ggplot() +
     geom_histogram(data=dur.prim.post, aes(x=X1, y=..density..), fill="turquoise",size=0.5, colour="turquoise", alpha=0.6, binwidth=2)+
     geom_area(data=dur.prim.prior,aes(x=x, y=y), fill="dimgrey", alpha=0.3)+
@@ -1743,7 +1743,7 @@ plot.posteriors <- function(post.sample, output_dir) {
   
   plot.behav <- ggplot(data=behav.post) +
     geom_line(aes(x=X1, y=value, group=X2, color=X2))+
-    geom_ribbon(data=x, aes(x=(start.year-10):(end.year),ymin=min, ymax=max), alpha=0.2)+
+    geom_ribbon(data=x, aes(x=(start.year-10):(end.year-1),ymin=min, ymax=max), alpha=0.2)+
     theme_classic()+
     theme(legend.position="none", axis.text.x=element_text(size=8),axis.text.y=element_text(size=8), title=element_text(size=8)) + 
     labs(x="Year", y="Transmission\nRR in MSM")
