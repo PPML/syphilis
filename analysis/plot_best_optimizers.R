@@ -1,7 +1,7 @@
 devtools::load_all()
 library(here)
 
-optim_path <- here("inst/optims/9-13-19/")
+optim_path <- here("inst/optims/9-23-19/")
 
 state <<- 'LA'
 load.start()

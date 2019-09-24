@@ -6,5 +6,5 @@ TODO.md
 .dropbox*
 .here
 inst/interventions/*.rds
-inst/optims/9-13-19/optim_*
-inst/mcmc/9-14-19/mcmc*
+inst/optims/*/optim_list_*
+inst/mcmc/*/mcmc*
