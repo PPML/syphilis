@@ -9,7 +9,7 @@ state <- 'LA'
 load.start()
 
 
-output_directory <- here("inst/mcmc/9-14-19/")
+output_directory <- here("inst/mcmc/9-24-19/")
 
 calibration_files <- grep(paste0("mcmc_"), list.files(output_directory, full.names = T), value = T)
 mcmc_list <- mcmc.list(lapply(calibration_files, function(f) mcmc(readRDS(f)$samples)))
@@ -48,5 +48,5 @@ trace_ma <- trace_ma[sample_idxs, ]
 usethis::use_data(trace_la, overwrite=TRUE)
 usethis::use_data(trace_ma, overwrite=TRUE)
 
-saveRDS(trace_la, paste0(output_directory, "trace_la_burned_and_thinned2.rds"))
-saveRDS(trace_ma, paste0(output_directory, "trace_ma_burned_and_thinned2.rds"))
+saveRDS(trace_la, paste0(output_directory, "trace_la_burned_and_thinned.rds"))
+saveRDS(trace_ma, paste0(output_directory, "trace_ma_burned_and_thinned.rds"))
