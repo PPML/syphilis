@@ -1,5 +1,6 @@
 #!/bin/bash
 #SBATCH -N 1
+#SBATCH --partition=shared
 #SBATCH --ntasks=1
 #SBATCH --time=24:00:00
 #SBATCH --mem-per-cpu=5GB
