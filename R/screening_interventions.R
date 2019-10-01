@@ -2243,6 +2243,7 @@ plot_violin_boxplot_for_change_in_intvs <- function(state, outcome) {
     geom_hline(yintercept = 0, size = .5, color = 'red', alpha = 0.4) +
     theme_minimal() + 
     coord_flip() + 
+    expand_limits(y=-100) + 
     scale_x_discrete(limits = rev(levels(df$intervention))) + 
     xlab("") + 
     ylab(outcome_lookup[[outcome]]) + 
