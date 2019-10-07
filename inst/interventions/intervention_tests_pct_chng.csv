@@ -1,0 +1,9 @@
+"","state","intv.x","total_tests.x","intv.y","total_tests.y","change_in_tests_pct"
+"1","LA","msm_annual_hr_msm_quarterly",2383823.84947338,"basecase",2223730.81196143,7.19929933294132
+"2","LA","msm_quarterly",2712472.89479674,"basecase",2223730.81196143,21.9784733029002
+"3","LA","hr_quarterly",1002343.44687074,"basecase",2223730.81196143,-54.9251446497417
+"4","LA","prior_diagnosis_quarterly",1068439.54241084,"basecase",2223730.81196143,-51.9528381464289
+"5","MA","msm_annual_hr_msm_quarterly",4595922.46755411,"basecase",4163319.16419631,10.3908272773824
+"6","MA","msm_quarterly",5488319.09491773,"basecase",4163319.16419631,31.8255670167242
+"7","MA","hr_quarterly",1487746.47639585,"basecase",4163319.16419631,-64.2653753478675
+"8","MA","prior_diagnosis_quarterly",1519119.86511616,"basecase",4163319.16419631,-63.5118086026102

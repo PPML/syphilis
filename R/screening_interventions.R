@@ -2064,7 +2064,7 @@ plot_outcome <- function(outcome) {
       fill = 'white',
       outlier.color = NA
       ) + 
-    stat_summary(fun.y = mean, geom = 'point') + 
+    stat_summary(fun.y = mean, geom = 'point', color = 'grey') + 
     geom_hline(yintercept = 0, size = .5, color = 'red', alpha = 0.4) +
 
     # formatting 
@@ -2239,7 +2239,7 @@ plot_violin_boxplot_for_change_in_intvs <- function(state, outcome) {
     mapping = aes(x = intervention, y = value, fill = intervention)) + 
     geom_violin(scale = 'width', alpha = 0.8) + 
     geom_boxplot(width = 0.1, color = 'black', fill = 'white', outlier.color = NA) + 
-    stat_summary(fun.y=mean, geom='point') + 
+    stat_summary(fun.y=mean, geom='point', color = 'dimgrey', alpha = 0.85) + 
     geom_hline(yintercept = 0, size = .5, color = 'red', alpha = 0.4) +
     theme_minimal() + 
     coord_flip() + 
