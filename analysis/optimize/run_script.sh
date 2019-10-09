@@ -1,5 +1,6 @@
 #!/bin/bash
 #SBATCH -N 1
+#SBATCH --partition=shared
 #SBATCH --ntasks=1
 #SBATCH --array=1-25
 #SBATCH --time=1-12:00:00
