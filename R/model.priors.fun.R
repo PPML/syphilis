@@ -140,7 +140,7 @@ return(c(
   dbeta(ilogit(theta["logit.b.msm"]), prior.param1["b.msm"],prior.param2["b.msm"], log=T),
   dnorm(exp(theta["log.dur.incub"]),prior.param1["dur.incub"],prior.param2["dur.incub"], log=T),
   dnorm(exp(theta["log.dur.prim"]),prior.param1["dur.prim"],prior.param2["dur.prim"], log=T),
-  dnorm(exp(theta["log.dur.sec"]),prior.param1["dur.sec"],prior.param2["dur.sec"], log=T),
+  dunif(exp(theta["log.dur.sec"]),prior.param1["dur.sec"],prior.param2["dur.sec"], log=T),
   dnorm(exp(theta["log.dur.imm.inf"]),prior.param1["dur.imm.inf"],prior.param2["dur.imm.inf"], log=T),
   dunif(exp(theta["log.dur.imm.early"]),prior.param1["dur.imm.early"],prior.param2["dur.imm.early"], log=T),
   dnorm(exp(theta["log.dur.immune"]),prior.param1["dur.immune"],prior.param2["dur.immune"], log=T),
