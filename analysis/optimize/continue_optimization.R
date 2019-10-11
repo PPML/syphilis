@@ -8,64 +8,39 @@ devtools::load_all()
 
 # config
 N_loops <- 20
-input_directory <- here("inst/optims/4-8-19")
-output_directory <- here("inst/optims/5-21-19")
+input_directory <- here("inst/optims/10-8-19/")
+output_directory <- here("inst/optims/10-11-19/")
 
 # command line arguments
-state <<- commandArgs(trailingOnly=T)[[1]]
-nth_sim <- as.numeric(commandArgs(trailingOnly=T)[[2]])
+nth_sim <- as.numeric(commandArgs(trailingOnly=T)[[1]])
 
-# load model
-load.start()
+### Construct dLogPosterior_simultaneous to calibrate to both 
+source(here("analysis/optimize/construct_simultaneous_optimization_function.R"))
 
-# read old optim chain
-optim_chain <- 
-    readRDS(file.path(
-              input_directory,
-              paste0(state,
-              "_optim_list_",
-              nth_sim,
-              ".rds")
-            ))
+# Read 
+top_optim_trace_path_la <- paste0(input_directory, "la_25_best_pars.rds")
+optim_trace_la <- readRDS(top_optim_trace_path_la)
+theta_la <- unlist(optim_trace_la[as.numeric(nth_sim), ])
 
-# get the original theta vector names properly 
-orig_theta_names <- names(get(paste0("theta_", tolower(state))))
+top_optim_trace_path_ma <- paste0(input_directory, "ma_25_best_pars.rds")
+optim_trace_ma <- readRDS(top_optim_trace_path_ma)
+theta_ma <- unlist(optim_trace_ma[as.numeric(nth_sim), ])
 
-# write a version of dLogPosterior that names the theta vector
-# since the optim() function calls its argument f with 
-# an unnamed numeric vector.
-dLogPosterior_for_optim <- function(theta) {
-	names(theta) <- orig_theta_names
-	d <- dLogPosterior(theta)
-	print(d)
-	return(d)
-}
+theta <- c(theta_la, theta_ma)
+orig_theta <- theta 
 
+dLogPosterior_val <- dLogPosterior_simultaneous(theta)
 
-# Write helpers to extract prior optimization data
-get_optim_vals <- function(optim_chain) {
-  sapply(optim_chain, `[[`, 'value')
-}
-
-# Extract posterior values
-optim_vals <- sapply(1:length(optim_chain), function(x) dLogPosterior_for_optim(optim_chain[[x]]$par))
-max_idx <- which(optim_vals == max(optim_vals))
-theta <- orig_theta <- optim_chain[[max_idx]]$par
-
-dLogPosterior_val <- dLogPosterior_for_optim(theta)
-
-print(paste0("starting with dLogPosterior_val: ", max(optim_vals)))
-print(paste0("confirming dLogPosterior_val matches:", dLogPosterior_val))
-
+print(paste0("starting with dLogPosterior_simultaneous value: ", dLogPosterior_val))
 
 # main optim loop -- run optims until 'done' and checkpoint outputs iteratively 
 n_done <- 0
 done <- F
 optim_list <- list()
-while (!done) {
+while (n_done <= N_loops) {
   out <- optim(
     par = theta,
-    fn = dLogPosterior_for_optim,
+    fn = dLogPosterior_simultaneous,
     method = c("Nelder-Mead", "BFGS")[[if (n_done > 5) 1 else 2]],
     control = list(fnscale = -1, maxit=1000)
   )
@@ -83,8 +58,7 @@ while (!done) {
     saveRDS(optim_list,
             paste0(
               output_directory,
-              state,
-              "_optim_list_",
+              "optim_list_",
               nth_sim,
               ".rds"
             )
