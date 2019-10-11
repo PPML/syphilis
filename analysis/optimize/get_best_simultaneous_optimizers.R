@@ -32,9 +32,10 @@ max_idxs <- sapply(optim_vals, function(x) which(x==max(x))[[1]])
 last <- function(x) { x[[length(x)]] }
 
 # Get the last optim output from each optim_chain
-last_optims <- lapply(optims, last)
-last_optims <- lapply(last_optims, function(x) x[['par']])
-optim_pars <- do.call(rbind.data.frame, last_optims) # rbind to a dataframe
+# last_optims <- lapply(optims, last)
+# last_optims <- lapply(last_optims, function(x) x[['par']])
+best_optims <- lapply(1:length(max_idxs), function(x) optims[[x]][[max_idxs[[x]]]][['par']])
+optim_pars <- do.call(rbind.data.frame, best_optims) # rbind to a dataframe
 
 # Give optim_pars colnames
 colnames(optim_pars) <- rep(names(theta_la), 2)
