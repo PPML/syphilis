@@ -8,8 +8,8 @@ devtools::load_all()
 
 # config
 N_loops <- 20
-input_directory <- here("inst/optims/10-8-19/")
-output_directory <- here("inst/optims/10-11-19/")
+input_directory <- here("inst/optims/10-11-19/")
+output_directory <- here("inst/optims/10-12-19/")
 
 # command line arguments
 nth_sim <- as.numeric(commandArgs(trailingOnly=T)[[1]])
@@ -41,7 +41,7 @@ while (n_done <= N_loops) {
   out <- optim(
     par = theta,
     fn = dLogPosterior_simultaneous,
-    method = c("Nelder-Mead", "BFGS")[[if (n_done > 5) 1 else 2]],
+    method = c("Nelder-Mead", "BFGS")[[if (n_done > 10) 1 else 2]],
     control = list(fnscale = -1, maxit=1000)
   )
 
