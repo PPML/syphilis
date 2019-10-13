@@ -3,7 +3,7 @@ devtools::load_all()
 library(here)
 
 # Find optimization.R output files
-files_path <- here('inst/optims/10-11-19/')
+files_path <- here('inst/optims/10-12-19/')
 
 # list the files
 files <- grep("optim_list", list.files(files_path, full.names=T), value=T)
