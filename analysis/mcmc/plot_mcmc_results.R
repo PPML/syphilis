@@ -1,7 +1,7 @@
 library(here)
 devtools::load_all()
 
-output_directory <- here("inst/mcmc/9-24-19/")
+output_directory <- here("inst/mcmc/10-13-19/")
 for (state in c("LA", "MA")) {
   load.start()
   # post.sample <- readRDS(post.sample, paste0(output_directory, state, "_posterior_sample.rds"))
