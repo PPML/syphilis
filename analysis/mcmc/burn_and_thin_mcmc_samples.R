@@ -9,7 +9,7 @@ state <- 'LA'
 load.start()
 
 
-output_directory <- here("inst/mcmc/9-24-19/")
+output_directory <- here("inst/mcmc/10-13-19/")
 
 calibration_files <- grep(paste0("mcmc_"), list.files(output_directory, full.names = T), value = T)
 mcmc_list <- mcmc.list(lapply(calibration_files, function(f) mcmc(readRDS(f)$samples)))
