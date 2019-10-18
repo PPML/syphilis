@@ -13,6 +13,6 @@ for (state in c("LA", "MA")) {
   post.sample <- model.fits(trace, use_trace_without_sampling = T)
   # post.sample <- readRDS(paste0(output_directory, state, "_posterior_sample.rds"))
   pred <- as.data.frame(post.sample$outputs)
-  # saveRDS(post.sample, paste0(output_directory, state, "_posterior_sample.rds"))
+  saveRDS(post.sample, paste0(output_directory, state, "_posterior_sample.rds"))
   plot.posteriors(output_directory, post.sample = post.sample)
 }
